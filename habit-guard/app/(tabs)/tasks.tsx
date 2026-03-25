@@ -28,7 +28,7 @@ import {
 const CategoryPill = ({ cat }: { cat: Category }) => (
   <View style={[s.pill, { backgroundColor: CATEGORY_COLORS[cat] + "22" }]}>
     <Text style={[s.pillText, { color: CATEGORY_COLORS[cat] }]}>
-      {CATEGORY_ICONS[cat]} {cat}
+      {cat}
     </Text>
   </View>
 );
@@ -356,15 +356,12 @@ export default function TasksTab({ tasks, setTasks }: Props) {
               activeOpacity={0.8}
             >
               <View style={[s.taskAccent, { backgroundColor: catColor }]} />
-              <View style={s.taskIcon}>
-                <Text style={{ fontSize: 22 }}>{CATEGORY_ICONS[task.category]}</Text>
-              </View>
               <View style={s.taskInfo}>
                 <Text style={[s.taskTitle, (isDone || isSkipped) && s.taskTitleDone]}>
                   {task.title}
                 </Text>
                 <View style={s.taskMeta}>
-                  <Text style={s.taskTime}>🕐 {task.time}</Text>
+                  <Text style={s.taskTime}>{task.time}</Text>
                   {task.streakCount > 0 && (
                     <View style={s.streakBadge}>
                       <Text style={s.streakText}>🔥 {task.streakCount}</Text>
@@ -381,7 +378,7 @@ export default function TasksTab({ tasks, setTasks }: Props) {
                     style={s.completedBadge}
                     onPress={() => toggleComplete(task.id)}
                   >
-                    <Text style={s.completedText}>✅ Done</Text>
+                    <Text style={s.completedText}>Done</Text>
                     <Text style={s.undoHint}>tap to undo</Text>
                   </TouchableOpacity>
                 ) : isSkipped ? (
@@ -390,7 +387,7 @@ export default function TasksTab({ tasks, setTasks }: Props) {
                     style={[s.completedBadge, s.skippedBadge]}
                     onPress={() => toggleSkip(task.id)}
                   >
-                    <Text style={[s.completedText, s.skippedText]}>⏭ Skipped</Text>
+                    <Text style={[s.completedText, s.skippedText]}>Skipped</Text>
                     <Text style={s.undoHint}>tap to undo</Text>
                   </TouchableOpacity>
                 ) : (
