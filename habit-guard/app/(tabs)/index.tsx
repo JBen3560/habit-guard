@@ -1,29 +1,61 @@
 import {
   View,
   Text,
-  Button,
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { useState } from 'react';
 
 type Task = {
   name: string;
   time: string;
+  category: string;
   completed: boolean;
 };
 
 export default function HomeScreen() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([
+    {
+      name: 'Morning Medication',
+      time: '08:00',
+      category: 'Medication',
+      completed: true,
+    },
+    {
+      name: 'Evening Medication',
+      time: '21:00',
+      category: 'Medication',
+      completed: true,
+    },
+    {
+      name: 'Morning Walk',
+      time: '07:30',
+      category: 'Exercise',
+      completed: false,
+    },
+    {
+      name: 'Drink Water (Morning)',
+      time: '07:00',
+      category: 'Hydration',
+      completed: false,
+    },
+  ]);
+
   const [newTask, setNewTask] = useState('');
 
   const addTask = () => {
-    if (newTask.trim() === '') return;
+    if (!newTask.trim()) return;
 
     setTasks([
       ...tasks,
-      { name: newTask, time: '08:00', completed: false },
+      {
+        name: newTask,
+        time: '09:00',
+        category: 'General',
+        completed: false,
+      },
     ]);
 
     setNewTask('');
@@ -36,127 +68,169 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tasks</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Today</Text>
 
       {/* Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter new habit"
-        value={newTask}
-        onChangeText={setNewTask}
-      />
+      <View style={styles.inputRow}>
+        <TextInput
+          placeholder="Add a habit..."
+          value={newTask}
+          onChangeText={setNewTask}
+          style={styles.input}
+        />
+        <TouchableOpacity style={styles.addBtn} onPress={addTask}>
+          <Text style={{ color: 'white', fontSize: 18 }}>+</Text>
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={addTask}>
-        <Text style={styles.addButtonText}>+ Add Task</Text>
-      </TouchableOpacity>
-
-      {/* Task List */}
+      {/* Tasks */}
       {tasks.map((task, index) => (
         <View key={index} style={styles.card}>
+          {/* Top row */}
           <View style={styles.row}>
-            <Text style={styles.taskName}>{task.name}</Text>
-            <Text style={styles.time}>{task.time}</Text>
+            <View>
+              <Text style={styles.taskName}>{task.name}</Text>
+              <Text style={styles.subText}>
+                {task.category} • {task.time}
+              </Text>
+            </View>
+
+            {task.completed && (
+              <View style={styles.completedBadge}>
+                <Text style={styles.completedText}>Completed</Text>
+              </View>
+            )}
           </View>
 
-          <View style={styles.row}>
+          {/* Buttons */}
+          <View style={styles.buttonRow}>
             <TouchableOpacity
-              style={styles.skipButton}
+              style={styles.skipBtn}
               onPress={() => alert('Skipped')}
             >
-              <Text>Skip</Text>
+              <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                styles.doneButton,
-                task.completed && styles.completed,
+                styles.doneBtn,
+                task.completed && styles.doneGreen,
               ]}
               onPress={() => toggleComplete(index)}
             >
-              <Text style={{ color: 'white' }}>
-                {task.completed ? 'Done ✓' : 'Done'}
+              <Text style={styles.doneText}>
+                {task.completed ? '✓ Done' : 'Done'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#f4f6fa',
     padding: 20,
-    backgroundColor: '#f5f7fb',
-    flex: 1,
   },
 
-  title: {
-    fontSize: 26,
+  header: {
+    fontSize: 28,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 15,
+  },
+
+  inputRow: {
+    flexDirection: 'row',
+    marginBottom: 20,
   },
 
   input: {
+    flex: 1,
     backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-
-  addButton: {
-    backgroundColor: '#3b82f6',
     padding: 12,
-    borderRadius: 10,
-    marginBottom: 15,
-    alignItems: 'center',
+    borderRadius: 12,
   },
 
-  addButtonText: {
-    color: 'white',
-    fontWeight: '600',
+  addBtn: {
+    backgroundColor: '#3b82f6',
+    marginLeft: 10,
+    padding: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 50,
   },
 
   card: {
     backgroundColor: 'white',
+    borderRadius: 16,
     padding: 15,
-    borderRadius: 15,
-    marginBottom: 10,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
   },
 
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
 
   taskName: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
-  time: {
+  subText: {
     color: 'gray',
+    marginTop: 4,
   },
 
-  skipButton: {
+  completedBadge: {
+    backgroundColor: '#d1fae5',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+
+  completedText: {
+    color: '#059669',
+    fontWeight: '600',
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+    gap: 10,
+  },
+
+  skipBtn: {
     backgroundColor: '#e5e7eb',
     padding: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
 
-  doneButton: {
+  skipText: {
+    color: '#374151',
+  },
+
+  doneBtn: {
     backgroundColor: '#3b82f6',
     padding: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
 
-  completed: {
+  doneGreen: {
     backgroundColor: '#22c55e',
+  },
+
+  doneText: {
+    color: 'white',
+    fontWeight: '600',
   },
 });
