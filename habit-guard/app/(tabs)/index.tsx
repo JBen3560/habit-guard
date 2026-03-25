@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Task = {
   name: string;
@@ -17,48 +18,37 @@ type Task = {
 
 export default function HomeScreen() {
   const [tasks, setTasks] = useState<Task[]>([
-    {
-      name: 'Morning Medication',
-      time: '08:00',
-      category: 'Medication',
-      completed: true,
-    },
-    {
-      name: 'Evening Medication',
-      time: '21:00',
-      category: 'Medication',
-      completed: true,
-    },
-    {
-      name: 'Morning Walk',
-      time: '07:30',
-      category: 'Exercise',
-      completed: false,
-    },
-    {
-      name: 'Drink Water (Morning)',
-      time: '07:00',
-      category: 'Hydration',
-      completed: false,
-    },
+    { name: 'Morning Medication', time: '08:00', category: 'Medication', completed: true },
+    { name: 'Evening Medication', time: '21:00', category: 'Medication', completed: true },
+    { name: 'Morning Walk', time: '07:30', category: 'Exercise', completed: false },
+    { name: 'Drink Water', time: '07:00', category: 'Hydration', completed: false },
   ]);
 
-  const [newTask, setNewTask] = useState('');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
-  const addTask = () => {
-    if (!newTask.trim()) return;
+  const startEdit = (index: number) => {
+    setEditingIndex(index);
+    setEditName(tasks[index].name);
+    setEditTime(tasks[index].time);
+    setEditCategory(tasks[index].category);
+  };
 
-    setTasks([
-      ...tasks,
-      {
-        name: newTask,
-        time: '09:00',
-        category: 'General',
-        completed: false,
-      },
-    ]);
+  const saveEdit = () => {
+    if (editingIndex === null) return;
 
-    setNewTask('');
+    const updated = [...tasks];
+    updated[editingIndex] = {
+      ...updated[editingIndex],
+      name: editName,
+      time: editTime,
+      category: editCategory,
+    };
+
+    setTasks(updated);
+    setEditingIndex(null);
   };
 
   const toggleComplete = (index: number) => {
@@ -68,65 +58,85 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Today</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.header}>Today</Text>
 
-      {/* Input */}
-      <View style={styles.inputRow}>
-        <TextInput
-          placeholder="Add a habit..."
-          value={newTask}
-          onChangeText={setNewTask}
-          style={styles.input}
-        />
-        <TouchableOpacity style={styles.addBtn} onPress={addTask}>
-          <Text style={{ color: 'white', fontSize: 18 }}>+</Text>
-        </TouchableOpacity>
-      </View>
+        {tasks.map((task, index) => (
+          <TouchableOpacity key={index} onPress={() => startEdit(index)}>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <View>
+                  <Text style={styles.taskName}>{task.name}</Text>
+                  <Text style={styles.subText}>
+                    {task.category} • {task.time}
+                  </Text>
+                </View>
 
-      {/* Tasks */}
-      {tasks.map((task, index) => (
-        <View key={index} style={styles.card}>
-          {/* Top row */}
-          <View style={styles.row}>
-            <View>
-              <Text style={styles.taskName}>{task.name}</Text>
-              <Text style={styles.subText}>
-                {task.category} • {task.time}
-              </Text>
-            </View>
-
-            {task.completed && (
-              <View style={styles.completedBadge}>
-                <Text style={styles.completedText}>Completed</Text>
+                {task.completed && (
+                  <View style={styles.completedBadge}>
+                    <Text style={styles.completedText}>Completed</Text>
+                  </View>
+                )}
               </View>
-            )}
-          </View>
 
-          {/* Buttons */}
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={styles.skipBtn}
-              onPress={() => alert('Skipped')}
-            >
-              <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.skipBtn}
+                  onPress={() => alert('Skipped')}
+                >
+                  <Text>Skip</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.doneBtn,
-                task.completed && styles.doneGreen,
-              ]}
-              onPress={() => toggleComplete(index)}
-            >
-              <Text style={styles.doneText}>
-                {task.completed ? '✓ Done' : 'Done'}
-              </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.doneBtn,
+                    task.completed && styles.doneGreen,
+                  ]}
+                  onPress={() => toggleComplete(index)}
+                >
+                  <Text style={{ color: 'white' }}>
+                    {task.completed ? '✓ Done' : 'Done'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+
+        {/* EDIT PANEL */}
+        {editingIndex !== null && (
+          <View style={styles.editBox}>
+            <Text style={styles.editTitle}>Edit Task</Text>
+
+            <TextInput
+              value={editName}
+              onChangeText={setEditName}
+              style={styles.input}
+              placeholder="Task name"
+            />
+
+            <TextInput
+              value={editTime}
+              onChangeText={setEditTime}
+              style={styles.input}
+              placeholder="Time (e.g. 08:00)"
+            />
+
+            <TextInput
+              value={editCategory}
+              onChangeText={setEditCategory}
+              style={styles.input}
+              placeholder="Category"
+            />
+
+            <TouchableOpacity style={styles.saveBtn} onPress={saveEdit}>
+              <Text style={{ color: 'white' }}>Save Changes</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      ))}
-    </ScrollView>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -142,36 +152,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  inputRow: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-
-  input: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 12,
-  },
-
-  addBtn: {
-    backgroundColor: '#3b82f6',
-    marginLeft: 10,
-    padding: 12,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 50,
-  },
-
   card: {
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 15,
     marginBottom: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
     elevation: 3,
   },
 
@@ -215,10 +200,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  skipText: {
-    color: '#374151',
-  },
-
   doneBtn: {
     backgroundColor: '#3b82f6',
     padding: 8,
@@ -229,8 +210,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#22c55e',
   },
 
-  doneText: {
-    color: 'white',
+  editBox: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 15,
+    marginTop: 20,
+  },
+
+  editTitle: {
+    fontSize: 20,
     fontWeight: '600',
+    marginBottom: 10,
+  },
+
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  saveBtn: {
+    backgroundColor: '#3b82f6',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
   },
 });
