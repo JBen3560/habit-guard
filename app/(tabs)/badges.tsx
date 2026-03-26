@@ -148,7 +148,7 @@ export default function BadgesTab({ trophies }: Props) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// Styles
 
 const s = StyleSheet.create({
   container: { flex: 1 },
