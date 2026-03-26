@@ -8,11 +8,11 @@ NODE_VERSION := 20
 NVM_VERSION := v0.39.7
 NVM_DIR := $(HOME)/.nvm
 
-.PHONY: help install-nvm setup install run clean
+.PHONY: help install-nvm install run clean
 
 help:
 	@echo "  make install    -> first time setup (nvm + node + dependencies)"
-	@echo "  make run        -> start the app"
+	@echo "  make run        -> start the app (installs deps if needed)"
 	@echo "  make clean      -> remove node_modules"
 
 # ------------------------------------------------------------
@@ -28,9 +28,9 @@ install-nvm:
 	fi
 
 # ------------------------------------------------------------
-# First time setup — run this once
+# Stamp file — only reinstalls when package.json changes
 # ------------------------------------------------------------
-install: install-nvm
+node_modules/.install-stamp: package.json package-lock.json
 	@export NVM_DIR="$(NVM_DIR)"; \
 	[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
 	unset NPM_CONFIG_PREFIX; \
@@ -41,18 +41,20 @@ install: install-nvm
 		echo "[INFO] Node $(NODE_VERSION) already installed, skipping"; \
 	fi; \
 	nvm use $(NODE_VERSION); \
-	echo "[INFO] Node: $$(node -v) | npm: $$(npm -v) | npx: $$(npx -v)"; \
-	if [ ! -d "node_modules" ]; then \
-		echo "[INFO] Installing dependencies..."; \
-		npm install; \
-	else \
-		echo "[INFO] node_modules already exists, skipping. Run make clean first if you need a fresh install."; \
-	fi
+	echo "[INFO] Node: $$(node -v) | npm: $$(npm -v)"; \
+	echo "[INFO] Installing dependencies..."; \
+	npm ci --prefer-offline; \
+	touch node_modules/.install-stamp
 
 # ------------------------------------------------------------
-# Run the app — lightweight, no reinstalling anything
+# First time setup
 # ------------------------------------------------------------
-run:
+install: install-nvm node_modules/.install-stamp
+
+# ------------------------------------------------------------
+# Run the app — triggers install only if stamp is missing
+# ------------------------------------------------------------
+run: install-nvm node_modules/.install-stamp
 	@export NVM_DIR="$(NVM_DIR)"; \
 	[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
 	unset NPM_CONFIG_PREFIX; \
