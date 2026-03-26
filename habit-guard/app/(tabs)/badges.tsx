@@ -105,7 +105,7 @@ export default function BadgesTab({ trophies }: Props) {
               {trophy.earned && trophy.earnedDate ? (
                 <Text style={s.earnedDate}>Earned {trophy.earnedDate}</Text>
               ) : !trophy.earned ? (
-                <Text style={s.lockedText}>🔒 Locked</Text>
+                <Text style={s.lockedText}>Locked</Text>
               ) : null}
             </View>
           ))}
