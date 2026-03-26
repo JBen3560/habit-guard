@@ -24,7 +24,7 @@ import {
   todayIdx,
 } from "@/src/types";
 
-// ─── CategoryPill ─────────────────────────────────────────────────────────────
+// CategoryPill
 
 const CategoryPill = ({ cat }: { cat: Category }) => (
   <View style={[s.pill, { backgroundColor: CATEGORY_COLORS[cat] + "22" }]}>
@@ -34,7 +34,7 @@ const CategoryPill = ({ cat }: { cat: Category }) => (
   </View>
 );
 
-// ─── DayToggle ────────────────────────────────────────────────────────────────
+// DayToggle
 
 const DayToggle = ({
   days,
@@ -64,7 +64,7 @@ const DayToggle = ({
   </View>
 );
 
-// ─── Task Modal ───────────────────────────────────────────────────────────────
+// Tasks
 
 type TaskFormData = Omit<Task, "id" | "streakCount" | "completedToday" | "skippedToday">;
 
@@ -213,7 +213,7 @@ function TaskModal({
   );
 }
 
-// ─── TasksTab ─────────────────────────────────────────────────────────────────
+// TasksTab
 
 type Props = Readonly<{
   tasks: Task[];
@@ -426,8 +426,7 @@ export default function TasksTab({ tasks, setTasks }: Props) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-// Only theme-independent values live here. Colors are applied inline above.
+// Styles
 
 const s = StyleSheet.create({
   container: { flex: 1 },
