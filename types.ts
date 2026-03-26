@@ -144,9 +144,8 @@ export const INITIAL_TROPHIES: Trophy[] = [
 ];
 
 export const INITIAL_FRIENDS: Friend[] = [
-  { id: "f1", name: "Alex Rivera", tag: "@alex_r", streakDays: 14, missedDays: 0, avatar: "🧑", tasks: 5 },
-  { id: "f2", name: "Jamie Chen", tag: "@jchen", streakDays: 3, missedDays: 3, avatar: "👩", tasks: 4 },
-  { id: "f3", name: "Morgan Lee", tag: "@morganlee", streakDays: 0, missedDays: 7, avatar: "🧔", tasks: 2 },
+  { id: "f1", name: "Doc Plaue", tag: "@cplaue", streakDays: 182, missedDays: 0, avatar: "👨", tasks: 404 },
+  { id: "f2", name: "Anna Galeano", tag: "@agalean", streakDays: 91, missedDays: 3, avatar: "👩", tasks: 45 },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
