@@ -20,7 +20,7 @@ import {
     Task,
     Trophy,
     getColors,
-} from "../../types";
+} from "@/src/types";
 
 type Tab = "Tasks" | "Badges" | "Profile";
 

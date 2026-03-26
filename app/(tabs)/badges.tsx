@@ -7,7 +7,7 @@ import {
 	View,
 	useColorScheme,
 } from "react-native";
-import { Trophy, getColors } from "../../types";
+import { Trophy, getColors } from "@/src/types";
 
 type Props = Readonly<{
   trophies: Trophy[];

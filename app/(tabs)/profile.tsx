@@ -11,7 +11,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Friend, genId, getColors } from "../../types";
+import { Friend, genId, getColors } from "@/src/types";
 
 // ─── Friend Profile Modal ─────────────────────────────────────────────────────
 

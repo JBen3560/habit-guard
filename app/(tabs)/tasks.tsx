@@ -22,7 +22,7 @@ import {
     Task,
     today,
     todayIdx,
-} from "../../types";
+} from "@/src/types";
 
 // ─── CategoryPill ─────────────────────────────────────────────────────────────
 
