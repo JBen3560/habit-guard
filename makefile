@@ -26,6 +26,12 @@ install-nvm:
 	else \
 		echo "[INFO] nvm already installed, skipping"; \
 	fi
+	@if ! grep -q "unset NPM_CONFIG_PREFIX" "$(HOME)/.bashrc"; then \
+		echo "[INFO] Adding NPM_CONFIG_PREFIX fix to ~/.bashrc..."; \
+		echo 'unset NPM_CONFIG_PREFIX' >> "$(HOME)/.bashrc"; \
+	else \
+		echo "[INFO] ~/.bashrc already patched, skipping"; \
+	fi
 
 # ------------------------------------------------------------
 # Stamp file — only reinstalls when package.json changes
