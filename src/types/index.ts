@@ -1,4 +1,4 @@
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 export type Category =
   | "Medication"
@@ -40,7 +40,7 @@ export type Friend = {
   tasks: number;
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// Constants
 
 export const CATEGORIES: Category[] = [
   "Medication",
@@ -71,7 +71,7 @@ export const CATEGORY_ICONS: Record<Category, string> = {
   Other: "⭐",
 };
 
-// ─── Initial Data ─────────────────────────────────────────────────────────────
+// Initial Data
 
 export const INITIAL_TASKS: Task[] = [
   {
@@ -148,28 +148,25 @@ export const INITIAL_FRIENDS: Friend[] = [
   { id: "f2", name: "Anna Galeano", tag: "@agalean", streakDays: 91, missedDays: 3, avatar: "👩", tasks: 5 },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 export const genId = () => Math.random().toString(36).slice(2);
 
 export const today = new Date();
 export const todayIdx = today.getDay(); // 0 = Sunday
 
-// ─── Shared Style Colors ──────────────────────────────────────────────────────
-// Call getColors(isDark) in each screen/component to get the right palette.
-// The accent colors (blue, green, yellow, red) stay the same in both modes —
-// only the surface and text colors shift.
+// Shared Style Colors
 
 export const getColors = (isDark: boolean) => ({
   // Surfaces
   bg:     isDark ? "#111827" : "#F9FAFB",  // page background
-  card:   isDark ? "#1F2937" : "#FFFFFF",  // card / tab bar background
+  card:   isDark ? "#1F2937" : "#FFFFFF",  // card/tab bar background
   // Text
   text:   isDark ? "#F9FAFB" : "#111827",  // primary text
-  sub:    isDark ? "#9CA3AF" : "#6B7280",  // secondary / muted text
+  sub:    isDark ? "#9CA3AF" : "#6B7280",  // secondary/muted text
   // Borders & dividers
   border: isDark ? "#374151" : "#E5E7EB",
-  // Accents — unchanged across modes
+  // Accents
   blue:   "#3B82F6",
   green:  "#10B981",
   yellow: "#F59E0B",
