@@ -8,11 +8,11 @@ import React, {
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ─── Storage key ─────────────────────────────────────────────────────────────
+// Storage key
 
 const THEME_KEY = "habit-guard:theme-override";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+//  Types 
 
 // null means "follow the system", "light"/"dark" means manually overridden
 type ThemeOverride = "light" | "dark" | null;
@@ -20,11 +20,10 @@ type ThemeOverride = "light" | "dark" | null;
 type ThemeContextValue = Readonly<{
   isDark: boolean;
   override: ThemeOverride;
-  // Call with "light" or "dark" to pin the theme, or null to follow system
   setOverride: (value: ThemeOverride) => void;
 }>;
 
-// ─── Context ─────────────────────────────────────────────────────────────────
+// Context
 
 const ThemeContext = createContext<ThemeContextValue>({
   isDark: false,
@@ -32,7 +31,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   setOverride: () => {},
 });
 
-// ─── Provider ────────────────────────────────────────────────────────────────
+// Provider
 
 export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const systemScheme = useColorScheme();
@@ -59,13 +58,10 @@ export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode
     }
   }, []);
 
-  // Resolve the actual theme: override wins, falls back to system
   const isDark = override !== null
     ? override === "dark"
     : systemScheme === "dark";
 
-  // Don't render children until we've loaded the stored preference —
-  // prevents a flash from system theme → stored theme on startup
   if (!loaded) return null;
 
   return (
@@ -75,9 +71,8 @@ export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode
   );
 }
 
-// ─── Hook ────────────────────────────────────────────────────────────────────
+// Hook 
 
-// Use this everywhere instead of useColorScheme()
 export function useTheme(): ThemeContextValue {
   return useContext(ThemeContext);
 }
