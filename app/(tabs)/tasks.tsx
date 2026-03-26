@@ -40,11 +40,11 @@ const DayToggle = ({
   days,
   onChange,
   C,
-}: {
+}: Readonly<{
   days: boolean[];
   onChange: (i: number) => void;
   C: ReturnType<typeof getColors>;
-}) => (
+}>) => (
   <View style={s.dayRow}>
     {DAY_LABELS.map((d, i) => (
       <TouchableOpacity
@@ -82,13 +82,13 @@ function TaskModal({
   onSave,
   onDelete,
   onClose,
-}: {
+}: Readonly<{
   visible: boolean;
   initial?: Task | null;
   onSave: (t: TaskFormData) => void;
   onDelete?: () => void;
   onClose: () => void;
-}) {
+}>) {
   const C = getColors(useColorScheme() === "dark");
   const [form, setForm] = useState<TaskFormData>(EMPTY_FORM);
 
@@ -214,10 +214,10 @@ function TaskModal({
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
 
-type Props = {
+type Props = Readonly<{
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-};
+}>;
 
 export default function TasksTab({ tasks, setTasks }: Props) {
   const C = getColors(useColorScheme() === "dark");
@@ -300,7 +300,7 @@ export default function TasksTab({ tasks, setTasks }: Props) {
               day: "numeric",
             })}
           </Text>
-          <Text style={[s.titleText, { color: C.text }]}>Today's Tasks</Text>
+          <Text style={[s.titleText, { color: C.text }]}>Today&apos;s Tasks</Text>
         </View>
         <TouchableOpacity style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]} onPress={openNew}>
           <Text style={s.addBtnText}>+ Add</Text>

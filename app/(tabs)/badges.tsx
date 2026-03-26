@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
 import { Trophy, getColors } from "./types";
 
-type Props = {
+type Props = Readonly<{
   trophies: Trophy[];
-};
+}>;
 
 const TYPE_COLOR: Record<Trophy["type"], string> = {
   gold: "#F59E0B",

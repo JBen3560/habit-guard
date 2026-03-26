@@ -19,11 +19,11 @@ function FriendModal({
   visible,
   friend,
   onClose,
-}: {
+}: Readonly<{
   visible: boolean;
   friend: Friend | null;
   onClose: () => void;
-}) {
+}>) {
   const C = getColors(useColorScheme() === "dark");
   if (!friend) return null;
   const needsNudge = friend.missedDays >= 2;
@@ -108,11 +108,11 @@ function AddFriendModal({
   visible,
   onAdd,
   onClose,
-}: {
+}: Readonly<{
   visible: boolean;
   onAdd: (tag: string) => void;
   onClose: () => void;
-}) {
+}>) {
   const C = getColors(useColorScheme() === "dark");
   const [tag, setTag] = useState("");
 
@@ -138,7 +138,7 @@ function AddFriendModal({
           </TouchableOpacity>
         </View>
         <View style={[s.modalBody, { backgroundColor: C.bg }]}>
-          <Text style={[s.fieldLabel, { color: C.sub }]}>Friend's Tag</Text>
+          <Text style={[s.fieldLabel, { color: C.sub }]}>Friend&apos;s Tag</Text>
           <TextInput
             style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
             value={tag}
@@ -148,7 +148,7 @@ function AddFriendModal({
             autoFocus
           />
           <Text style={[s.addFriendHint, { color: C.sub }]}>
-            Enter your friend's unique tag to send a friend request.
+            Enter your friend&apos;s unique tag to send a friend request.
           </Text>
         </View>
       </SafeAreaView>
@@ -158,10 +158,10 @@ function AddFriendModal({
 
 // ─── ProfileTab ───────────────────────────────────────────────────────────────
 
-type Props = {
+type Props = Readonly<{
   friends: Friend[];
   setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
-};
+}>;
 
 export default function ProfileTab({ friends, setFriends }: Props) {
   const C = getColors(useColorScheme() === "dark");
