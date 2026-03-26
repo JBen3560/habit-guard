@@ -157,15 +157,25 @@ export const today = new Date();
 export const todayIdx = today.getDay(); // 0 = Sunday
 
 // ─── Shared Style Colors ──────────────────────────────────────────────────────
+// Call getColors(isDark) in each screen/component to get the right palette.
+// The accent colors (blue, green, yellow, red) stay the same in both modes —
+// only the surface and text colors shift.
 
-export const C = {
-  bg: "#F9FAFB",
-  card: "#FFFFFF",
-  blue: "#3B82F6",
-  green: "#10B981",
+export const getColors = (isDark: boolean) => ({
+  // Surfaces
+  bg:     isDark ? "#111827" : "#F9FAFB",  // page background
+  card:   isDark ? "#1F2937" : "#FFFFFF",  // card / tab bar background
+  // Text
+  text:   isDark ? "#F9FAFB" : "#111827",  // primary text
+  sub:    isDark ? "#9CA3AF" : "#6B7280",  // secondary / muted text
+  // Borders & dividers
+  border: isDark ? "#374151" : "#E5E7EB",
+  // Accents — unchanged across modes
+  blue:   "#3B82F6",
+  green:  "#10B981",
   yellow: "#F59E0B",
-  red: "#EF4444",
-  text: "#111827",
-  sub: "#6B7280",
-  border: "#E5E7EB",
-};
+  red:    "#EF4444",
+});
+
+// Convenience type so screens can type their local C variable
+export type Colors = ReturnType<typeof getColors>;

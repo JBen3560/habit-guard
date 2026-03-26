@@ -7,9 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "habitguard",
     "userInterfaceStyle": "automatic",
+    "backgroundColor": "#F9FAFB",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "userInterfaceStyle": "automatic"
     },
     "android": {
       "adaptiveIcon": {

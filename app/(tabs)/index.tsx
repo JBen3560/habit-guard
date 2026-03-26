@@ -3,11 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Platform,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import TasksTab from "./tasks";
 import BadgesTab from "./badges";
@@ -20,7 +19,7 @@ import {
   INITIAL_TASKS,
   INITIAL_TROPHIES,
   INITIAL_FRIENDS,
-  C,
+  getColors,
 } from "./types";
 
 type Tab = "Tasks" | "Badges" | "Profile";
@@ -32,16 +31,22 @@ const TAB_ICONS: Record<Tab, string> = {
 };
 
 export default function App() {
+  const colorScheme = useColorScheme();
+  const C = getColors(colorScheme === "dark");
+  const insets = useSafeAreaInsets();
+
   // ── All shared state lives here so switching tabs never resets anything ──
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [trophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
-
   const [activeTab, setActiveTab] = useState<Tab>("Tasks");
 
   return (
-    <SafeAreaView style={s.root}>
-      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+    // We use a plain View instead of SafeAreaView so we can control exactly
+    // which edges get padding. paddingTop comes from insets so the content
+    // sits below the status bar. The background color fills the status bar
+    // area and the home indicator area so there are no mismatched strips.
+    <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
 
       {/*
         All three tabs are mounted at once (display: none when inactive).
@@ -60,8 +65,19 @@ export default function App() {
         <ProfileTab friends={friends} setFriends={setFriends} />
       </View>
 
-      {/* Bottom Tab Bar */}
-      <View style={s.tabBar}>
+      {/* Bottom Tab Bar — paddingBottom pushes content above the home indicator */}
+      <View
+        style={[
+          s.tabBar,
+          {
+            backgroundColor: C.card,
+            borderTopColor: C.border,
+            // insets.bottom is the home indicator height on iPhone (typically 34pt).
+            // On devices with no home indicator insets.bottom is 0 so we fall back to 8pt.
+            paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          },
+        ]}
+      >
         {(["Tasks", "Badges", "Profile"] as Tab[]).map((tab) => {
           const active = activeTab === tab;
           return (
@@ -71,21 +87,31 @@ export default function App() {
               onPress={() => setActiveTab(tab)}
               activeOpacity={0.7}
             >
-              {active && <View style={s.tabIndicator} />}
+              {active && (
+                <View style={[s.tabIndicator, { backgroundColor: C.blue }]} />
+              )}
               <Text style={[s.tabIcon, active && s.tabIconActive]}>
                 {TAB_ICONS[tab]}
               </Text>
-              <Text style={[s.tabLabel, active && s.tabLabelActive]}>{tab}</Text>
+              <Text
+                style={[
+                  s.tabLabel,
+                  { color: C.sub },
+                  active && { color: C.blue, fontWeight: "700" },
+                ]}
+              >
+                {tab}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root: { flex: 1 },
 
   // Each tab fills all available space; hidden ones collapse via display:none
   tab: { flex: 1 },
@@ -94,10 +120,7 @@ const s = StyleSheet.create({
 
   tabBar: {
     flexDirection: "row",
-    backgroundColor: C.card,
     borderTopWidth: 1,
-    borderTopColor: C.border,
-    paddingBottom: Platform.OS === "ios" ? 20 : 8,
     paddingTop: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -116,11 +139,9 @@ const s = StyleSheet.create({
     top: 0,
     width: 32,
     height: 3,
-    backgroundColor: C.blue,
     borderRadius: 2,
   },
   tabIcon: { fontSize: 22, marginBottom: 2, opacity: 0.4 },
   tabIconActive: { opacity: 1 },
-  tabLabel: { fontSize: 11, color: C.sub, fontWeight: "500" },
-  tabLabelActive: { color: C.blue, fontWeight: "700" },
+  tabLabel: { fontSize: 11, fontWeight: "500" },
 });

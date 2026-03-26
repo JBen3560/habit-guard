@@ -9,8 +9,9 @@ import {
   Alert,
   StyleSheet,
   SafeAreaView,
+  useColorScheme,
 } from "react-native";
-import { Friend, C, genId } from "./types";
+import { Friend, getColors, genId } from "./types";
 
 // ─── Friend Profile Modal ─────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ function FriendModal({
   friend: Friend | null;
   onClose: () => void;
 }) {
+  const C = getColors(useColorScheme() === "dark");
   if (!friend) return null;
   const needsNudge = friend.missedDays >= 2;
   const firstName = friend.name.split(" ")[0];
@@ -34,72 +36,59 @@ function FriendModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={s.modalSafe}>
-        <View style={s.modalHeader}>
+      <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
+        <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
           <TouchableOpacity onPress={onClose}>
-            <Text style={s.modalBack}>‹ Back</Text>
+            <Text style={[s.modalBack, { color: C.sub }]}>‹ Back</Text>
           </TouchableOpacity>
-          <Text style={s.modalTitle}>{friend.name}</Text>
+          <Text style={[s.modalTitle, { color: C.text }]}>{friend.name}</Text>
           <View style={{ width: 60 }} />
         </View>
 
-        <ScrollView style={s.modalBody}>
-          <View style={s.friendProfileCard}>
+        <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]}>
+          <View style={[s.friendProfileCard, { backgroundColor: C.card }]}>
             <Text style={s.friendProfileAvatar}>{friend.avatar}</Text>
-            <Text style={s.friendProfileName}>{friend.name}</Text>
-            <Text style={s.friendProfileTag}>{friend.tag}</Text>
+            <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
+            <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
 
             <View style={s.friendStats}>
               <View style={s.friendStat}>
-                <Text style={s.friendStatNum}>{friend.streakDays}</Text>
-                <Text style={s.friendStatLabel}>Streak Days</Text>
+                <Text style={[s.friendStatNum, { color: C.text }]}>{friend.streakDays}</Text>
+                <Text style={[s.friendStatLabel, { color: C.sub }]}>Streak Days</Text>
               </View>
-              <View style={s.statDivider} />
+              <View style={[s.statDivider, { backgroundColor: C.border }]} />
               <View style={s.friendStat}>
-                <Text style={[s.friendStatNum, { color: C.red }]}>
-                  {friend.missedDays}
-                </Text>
-                <Text style={s.friendStatLabel}>Missed Days</Text>
+                <Text style={[s.friendStatNum, { color: C.red }]}>{friend.missedDays}</Text>
+                <Text style={[s.friendStatLabel, { color: C.sub }]}>Missed Days</Text>
               </View>
-              <View style={s.statDivider} />
+              <View style={[s.statDivider, { backgroundColor: C.border }]} />
               <View style={s.friendStat}>
-                <Text style={s.friendStatNum}>{friend.tasks}</Text>
-                <Text style={s.friendStatLabel}>Active Tasks</Text>
+                <Text style={[s.friendStatNum, { color: C.text }]}>{friend.tasks}</Text>
+                <Text style={[s.friendStatLabel, { color: C.sub }]}>Active Tasks</Text>
               </View>
             </View>
           </View>
 
           {needsNudge ? (
             <View style={s.nudgeBox}>
-              <Text style={s.nudgeTitle}>
-                ⚠️ {firstName} has missed {friend.missedDays} days!
-              </Text>
-              <Text style={s.nudgeSubtitle}>Send some encouragement</Text>
+              <Text style={s.nudgeTitle}>⚠️ {firstName} has missed {friend.missedDays} days!</Text>
+              <Text style={[s.nudgeSubtitle, { color: C.sub }]}>Send some encouragement</Text>
               <TouchableOpacity
-                style={s.nudgeBtn}
-                onPress={() =>
-                  Alert.alert("Nudge sent!", `${firstName} has been nudged! 💪`)
-                }
+                style={[s.nudgeBtn, { backgroundColor: C.yellow }]}
+                onPress={() => Alert.alert("Nudge sent!", `${firstName} has been nudged! 💪`)}
               >
                 <Text style={s.nudgeBtnText}>👋 Check In</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.nudgeBtn, { backgroundColor: C.green }]}
-                onPress={() =>
-                  Alert.alert(
-                    "Message sent!",
-                    `You sent a motivational message to ${firstName}! 🌟`
-                  )
-                }
+                onPress={() => Alert.alert("Message sent!", `You sent a motivational message to ${firstName}! 🌟`)}
               >
                 <Text style={s.nudgeBtnText}>🌟 Send Motivation</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={[s.nudgeBox, s.nudgeBoxGood]}>
-              <Text style={s.nudgeGoodText}>
-                🔥 {firstName} is on a roll!
-              </Text>
+              <Text style={[s.nudgeGoodText, { color: C.green }]}>🔥 {firstName} is on a roll!</Text>
               <Text style={{ color: C.sub, marginTop: 4 }}>
                 {friend.streakDays}-day streak going strong
               </Text>
@@ -124,13 +113,11 @@ function AddFriendModal({
   onAdd: (tag: string) => void;
   onClose: () => void;
 }) {
+  const C = getColors(useColorScheme() === "dark");
   const [tag, setTag] = useState("");
 
   const handleAdd = () => {
-    if (tag.trim()) {
-      onAdd(tag.trim());
-      setTag("");
-    }
+    if (tag.trim()) { onAdd(tag.trim()); setTag(""); }
   };
 
   return (
@@ -140,27 +127,27 @@ function AddFriendModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={s.modalSafe}>
-        <View style={s.modalHeader}>
+      <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
+        <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
           <TouchableOpacity onPress={onClose}>
-            <Text style={s.modalBack}>Cancel</Text>
+            <Text style={[s.modalBack, { color: C.sub }]}>Cancel</Text>
           </TouchableOpacity>
-          <Text style={s.modalTitle}>Add Friend</Text>
+          <Text style={[s.modalTitle, { color: C.text }]}>Add Friend</Text>
           <TouchableOpacity onPress={handleAdd}>
-            <Text style={s.modalSave}>Add</Text>
+            <Text style={[s.modalSave, { color: C.blue }]}>Add</Text>
           </TouchableOpacity>
         </View>
-        <View style={s.modalBody}>
-          <Text style={s.fieldLabel}>Friend's Tag</Text>
+        <View style={[s.modalBody, { backgroundColor: C.bg }]}>
+          <Text style={[s.fieldLabel, { color: C.sub }]}>Friend's Tag</Text>
           <TextInput
-            style={s.textInput}
+            style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
             value={tag}
             onChangeText={setTag}
             placeholder="@username"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={C.sub}
             autoFocus
           />
-          <Text style={s.addFriendHint}>
+          <Text style={[s.addFriendHint, { color: C.sub }]}>
             Enter your friend's unique tag to send a friend request.
           </Text>
         </View>
@@ -177,6 +164,7 @@ type Props = {
 };
 
 export default function ProfileTab({ friends, setFriends }: Props) {
+  const C = getColors(useColorScheme() === "dark");
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [addFriendVisible, setAddFriendVisible] = useState(false);
@@ -185,10 +173,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   const MY_STREAK = 13;
   const MY_TASKS = 5;
 
-  const openFriend = (f: Friend) => {
-    setSelectedFriend(f);
-    setFriendModalVisible(true);
-  };
+  const openFriend = (f: Friend) => { setSelectedFriend(f); setFriendModalVisible(true); };
 
   const addFriend = (tag: string) => {
     const normalized = tag.startsWith("@") ? tag : `@${tag}`;
@@ -207,52 +192,47 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   };
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: C.bg }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* My Profile */}
-        <View style={s.profileCard}>
+        <View style={[s.profileCard, { backgroundColor: C.card }]}>
           <View style={s.profileAvatar}>
             <Text style={{ fontSize: 44 }}>😊</Text>
           </View>
-          <Text style={s.profileName}>You</Text>
+          <Text style={[s.profileName, { color: C.text }]}>You</Text>
           <View style={s.profileTagRow}>
-            <Text style={s.profileTag}>{MY_TAG}</Text>
+            <Text style={[s.profileTag, { color: C.blue, backgroundColor: C.blue + "18" }]}>{MY_TAG}</Text>
             <TouchableOpacity
-              style={s.shareBtn}
-              onPress={() =>
-                Alert.alert(
-                  "Share",
-                  `Your tag is ${MY_TAG} — share it with friends!`
-                )
-              }
+              style={[s.shareBtn, { backgroundColor: C.green }]}
+              onPress={() => Alert.alert("Share", `Your tag is ${MY_TAG} — share it with friends!`)}
             >
               <Text style={s.shareBtnText}>📤 Share</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={s.profileStats}>
+          <View style={[s.profileStats, { borderTopColor: C.border }]}>
             <View style={s.profileStat}>
-              <Text style={s.profileStatNum}>{MY_STREAK}</Text>
-              <Text style={s.profileStatLabel}>Best Streak</Text>
+              <Text style={[s.profileStatNum, { color: C.text }]}>{MY_STREAK}</Text>
+              <Text style={[s.profileStatLabel, { color: C.sub }]}>Best Streak</Text>
             </View>
-            <View style={s.statDivider} />
+            <View style={[s.statDivider, { backgroundColor: C.border }]} />
             <View style={s.profileStat}>
-              <Text style={s.profileStatNum}>{MY_TASKS}</Text>
-              <Text style={s.profileStatLabel}>Tasks</Text>
+              <Text style={[s.profileStatNum, { color: C.text }]}>{MY_TASKS}</Text>
+              <Text style={[s.profileStatLabel, { color: C.sub }]}>Tasks</Text>
             </View>
-            <View style={s.statDivider} />
+            <View style={[s.statDivider, { backgroundColor: C.border }]} />
             <View style={s.profileStat}>
-              <Text style={s.profileStatNum}>{friends.length}</Text>
-              <Text style={s.profileStatLabel}>Friends</Text>
+              <Text style={[s.profileStatNum, { color: C.text }]}>{friends.length}</Text>
+              <Text style={[s.profileStatLabel, { color: C.sub }]}>Friends</Text>
             </View>
           </View>
         </View>
 
         {/* Friends */}
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>Friends</Text>
+          <Text style={[s.sectionTitle, { color: C.text }]}>Friends</Text>
           <TouchableOpacity
-            style={s.addBtn}
+            style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]}
             onPress={() => setAddFriendVisible(true)}
           >
             <Text style={s.addBtnText}>+ Add</Text>
@@ -264,25 +244,21 @@ export default function ProfileTab({ friends, setFriends }: Props) {
           return (
             <TouchableOpacity
               key={friend.id}
-              style={s.friendCard}
+              style={[s.friendCard, { backgroundColor: C.card }]}
               onPress={() => openFriend(friend)}
               activeOpacity={0.8}
             >
-              <View style={s.friendAvatar}>
+              <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
                 <Text style={{ fontSize: 28 }}>{friend.avatar}</Text>
               </View>
               <View style={s.friendInfo}>
-                <Text style={s.friendName}>{friend.name}</Text>
-                <Text style={s.friendTagText}>{friend.tag}</Text>
+                <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
+                <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
                 <View style={s.friendMeta}>
-                  <Text style={s.friendMetaText}>
-                    🔥 {friend.streakDays}-day streak
-                  </Text>
+                  <Text style={[s.friendMetaText, { color: C.sub }]}>🔥 {friend.streakDays}-day streak</Text>
                   {needsNudge && (
                     <View style={s.missedBadge}>
-                      <Text style={s.missedText}>
-                        ⚠️ {friend.missedDays} missed
-                      </Text>
+                      <Text style={[s.missedText, { color: C.red }]}>⚠️ {friend.missedDays} missed</Text>
                     </View>
                   )}
                 </View>
@@ -290,24 +266,19 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               {needsNudge && (
                 <TouchableOpacity
                   style={s.nudgeSmallBtn}
-                  onPress={() =>
-                    Alert.alert(
-                      "Nudge sent!",
-                      `${friend.name.split(" ")[0]} has been nudged! 💪`
-                    )
-                  }
+                  onPress={() => Alert.alert("Nudge sent!", `${friend.name.split(" ")[0]} has been nudged! 💪`)}
                 >
                   <Text style={s.nudgeSmallText}>👋</Text>
                 </TouchableOpacity>
               )}
-              <Text style={s.chevron}>›</Text>
+              <Text style={[s.chevron, { color: C.sub }]}>›</Text>
             </TouchableOpacity>
           );
         })}
 
         {/* Settings */}
         <View style={[s.sectionHeader, { marginTop: 8 }]}>
-          <Text style={s.sectionTitle}>Settings</Text>
+          <Text style={[s.sectionTitle, { color: C.text }]}>Settings</Text>
         </View>
 
         {[
@@ -319,14 +290,12 @@ export default function ProfileTab({ friends, setFriends }: Props) {
         ].map((item) => (
           <TouchableOpacity
             key={item.label}
-            style={s.settingsRow}
-            onPress={() =>
-              Alert.alert(item.label, `${item.label} settings coming soon!`)
-            }
+            style={[s.settingsRow, { backgroundColor: C.card }]}
+            onPress={() => Alert.alert(item.label, `${item.label} settings coming soon!`)}
           >
             <Text style={s.settingsIcon}>{item.icon}</Text>
-            <Text style={s.settingsLabel}>{item.label}</Text>
-            <Text style={s.chevron}>›</Text>
+            <Text style={[s.settingsLabel, { color: C.text }]}>{item.label}</Text>
+            <Text style={[s.chevron, { color: C.sub }]}>›</Text>
           </TouchableOpacity>
         ))}
 
@@ -350,10 +319,8 @@ export default function ProfileTab({ friends, setFriends }: Props) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-
+  container: { flex: 1 },
   profileCard: {
-    backgroundColor: C.card,
     margin: 20,
     borderRadius: 20,
     padding: 24,
@@ -365,216 +332,96 @@ const s = StyleSheet.create({
     elevation: 5,
   },
   profileAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 80, height: 80, borderRadius: 40,
     backgroundColor: "#EEF2FF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
+    alignItems: "center", justifyContent: "center", marginBottom: 12,
   },
-  profileName: { fontSize: 22, fontWeight: "800", color: C.text, marginBottom: 6 },
-  profileTagRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 16,
-  },
-  profileTag: {
-    fontSize: 14,
-    color: C.blue,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontWeight: "700",
-  },
-  shareBtn: {
-    backgroundColor: C.green,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
+  profileName: { fontSize: 22, fontWeight: "800", marginBottom: 6 },
+  profileTagRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
+  profileTag: { fontSize: 14, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, fontWeight: "700" },
+  shareBtn: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
   shareBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
   profileStats: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    paddingTop: 16,
+    flexDirection: "row", width: "100%", justifyContent: "space-around",
+    borderTopWidth: 1, paddingTop: 16,
   },
   profileStat: { alignItems: "center" },
-  profileStatNum: { fontSize: 22, fontWeight: "800", color: C.text },
-  profileStatLabel: {
-    fontSize: 11,
-    color: C.sub,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  statDivider: { width: 1, backgroundColor: C.border },
-
+  profileStatNum: { fontSize: 22, fontWeight: "800" },
+  profileStatLabel: { fontSize: 11, fontWeight: "600", marginTop: 2 },
+  statDivider: { width: 1 },
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 8,
+    flexDirection: "row", justifyContent: "space-between",
+    alignItems: "center", paddingHorizontal: 20, marginBottom: 8,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "800", color: C.text },
+  sectionTitle: { fontSize: 18, fontWeight: "800" },
   addBtn: {
-    backgroundColor: C.blue,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: C.blue,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
   },
   addBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-
   friendCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: C.card,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    flexDirection: "row", alignItems: "center",
+    marginHorizontal: 20, marginBottom: 10, borderRadius: 16, padding: 14,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 8, elevation: 3,
   },
   friendAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
+    width: 48, height: 48, borderRadius: 24,
+    alignItems: "center", justifyContent: "center", marginRight: 12,
   },
   friendInfo: { flex: 1 },
-  friendName: { fontSize: 15, fontWeight: "700", color: C.text },
-  friendTagText: { fontSize: 12, color: C.sub, marginBottom: 4 },
+  friendName: { fontSize: 15, fontWeight: "700" },
+  friendTagText: { fontSize: 12, marginBottom: 4 },
   friendMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
-  friendMetaText: { fontSize: 12, color: C.sub },
-  missedBadge: {
-    backgroundColor: "#FEF2F2",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  missedText: { fontSize: 11, color: C.red, fontWeight: "700" },
+  friendMetaText: { fontSize: 12 },
+  missedBadge: { backgroundColor: "#FEF2F2", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  missedText: { fontSize: 11, fontWeight: "700" },
   nudgeSmallBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FEF3C7",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "#FEF3C7", alignItems: "center", justifyContent: "center", marginRight: 8,
   },
   nudgeSmallText: { fontSize: 18 },
-  chevron: { fontSize: 22, color: C.sub },
-
+  chevron: { fontSize: 22 },
   // Friend profile modal
   friendProfileCard: {
-    backgroundColor: C.card,
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 5,
+    borderRadius: 20, padding: 24, alignItems: "center", marginBottom: 16,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08, shadowRadius: 12, elevation: 5,
   },
   friendProfileAvatar: { fontSize: 64, marginBottom: 12 },
-  friendProfileName: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: C.text,
-    marginBottom: 4,
-  },
-  friendProfileTag: { fontSize: 14, color: C.blue, marginBottom: 16 },
+  friendProfileName: { fontSize: 22, fontWeight: "800", marginBottom: 4 },
+  friendProfileTag: { fontSize: 14, marginBottom: 16 },
   friendStats: { flexDirection: "row", gap: 24 },
   friendStat: { alignItems: "center" },
-  friendStatNum: { fontSize: 22, fontWeight: "800", color: C.text },
-  friendStatLabel: { fontSize: 11, color: C.sub, fontWeight: "600" },
-
+  friendStatNum: { fontSize: 22, fontWeight: "800" },
+  friendStatLabel: { fontSize: 11, fontWeight: "600" },
   nudgeBox: {
-    backgroundColor: "#FFF7ED",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#FED7AA",
+    backgroundColor: "#FFF7ED", borderRadius: 16, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: "#FED7AA",
   },
-  nudgeBoxGood: {
-    backgroundColor: "#ECFDF5",
-    borderColor: C.green,
-  },
+  nudgeBoxGood: { backgroundColor: "#ECFDF5", borderColor: "#10B981" },
   nudgeTitle: { fontSize: 15, fontWeight: "700", color: "#9A3412", marginBottom: 4 },
-  nudgeSubtitle: { fontSize: 13, color: C.sub, marginBottom: 12 },
-  nudgeBtn: {
-    backgroundColor: C.yellow,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center",
-    marginBottom: 8,
-  },
+  nudgeSubtitle: { fontSize: 13, marginBottom: 12 },
+  nudgeBtn: { borderRadius: 12, padding: 12, alignItems: "center", marginBottom: 8 },
   nudgeBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  nudgeGoodText: { color: C.green, fontWeight: "700", fontSize: 15 },
-
+  nudgeGoodText: { fontWeight: "700", fontSize: 15 },
   settingsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: C.card,
-    marginHorizontal: 20,
-    marginBottom: 2,
-    padding: 16,
-    borderRadius: 12,
+    flexDirection: "row", alignItems: "center",
+    marginHorizontal: 20, marginBottom: 2, padding: 16, borderRadius: 12,
   },
   settingsIcon: { fontSize: 20, marginRight: 14 },
-  settingsLabel: { flex: 1, fontSize: 15, color: C.text, fontWeight: "600" },
-
+  settingsLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
   // Modal shared
-  modalSafe: { flex: 1, backgroundColor: C.bg },
+  modalSafe: { flex: 1 },
   modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-    backgroundColor: C.card,
+    flexDirection: "row", justifyContent: "space-between",
+    alignItems: "center", padding: 16, borderBottomWidth: 1,
   },
-  modalBack: { fontSize: 16, color: C.sub },
-  modalTitle: { fontSize: 17, fontWeight: "700", color: C.text },
-  modalSave: { fontSize: 16, color: C.blue, fontWeight: "700" },
+  modalBack: { fontSize: 16 },
+  modalTitle: { fontSize: 17, fontWeight: "700" },
+  modalSave: { fontSize: 16, fontWeight: "700" },
   modalBody: { flex: 1, padding: 20 },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: C.sub,
-    marginBottom: 8,
-    marginTop: 4,
-  },
-  textInput: {
-    backgroundColor: C.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 14,
-    fontSize: 15,
-    color: C.text,
-    marginBottom: 16,
-  },
-  addFriendHint: { fontSize: 13, color: C.sub, marginTop: 4 },
+  fieldLabel: { fontSize: 13, fontWeight: "700", marginBottom: 8, marginTop: 4 },
+  textInput: { borderRadius: 12, borderWidth: 1, padding: 14, fontSize: 15, marginBottom: 16 },
+  addFriendHint: { fontSize: 13, marginTop: 4 },
 });
