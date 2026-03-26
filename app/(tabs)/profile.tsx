@@ -8,9 +8,9 @@ import {
   Modal,
   Alert,
   StyleSheet,
-  SafeAreaView,
   useColorScheme,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Friend, getColors, genId } from "./types";
 
 // ─── Friend Profile Modal ─────────────────────────────────────────────────────

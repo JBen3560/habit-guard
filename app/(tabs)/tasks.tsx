@@ -8,9 +8,9 @@ import {
   Modal,
   Switch,
   StyleSheet,
-  SafeAreaView,
   useColorScheme,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Task,
   Category,
