@@ -1,7 +1,17 @@
 {
   "recommendations": [
-    "expo.vscode-expo-tools",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
+    // ── Formatting & linting (required) ──────────────────────────────────────
+    "esbenp.prettier-vscode",          // Prettier formatter
+    "dbaeumer.vscode-eslint",          // ESLint inline errors + auto-fix
+
+    // ── TypeScript ────────────────────────────────────────────────────────────
+    "ms-vscode.vscode-typescript-next", // latest TS language features
+
+    // ── React Native / Expo ───────────────────────────────────────────────────
+    "expo.vscode-expo-tools",           // app.json IntelliSense, Expo commands
+
+    // ── Developer experience ──────────────────────────────────────────────────
+    "eamodio.gitlens",                  // Git blame / history inline
+    "christian-kohler.path-intellisense" // autocomplete file paths in imports
   ]
 }

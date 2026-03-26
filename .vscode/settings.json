@@ -1,9 +1,35 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.organizeImports": "explicit",
-    "source.sortMembers": "explicit"
-  },
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
-  "js/ts.tsdk.promptToUseWorkspaceVersion": true
+    // ── Formatter ──────────────────────────────────────────────────────────────
+    // Prettier is the single source of truth for formatting.
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+
+    // ── ESLint auto-fix on save ────────────────────────────────────────────────
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+
+    // ── TypeScript ────────────────────────────────────────────────────────────
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+
+    // ── ESLint ────────────────────────────────────────────────────────────────
+    // Validate TS/TSX files (not just JS)
+    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+    // ── File associations ─────────────────────────────────────────────────────
+    "files.associations": {
+        "*.tsx": "typescriptreact",
+        "*.ts": "typescript"
+    },
+
+    // ── Recommended extensions (surfaced in the Extensions panel) ─────────────
+
+    // ── Misc editor quality-of-life ───────────────────────────────────────────
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
 }
