@@ -8,6 +8,13 @@ module.exports = defineConfig([
     ignores: ['dist/*'],
   },
   {
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
+    },
     rules: {
       // Apostrophes and quotes in JSX text must be escaped
       'react/no-unescaped-entities': 'warn',

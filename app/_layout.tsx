@@ -1,30 +1,40 @@
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SystemUI from "expo-system-ui";
 
-// Light and dark background colors — must match C.bg in types.ts
+import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
+
+// Light and dark background colors — must match getColors() in src/types/index.ts
 const BG_LIGHT = "#F9FAFB";
-const BG_DARK = "#111827";
+const BG_DARK  = "#111827";
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+// Inner component so it can consume ThemeContext (which is provided above it)
+function AppShell() {
+  const { isDark } = useTheme();
 
-  // Sets the native system background color (the area behind the app) as early
-  // as possible — this is what prevents the black bars on initial load in dark
-  // mode before React has finished mounting.
+  // Sets the native system background color as early as possible — prevents
+  // black bars on initial load in dark mode before React finishes mounting.
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(isDark ? BG_DARK : BG_LIGHT);
   }, [isDark]);
 
   return (
-    <SafeAreaProvider>
+    <>
       {/* style="light" = dark icons (for light bg), style="dark" = white icons (for dark bg) */}
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,25 +1,25 @@
 import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useColorScheme,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
+import { useTheme } from "@/src/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import TasksTab from "./tasks";
 import BadgesTab from "./badges";
 import ProfileTab from "./profile";
-import TasksTab from "./tasks";
 
 import {
-    Friend,
-    INITIAL_FRIENDS,
-    INITIAL_TASKS,
-    INITIAL_TROPHIES,
-    Task,
-    Trophy,
-    getColors,
+  Task,
+  Trophy,
+  Friend,
+  INITIAL_TASKS,
+  INITIAL_TROPHIES,
+  INITIAL_FRIENDS,
+  getColors,
 } from "@/src/types";
 
 type Tab = "Tasks" | "Badges" | "Profile";
@@ -31,8 +31,8 @@ const TAB_ICONS: Record<Tab, string> = {
 };
 
 export default function App() {
-  const colorScheme = useColorScheme();
-  const C = getColors(colorScheme === "dark");
+  const { isDark } = useTheme();
+  const C = getColors(isDark);
   const insets = useSafeAreaInsets();
 
   // ── All shared state lives here so switching tabs never resets anything ──
@@ -47,6 +47,7 @@ export default function App() {
     // sits below the status bar. The background color fills the status bar
     // area and the home indicator area so there are no mismatched strips.
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
+
       {/*
         All three tabs are mounted at once (display: none when inactive).
         This preserves scroll position, filter state, and task state

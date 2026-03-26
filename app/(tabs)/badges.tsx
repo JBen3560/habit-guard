@@ -1,3 +1,5 @@
+import { useTheme } from "@/src/context/ThemeContext";
+import { Trophy, getColors } from "@/src/types/index";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -5,9 +7,7 @@ import {
 	Text,
 	TouchableOpacity,
 	View,
-	useColorScheme,
 } from "react-native";
-import { Trophy, getColors } from "@/src/types";
 
 type Props = Readonly<{
   trophies: Trophy[];
@@ -30,7 +30,8 @@ const TYPE_LABEL: Record<Trophy["type"], string> = {
 };
 
 export default function BadgesTab({ trophies }: Props) {
-  const C = getColors(useColorScheme() === "dark");
+  const { isDark } = useTheme();
+  const C = getColors(isDark);
   const [filter, setFilter] = useState<"All" | "Earned" | "Locked">("All");
 
   const earned = trophies.filter((t) => t.earned);
