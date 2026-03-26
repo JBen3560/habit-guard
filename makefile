@@ -34,12 +34,20 @@ install: install-nvm
 	@export NVM_DIR="$(NVM_DIR)"; \
 	[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
 	unset NPM_CONFIG_PREFIX; \
-	echo "[INFO] Installing Node $(NODE_VERSION)..."; \
-	nvm install $(NODE_VERSION); \
+	if ! nvm ls $(NODE_VERSION) | grep -q "v$(NODE_VERSION)"; then \
+		echo "[INFO] Installing Node $(NODE_VERSION)..."; \
+		nvm install $(NODE_VERSION); \
+	else \
+		echo "[INFO] Node $(NODE_VERSION) already installed, skipping"; \
+	fi; \
 	nvm use $(NODE_VERSION); \
 	echo "[INFO] Node: $$(node -v) | npm: $$(npm -v) | npx: $$(npx -v)"; \
-	echo "[INFO] Installing dependencies..."; \
-	npm install
+	if [ ! -d "node_modules" ]; then \
+		echo "[INFO] Installing dependencies..."; \
+		npm install; \
+	else \
+		echo "[INFO] node_modules already exists, skipping. Run make clean first if you need a fresh install."; \
+	fi
 
 # ------------------------------------------------------------
 # Run the app — lightweight, no reinstalling anything
