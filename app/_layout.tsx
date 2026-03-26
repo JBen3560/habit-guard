@@ -6,16 +6,14 @@ import * as SystemUI from "expo-system-ui";
 
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
 
-// Light and dark background colors — must match getColors() in src/types/index.ts
+// Light and dark background colors
 const BG_LIGHT = "#F9FAFB";
 const BG_DARK  = "#111827";
 
-// Inner component so it can consume ThemeContext (which is provided above it)
 function AppShell() {
   const { isDark } = useTheme();
 
-  // Sets the native system background color as early as possible — prevents
-  // black bars on initial load in dark mode before React finishes mounting.
+  // Sets the native system background color as early as possible
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(isDark ? BG_DARK : BG_LIGHT);
   }, [isDark]);
