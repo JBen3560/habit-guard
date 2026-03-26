@@ -34,8 +34,9 @@ help:
 # ------------------------------------------------------------
 install-nvm:
 	@if [ ! -d "$(NVM_DIR)" ]; then \
-		echo "[INFO] Installing nvm..."; \
-		curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$(NVM_VERSION)/install.sh | bash; \
+		echo "[INFO] Installing nvm (tarball method)..."; \
+		mkdir -p "$(NVM_DIR)"; \
+		curl -fsSL https://github.com/nvm-sh/nvm/archive/refs/tags/$(NVM_VERSION).tar.gz | tar -xz -C "$(NVM_DIR)" --strip-components=1; \
 	else \
 		echo "[INFO] nvm already installed"; \
 	fi
