@@ -35,24 +35,16 @@ export default function App() {
   const C = getColors(isDark);
   const insets = useSafeAreaInsets();
 
-  // ── All shared state lives here so switching tabs never resets anything ──
+  // Save current state
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [trophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [activeTab, setActiveTab] = useState<Tab>("Tasks");
 
   return (
-    // We use a plain View instead of SafeAreaView so we can control exactly
-    // which edges get padding. paddingTop comes from insets so the content
-    // sits below the status bar. The background color fills the status bar
-    // area and the home indicator area so there are no mismatched strips.
+    
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
 
-      {/*
-        All three tabs are mounted at once (display: none when inactive).
-        This preserves scroll position, filter state, and task state
-        across tab switches — no resets when navigating back.
-      */}
       <View style={[s.tab, activeTab === "Tasks" ? s.visible : s.hidden]}>
         <TasksTab tasks={tasks} setTasks={setTasks} />
       </View>
@@ -65,15 +57,13 @@ export default function App() {
         <ProfileTab friends={friends} setFriends={setFriends} />
       </View>
 
-      {/* Bottom Tab Bar — paddingBottom pushes content above the home indicator */}
+      {/* Bottom Tab Bar */}
       <View
         style={[
           s.tabBar,
           {
             backgroundColor: C.card,
             borderTopColor: C.border,
-            // insets.bottom is the home indicator height on iPhone (typically 34pt).
-            // On devices with no home indicator insets.bottom is 0 so we fall back to 8pt.
             paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
           },
         ]}
@@ -113,7 +103,7 @@ export default function App() {
 const s = StyleSheet.create({
   root: { flex: 1 },
 
-  // Each tab fills all available space; hidden ones collapse via display:none
+  // Each tab fills all available space
   tab: { flex: 1 },
   visible: { display: "flex" },
   hidden: { display: "none" },
