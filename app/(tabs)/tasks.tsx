@@ -1,36 +1,34 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Switch,
-  StyleSheet,
-  useColorScheme,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Task,
-  Category,
-  CATEGORIES,
-  DAY_LABELS,
-  CATEGORY_COLORS,
-  CATEGORY_ICONS,
-  getColors,
-  genId,
-  today,
-  todayIdx,
-} from "./types";
+    CATEGORIES,
+    Category,
+    CATEGORY_COLORS,
+    CATEGORY_ICONS,
+    DAY_LABELS,
+    genId,
+    getColors,
+    Task,
+    today,
+    todayIdx,
+} from "../../types";
 
 // ─── CategoryPill ─────────────────────────────────────────────────────────────
 
 const CategoryPill = ({ cat }: { cat: Category }) => (
   <View style={[s.pill, { backgroundColor: CATEGORY_COLORS[cat] + "22" }]}>
-    <Text style={[s.pillText, { color: CATEGORY_COLORS[cat] }]}>
-      {cat}
-    </Text>
+    <Text style={[s.pillText, { color: CATEGORY_COLORS[cat] }]}>{cat}</Text>
   </View>
 );
 
@@ -56,7 +54,9 @@ const DayToggle = ({
           days[i] && { backgroundColor: C.blue, borderColor: C.blue },
         ]}
       >
-        <Text style={[s.dayBtnText, { color: C.sub }, days[i] && { color: "#fff" }]}>
+        <Text
+          style={[s.dayBtnText, { color: C.sub }, days[i] && { color: "#fff" }]}
+        >
           {d}
         </Text>
       </TouchableOpacity>
@@ -66,7 +66,10 @@ const DayToggle = ({
 
 // ─── Task Modal ───────────────────────────────────────────────────────────────
 
-type TaskFormData = Omit<Task, "id" | "streakCount" | "completedToday" | "skippedToday">;
+type TaskFormData = Omit<
+  Task,
+  "id" | "streakCount" | "completedToday" | "skippedToday"
+>;
 
 const EMPTY_FORM: TaskFormData = {
   title: "",
@@ -103,7 +106,7 @@ function TaskModal({
               days: [...initial.days],
               active: initial.active,
             }
-          : { ...EMPTY_FORM, days: [true, true, true, true, true, true, true] }
+          : { ...EMPTY_FORM, days: [true, true, true, true, true, true, true] },
       );
     }
   }, [visible, initial]);
@@ -122,11 +125,18 @@ function TaskModal({
       onRequestClose={onClose}
     >
       <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
-        <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View
+          style={[
+            s.modalHeader,
+            { borderBottomColor: C.border, backgroundColor: C.card },
+          ]}
+        >
           <TouchableOpacity onPress={onClose}>
             <Text style={[s.modalCancel, { color: C.sub }]}>Cancel</Text>
           </TouchableOpacity>
-          <Text style={[s.modalTitle, { color: C.text }]}>{initial ? "Edit Task" : "New Task"}</Text>
+          <Text style={[s.modalTitle, { color: C.text }]}>
+            {initial ? "Edit Task" : "New Task"}
+          </Text>
           <TouchableOpacity
             onPress={() => {
               if (form.title.trim()) onSave(form);
@@ -136,10 +146,16 @@ function TaskModal({
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={[s.modalBody, { backgroundColor: C.bg }]}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={[s.fieldLabel, { color: C.sub }]}>Task Name</Text>
           <TextInput
-            style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
+            style={[
+              s.textInput,
+              { backgroundColor: C.card, borderColor: C.border, color: C.text },
+            ]}
             value={form.title}
             onChangeText={(t) => setForm({ ...form, title: t })}
             placeholder="e.g. Morning Run"
@@ -148,7 +164,10 @@ function TaskModal({
 
           <Text style={[s.fieldLabel, { color: C.sub }]}>Time</Text>
           <TextInput
-            style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
+            style={[
+              s.textInput,
+              { backgroundColor: C.card, borderColor: C.border, color: C.text },
+            ]}
             value={form.time}
             onChangeText={(t) => setForm({ ...form, time: t })}
             placeholder="HH:MM"
@@ -202,7 +221,9 @@ function TaskModal({
 
           {initial && onDelete && (
             <TouchableOpacity style={s.deleteBtn} onPress={onDelete}>
-              <Text style={[s.deleteBtnText, { color: C.red }]}>🗑 Delete Task</Text>
+              <Text style={[s.deleteBtnText, { color: C.red }]}>
+                🗑 Delete Task
+              </Text>
             </TouchableOpacity>
           )}
           <View style={{ height: 40 }} />
@@ -226,7 +247,9 @@ export default function TasksTab({ tasks, setTasks }: Props) {
   const [editTask, setEditTask] = useState<Task | null>(null);
 
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
-  const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
+  const pending = todayTasks.filter(
+    (t) => !t.completedToday && !t.skippedToday,
+  );
   const done = todayTasks.filter((t) => t.completedToday || t.skippedToday);
   const filtered =
     filter === "All" ? todayTasks : filter === "Pending" ? pending : done;
@@ -243,8 +266,8 @@ export default function TasksTab({ tasks, setTasks }: Props) {
                 ? t.streakCount + 1
                 : Math.max(0, t.streakCount - 1),
             }
-          : t
-      )
+          : t,
+      ),
     );
 
   const toggleSkip = (id: string) =>
@@ -256,13 +279,15 @@ export default function TasksTab({ tasks, setTasks }: Props) {
               skippedToday: !t.skippedToday,
               completedToday: t.skippedToday ? t.completedToday : false,
             }
-          : t
-      )
+          : t,
+      ),
     );
 
   const saveTask = (form: TaskFormData) => {
     if (editTask) {
-      setTasks((ts) => ts.map((t) => (t.id === editTask.id ? { ...t, ...form } : t)));
+      setTasks((ts) =>
+        ts.map((t) => (t.id === editTask.id ? { ...t, ...form } : t)),
+      );
     } else {
       setTasks((ts) => [
         ...ts,
@@ -285,8 +310,14 @@ export default function TasksTab({ tasks, setTasks }: Props) {
     setEditTask(null);
   };
 
-  const openNew = () => { setEditTask(null); setModalVisible(true); };
-  const openEdit = (t: Task) => { setEditTask(t); setModalVisible(true); };
+  const openNew = () => {
+    setEditTask(null);
+    setModalVisible(true);
+  };
+  const openEdit = (t: Task) => {
+    setEditTask(t);
+    setModalVisible(true);
+  };
 
   return (
     <View style={[s.container, { backgroundColor: C.bg }]}>
@@ -300,9 +331,14 @@ export default function TasksTab({ tasks, setTasks }: Props) {
               day: "numeric",
             })}
           </Text>
-          <Text style={[s.titleText, { color: C.text }]}>Today&apos;s Tasks</Text>
+          <Text style={[s.titleText, { color: C.text }]}>
+            Today&apos;s Tasks
+          </Text>
         </View>
-        <TouchableOpacity style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]} onPress={openNew}>
+        <TouchableOpacity
+          style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]}
+          onPress={openNew}
+        >
           <Text style={s.addBtnText}>+ Add</Text>
         </TouchableOpacity>
       </View>
@@ -310,7 +346,9 @@ export default function TasksTab({ tasks, setTasks }: Props) {
       {/* Stats */}
       <View style={[s.statsBar, { backgroundColor: C.card }]}>
         <View style={s.statItem}>
-          <Text style={[s.statNum, { color: C.text }]}>{todayTasks.length}</Text>
+          <Text style={[s.statNum, { color: C.text }]}>
+            {todayTasks.length}
+          </Text>
           <Text style={[s.statLabel, { color: C.sub }]}>TOTAL</Text>
         </View>
         <View style={[s.statDivider, { backgroundColor: C.border }]} />
@@ -337,13 +375,19 @@ export default function TasksTab({ tasks, setTasks }: Props) {
               filter === f && { backgroundColor: C.blue, borderColor: C.blue },
             ]}
           >
-            <Text style={[s.filterTabText, { color: C.sub }, filter === f && { color: "#fff" }]}>
+            <Text
+              style={[
+                s.filterTabText,
+                { color: C.sub },
+                filter === f && { color: "#fff" },
+              ]}
+            >
               {f}{" "}
               {f === "All"
                 ? `(${todayTasks.length})`
                 : f === "Pending"
-                ? `(${pending.length})`
-                : `(${done.length})`}
+                  ? `(${pending.length})`
+                  : `(${done.length})`}
             </Text>
           </TouchableOpacity>
         ))}
@@ -365,11 +409,22 @@ export default function TasksTab({ tasks, setTasks }: Props) {
             >
               <View style={[s.taskAccent, { backgroundColor: catColor }]} />
               <View style={s.taskInfo}>
-                <Text style={[s.taskTitle, { color: C.text }, (isDone || isSkipped) && { color: C.sub, textDecorationLine: "line-through" }]}>
+                <Text
+                  style={[
+                    s.taskTitle,
+                    { color: C.text },
+                    (isDone || isSkipped) && {
+                      color: C.sub,
+                      textDecorationLine: "line-through",
+                    },
+                  ]}
+                >
                   {task.title}
                 </Text>
                 <View style={s.taskMeta}>
-                  <Text style={[s.taskTime, { color: C.sub }]}>{task.time}</Text>
+                  <Text style={[s.taskTime, { color: C.sub }]}>
+                    {task.time}
+                  </Text>
                   {task.streakCount > 0 && (
                     <View style={s.streakBadge}>
                       <Text style={s.streakText}>🔥 {task.streakCount}</Text>
@@ -381,14 +436,26 @@ export default function TasksTab({ tasks, setTasks }: Props) {
 
               <View style={s.taskActions}>
                 {isDone ? (
-                  <TouchableOpacity style={s.completedBadge} onPress={() => toggleComplete(task.id)}>
+                  <TouchableOpacity
+                    style={s.completedBadge}
+                    onPress={() => toggleComplete(task.id)}
+                  >
                     <Text style={s.completedText}>Done</Text>
-                    <Text style={[s.undoHint, { color: C.sub }]}>tap to undo</Text>
+                    <Text style={[s.undoHint, { color: C.sub }]}>
+                      tap to undo
+                    </Text>
                   </TouchableOpacity>
                 ) : isSkipped ? (
-                  <TouchableOpacity style={[s.completedBadge, s.skippedBadge]} onPress={() => toggleSkip(task.id)}>
-                    <Text style={[s.completedText, s.skippedText]}>Skipped</Text>
-                    <Text style={[s.undoHint, { color: C.sub }]}>tap to undo</Text>
+                  <TouchableOpacity
+                    style={[s.completedBadge, s.skippedBadge]}
+                    onPress={() => toggleSkip(task.id)}
+                  >
+                    <Text style={[s.completedText, s.skippedText]}>
+                      Skipped
+                    </Text>
+                    <Text style={[s.undoHint, { color: C.sub }]}>
+                      tap to undo
+                    </Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={s.actionBtns}>
@@ -396,7 +463,9 @@ export default function TasksTab({ tasks, setTasks }: Props) {
                       style={[s.skipBtn, { borderColor: C.border }]}
                       onPress={() => toggleSkip(task.id)}
                     >
-                      <Text style={[s.skipBtnText, { color: C.sub }]}>Skip</Text>
+                      <Text style={[s.skipBtnText, { color: C.sub }]}>
+                        Skip
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[s.doneBtn, { backgroundColor: C.blue }]}
@@ -418,7 +487,10 @@ export default function TasksTab({ tasks, setTasks }: Props) {
         initial={editTask}
         onSave={saveTask}
         onDelete={editTask ? deleteTask : undefined}
-        onClose={() => { setModalVisible(false); setEditTask(null); }}
+        onClose={() => {
+          setModalVisible(false);
+          setEditTask(null);
+        }}
       />
     </View>
   );
@@ -465,8 +537,18 @@ const s = StyleSheet.create({
   statNum: { fontSize: 24, fontWeight: "800" },
   statLabel: { fontSize: 10, fontWeight: "600", marginTop: 2 },
   statDivider: { width: 1 },
-  filterRow: { flexDirection: "row", paddingHorizontal: 20, marginBottom: 12, gap: 8 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  filterRow: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    gap: 8,
+  },
+  filterTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
   filterTabText: { fontSize: 13, fontWeight: "600" },
   list: { flex: 1, paddingHorizontal: 20 },
   taskCard: {
@@ -485,38 +567,105 @@ const s = StyleSheet.create({
   taskAccent: { width: 4, height: 48, borderRadius: 2, marginRight: 12 },
   taskInfo: { flex: 1 },
   taskTitle: { fontSize: 15, fontWeight: "700", marginBottom: 4 },
-  taskMeta: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
+  taskMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 6,
+  },
   taskTime: { fontSize: 12 },
-  streakBadge: { backgroundColor: "#FEF3C7", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  streakBadge: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
   streakText: { fontSize: 11, color: "#92400E", fontWeight: "700" },
   taskActions: { alignItems: "flex-end" },
   actionBtns: { gap: 6 },
-  skipBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1 },
+  skipBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
   skipBtnText: { fontSize: 12, fontWeight: "600" },
   doneBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
   doneBtnText: { fontSize: 12, color: "#fff", fontWeight: "700" },
-  completedBadge: { backgroundColor: "#DCFCE7", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, alignItems: "center" },
+  completedBadge: {
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    alignItems: "center",
+  },
   skippedBadge: { backgroundColor: "#FEF9C3" },
   completedText: { fontSize: 12, color: "#166534", fontWeight: "700" },
   skippedText: { color: "#A16207" },
   undoHint: { fontSize: 9, marginTop: 2 },
-  pill: { alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  pill: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
   pillText: { fontSize: 10, fontWeight: "700" },
   // Modal
   modalSafe: { flex: 1 },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, borderBottomWidth: 1 },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+  },
   modalCancel: { fontSize: 16 },
   modalTitle: { fontSize: 17, fontWeight: "700" },
   modalSave: { fontSize: 16, fontWeight: "700" },
   modalBody: { flex: 1, padding: 20 },
-  fieldLabel: { fontSize: 13, fontWeight: "700", marginBottom: 8, marginTop: 4 },
-  textInput: { borderRadius: 12, borderWidth: 1, padding: 14, fontSize: 15, marginBottom: 16 },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  textInput: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+    fontSize: 15,
+    marginBottom: 16,
+  },
   dayRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
-  dayBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", borderWidth: 1 },
+  dayBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
   dayBtnText: { fontSize: 13, fontWeight: "600" },
-  switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  catOption: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, marginRight: 8 },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  catOption: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginRight: 8,
+  },
   catOptionText: { fontSize: 13, fontWeight: "600" },
-  deleteBtn: { backgroundColor: "#FEE2E2", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 16 },
+  deleteBtn: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+    marginTop: 16,
+  },
   deleteBtnText: { fontWeight: "700", fontSize: 15 },
 });

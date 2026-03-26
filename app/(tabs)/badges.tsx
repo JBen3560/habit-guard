@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
-import { Trophy, getColors } from "./types";
+import {
+	ScrollView,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
+	useColorScheme,
+} from "react-native";
+import { Trophy, getColors } from "../../types";
 
 type Props = Readonly<{
   trophies: Trophy[];
@@ -38,7 +45,9 @@ export default function BadgesTab({ trophies }: Props) {
       <View style={s.header}>
         <View>
           <Text style={[s.dateText, { color: C.sub }]}>Your Achievements</Text>
-          <Text style={[s.titleText, { color: C.text }]}>Trophies & Badges</Text>
+          <Text style={[s.titleText, { color: C.text }]}>
+            Trophies & Badges
+          </Text>
         </View>
       </View>
 
@@ -72,7 +81,13 @@ export default function BadgesTab({ trophies }: Props) {
               filter === f && { backgroundColor: C.blue, borderColor: C.blue },
             ]}
           >
-            <Text style={[s.filterTabText, { color: C.sub }, filter === f && { color: "#fff" }]}>
+            <Text
+              style={[
+                s.filterTabText,
+                { color: C.sub },
+                filter === f && { color: "#fff" },
+              ]}
+            >
               {f}
             </Text>
           </TouchableOpacity>
@@ -94,17 +109,32 @@ export default function BadgesTab({ trophies }: Props) {
               <Text style={[s.icon, !trophy.earned && { opacity: 0.3 }]}>
                 {trophy.icon}
               </Text>
-              <View style={[s.typeBadge, { backgroundColor: TYPE_COLOR[trophy.type] + "22" }]}>
+              <View
+                style={[
+                  s.typeBadge,
+                  { backgroundColor: TYPE_COLOR[trophy.type] + "22" },
+                ]}
+              >
                 <Text style={[s.typeText, { color: TYPE_COLOR[trophy.type] }]}>
                   {TYPE_LABEL[trophy.type]}
                 </Text>
               </View>
-              <Text style={[s.cardTitle, { color: C.text }, !trophy.earned && { color: C.sub }]}>
+              <Text
+                style={[
+                  s.cardTitle,
+                  { color: C.text },
+                  !trophy.earned && { color: C.sub },
+                ]}
+              >
                 {trophy.title}
               </Text>
-              <Text style={[s.cardDesc, { color: C.sub }]}>{trophy.description}</Text>
+              <Text style={[s.cardDesc, { color: C.sub }]}>
+                {trophy.description}
+              </Text>
               {trophy.earned && trophy.earnedDate ? (
-                <Text style={[s.earnedDate, { color: C.green }]}>Earned {trophy.earnedDate}</Text>
+                <Text style={[s.earnedDate, { color: C.green }]}>
+                  Earned {trophy.earnedDate}
+                </Text>
               ) : !trophy.earned ? (
                 <Text style={[s.lockedText, { color: C.sub }]}>Locked</Text>
               ) : null}
@@ -147,8 +177,18 @@ const s = StyleSheet.create({
   statNum: { fontSize: 24, fontWeight: "800" },
   statLabel: { fontSize: 10, fontWeight: "600", marginTop: 2 },
   statDivider: { width: 1 },
-  filterRow: { flexDirection: "row", paddingHorizontal: 20, marginBottom: 12, gap: 8 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  filterRow: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    gap: 8,
+  },
+  filterTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
   filterTabText: { fontSize: 13, fontWeight: "600" },
   list: { flex: 1, paddingHorizontal: 20 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
@@ -163,11 +203,25 @@ const s = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  cardBad: { backgroundColor: "#FEF2F2", borderWidth: 1, borderColor: "#FECACA" },
+  cardBad: {
+    backgroundColor: "#FEF2F2",
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
   icon: { fontSize: 40, marginBottom: 8 },
-  typeBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginBottom: 8 },
+  typeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
   typeText: { fontSize: 10, fontWeight: "700" },
-  cardTitle: { fontSize: 13, fontWeight: "800", textAlign: "center", marginBottom: 4 },
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    textAlign: "center",
+    marginBottom: 4,
+  },
   cardDesc: { fontSize: 11, textAlign: "center", marginBottom: 4 },
   earnedDate: { fontSize: 10, fontWeight: "600" },
   lockedText: { fontSize: 10, marginTop: 4 },

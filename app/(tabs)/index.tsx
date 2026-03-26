@@ -1,26 +1,26 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import TasksTab from "./tasks";
 import BadgesTab from "./badges";
 import ProfileTab from "./profile";
+import TasksTab from "./tasks";
 
 import {
-  Task,
-  Trophy,
-  Friend,
-  INITIAL_TASKS,
-  INITIAL_TROPHIES,
-  INITIAL_FRIENDS,
-  getColors,
-} from "./types";
+    Friend,
+    INITIAL_FRIENDS,
+    INITIAL_TASKS,
+    INITIAL_TROPHIES,
+    Task,
+    Trophy,
+    getColors,
+} from "../../types";
 
 type Tab = "Tasks" | "Badges" | "Profile";
 
@@ -47,7 +47,6 @@ export default function App() {
     // sits below the status bar. The background color fills the status bar
     // area and the home indicator area so there are no mismatched strips.
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
-
       {/*
         All three tabs are mounted at once (display: none when inactive).
         This preserves scroll position, filter state, and task state

@@ -7,4 +7,10 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    rules: {
+      // Apostrophes and quotes in JSX text must be escaped
+      'react/no-unescaped-entities': 'warn',
+    },
+  },
 ]);
