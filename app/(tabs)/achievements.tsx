@@ -193,7 +193,7 @@ const s = StyleSheet.create({
   },
   filterTabText: { fontSize: 13, fontWeight: "600" },
   list: { flex: 1, paddingHorizontal: 20 },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12, justifyContent: "center" },
   card: {
     width: "47%",
     borderRadius: 16,
