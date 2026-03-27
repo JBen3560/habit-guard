@@ -337,8 +337,6 @@ const s = StyleSheet.create({
   profileName: { fontSize: 22, fontWeight: "800", marginBottom: 6 },
   profileTagRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
   profileTag: { fontSize: 14, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, fontWeight: "700" },
-  shareBtn: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  shareBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
   profileStats: {
     flexDirection: "row", width: "100%", justifyContent: "space-around",
     borderTopWidth: 1, paddingTop: 16,
