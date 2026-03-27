@@ -1,4 +1,6 @@
-// Types 
+import type { ImageSourcePropType } from 'react-native';
+
+// Types
 
 export type Category =
     | 'Medication'
@@ -38,7 +40,7 @@ export type Friend = {
     tag: string;
     streakDays: number;
     missedDays: number;
-    avatar: string;
+    photo?: ImageSourcePropType;
     tasks: number;
 };
 
@@ -70,6 +72,11 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 
 // Static data
 
+export const PROFILE_PHOTOS = {
+    cplaue: require('../../assets/avatars/cplaue.png') as ImageSourcePropType,
+    agalean: require('../../assets/avatars/agalean.png') as ImageSourcePropType,
+};
+
 export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't1', title: 'First Step',       description: 'Complete your first habit',     icon: '👟', type: 'bronze', earned: true,  earnedDate: 'Mar 1'  },
     { id: 't2', title: 'Sennight Soldier', description: '7-day streak on any habit',     icon: '⚔️', type: 'silver', earned: true,  earnedDate: 'Mar 8'  },
@@ -84,8 +91,8 @@ export const INITIAL_TROPHIES: Trophy[] = [
 ];
 
 export const INITIAL_FRIENDS: Friend[] = [
-    { id: 'f1', name: 'Doc Plaue',    tag: '@cplaue',  streakDays: 182, missedDays: 0, avatar: '👨', tasks: 10 },
-    { id: 'f2', name: 'Anna Galeano', tag: '@agalean', streakDays: 91,  missedDays: 3, avatar: '👩', tasks: 5  },
+    { id: 'f1', name: 'Doc Plaue',    tag: '@cplaue',  streakDays: 182, missedDays: 0, photo: PROFILE_PHOTOS.cplaue, tasks: 10 },
+    { id: 'f2', name: 'Anna Galeano', tag: '@agalean', streakDays: 91,  missedDays: 3, photo: PROFILE_PHOTOS.agalean, tasks: 5  },
 ];
 
 // Helpers

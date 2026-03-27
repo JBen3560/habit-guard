@@ -150,18 +150,14 @@ function FriendModal({
         <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]}>
           <View style={[s.friendProfileCard, { backgroundColor: C.card }]}>
           <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
-            {(friend.tag === '@cplaue' || friend.tag === '@agalean') ? (
+            {friend.photo ? (
               <Image
-                source={
-                  friend.tag === '@cplaue'
-                    ? require('../../assets/avatars/cplaue.png')
-                    : require('../../assets/avatars/agalean.png')
-                }
+                source={friend.photo}
                 style={s.friendAvatarImg}
                 resizeMode="cover"
               />
             ) : (
-              <Text style={{ fontSize: 28 }}>{friend.avatar}</Text>
+              <MaterialIcons name="person" size={28} color={C.sub} />
             )}
           </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
@@ -288,7 +284,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
       tag: normalized,
       streakDays: 0,
       missedDays: 0,
-      avatar: "🙂",
+      photo: undefined,
       tasks: 0,
     };
     setFriends((fs) => [...fs, newFriend]);
@@ -354,20 +350,14 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               activeOpacity={0.8}
             >
               <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
-                {{
-                  '@cplaue': require('../../assets/avatars/cplaue.png'),
-                  '@agalean': require('../../assets/avatars/agalean.png'),
-                }[friend.tag] ? (
+                {friend.photo ? (
                   <Image
-                    source={{
-                      '@cplaue': require('../../assets/avatars/cplaue.png'),
-                      '@agalean': require('../../assets/avatars/agalean.png'),
-                    }[friend.tag]}
+                    source={friend.photo}
                     style={s.friendAvatarImg}
                     resizeMode="cover"
                   />
                 ) : (
-                  <Text style={{ fontSize: 28 }}>{friend.avatar}</Text>
+                  <MaterialIcons name="person" size={28} color={C.sub} />
                 )}
               </View>
               <View style={s.friendInfo}>
