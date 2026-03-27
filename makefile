@@ -65,9 +65,9 @@ run: install-nvm node_modules/.install-stamp
 	[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
 	unset NPM_CONFIG_PREFIX; \
 	nvm use $(NODE_VERSION); \
-	echo "[INFO] Starting app..."; \
 	echo "[INFO] Installing react-native-svg..."; \
 	npx expo install react-native-svg; \
+	echo "[INFO] Starting app..."; \
 	npx expo start
 
 # ------------------------------------------------------------
