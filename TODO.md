@@ -1,20 +1,13 @@
 # TODO LIST BEFORE SUBMISSION
 
-- ## add another penalty task so that there isn't just one
-- have a couple of functioning badgest to show off during presentation. so that not all of them are preset.
-- make all badges not achieved yet (except for the first day 1)
+- update friends profile tabs so there are icons instead of emojis
+- update appearances.tsx so the theme settings use icons instead of emojis
 
-- add stuff for history on previous days (last week for percentage. 28 day or month period for heatmap)
+- convert anna and plaue images to .pngs
+- swap out the placeholder calls to the monochrome png to the respective pngs for anna and plaue
 
-streak saver = snapchat paid streak saver
+- make it so no task/habit has a 30 day streak
 
-- streak ends if not marked as skipped?
-- specific % of tasks not done in a 24 hour period?
-  (slacker penalty badge/card)
+- ADD COMMENTS
 
-- if you skip a task, it ends the streak
-- penalties are for friends to check on you if you're overall doing poorly (half, certain number of days, falling behind. Aka, not necessary for skipping teeth brushing)
-
-- whenever you get an achievement/penalty gets pop up for "you've unlocked XXXX award/penalty. Go check the achievements tab!" (variable depending on penalty vs award)
-
-Update profile tab to include some progress function
+- Test final version on linux machine
