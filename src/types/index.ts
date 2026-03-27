@@ -1,4 +1,4 @@
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types 
 
 export type Category =
     | 'Medication'
@@ -42,7 +42,7 @@ export type Friend = {
     tasks: number;
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// Constants
 
 export const CATEGORIES: Category[] = [
     'Medication',
@@ -68,7 +68,7 @@ export const CATEGORY_COLORS: Record<Category, string> = {
     Other:       '#6B7280',
 };
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// Static data
 
 export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't1', title: 'First Step',       description: 'Complete your first habit',     icon: '👟', type: 'bronze', earned: true,  earnedDate: 'Mar 1'  },
@@ -88,7 +88,7 @@ export const INITIAL_FRIENDS: Friend[] = [
     { id: 'f2', name: 'Anna Galeano', tag: '@agalean', streakDays: 91,  missedDays: 3, avatar: '👩', tasks: 5  },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 export const today    = new Date();
 export const todayIdx = today.getDay(); // 0 = Sunday
