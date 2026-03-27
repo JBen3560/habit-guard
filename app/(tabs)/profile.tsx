@@ -149,7 +149,7 @@ function FriendModal({
 
         <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]}>
           <View style={[s.friendProfileCard, { backgroundColor: C.card }]}>
-          <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
+          <View style={[s.friendProfileAvatarWrap, { backgroundColor: C.border }]}>
             {friend.photo ? (
               <Image
                 source={friend.photo}
@@ -157,11 +157,14 @@ function FriendModal({
                 resizeMode="cover"
               />
             ) : (
-              <MaterialIcons name="person" size={28} color={C.sub} />
+              <MaterialIcons name="person" size={52} color={C.sub} />
             )}
           </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
             <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
+            {friend.tag === '@cplaue' && (
+              <Text style={[s.friendBio, { color: C.sub }]}>Enthusiast of greasy keyboards 🤌</Text>
+            )}
             <View style={s.friendStats}>
               <View style={s.friendStat}>
                 <Text style={[s.friendStatNum, { color: C.text }]}>{friend.streakDays}</Text>
@@ -182,18 +185,25 @@ function FriendModal({
 
           {needsNudge ? (
             <View style={s.nudgeBox}>
-              <Text style={s.nudgeTitle}>⚠️ {firstName} has missed {friend.missedDays} days!</Text>
+              <View style={s.nudgeBoxTitle}>
+                <MaterialIcons name="warning" size={18} color="#9A3412" />
+                <Text style={s.nudgeTitle}>{firstName} has missed {friend.missedDays} days!</Text>
+              </View>
               <Text style={[s.nudgeSubtitle, { color: C.sub }]}>Send some encouragement</Text>
               <TouchableOpacity
                 style={[s.nudgeBtn, { backgroundColor: C.yellow }]}
-                onPress={() => Alert.alert("Nudge sent!", `${firstName} has been nudged! 💪`)}
+                onPress={() => Alert.alert("Nudge sent!", `${firstName} has been nudged!`)}
               >
-                <Text style={s.nudgeBtnText}>👋 Check In</Text>
+                <MaterialIcons name="notifications-active" size={18} color="#fff" />
+                <Text style={s.nudgeBtnText}>Check In</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={[s.nudgeBox, s.nudgeBoxGood]}>
-              <Text style={[s.nudgeGoodText, { color: C.green }]}>🔥 {firstName} is on a roll!</Text>
+              <View style={s.nudgeBoxTitle}>
+                <MaterialIcons name="local-fire-department" size={18} color={C.green} />
+                <Text style={[s.nudgeGoodText, { color: C.green }]}>{firstName} is on a roll!</Text>
+              </View>
               <Text style={{ color: C.sub, marginTop: 4 }}>{friend.streakDays}-day streak going strong</Text>
             </View>
           )}
@@ -299,7 +309,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
         {/* ── My Profile card ── */}
         <View style={[s.profileCard, { backgroundColor: C.card }]}>
           <View style={s.profileAvatarWrap}>
-            <Text style={s.profileAvatarEmoji}>😊</Text>
+            <MaterialIcons name="person" size={48} color="#6366F1" />
           </View>
           <Text style={[s.profileName, { color: C.text }]}>{MY_NAME}</Text>
           <View style={s.profileTagRow}>
@@ -377,7 +387,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               {needsNudge && (
                 <TouchableOpacity
                   style={s.nudgeSmallBtn}
-                  onPress={() => Alert.alert("Nudge sent!", `${friend.name.split(" ")[0]} has been nudged! 💪`)}
+                  onPress={() => Alert.alert("Nudge sent!", `${friend.name.split(" ")[0]} has been nudged!`)}
                 >
                   <MaterialIcons name="notifications" size={18} color="#92400E" />
                 </TouchableOpacity>
@@ -445,7 +455,15 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  profileAvatarEmoji: { fontSize: 44 },
+  friendProfileAvatarWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    overflow: "hidden",
+    marginBottom: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   profileName:     { fontSize: 22, fontWeight: "800", marginBottom: 6 },
   profileTagRow:   { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
   profileTag:      { fontSize: 14, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, fontWeight: "700" },
@@ -571,9 +589,9 @@ const s = StyleSheet.create({
     borderRadius: 20, padding: 24, alignItems: "center", marginBottom: 16,
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 5,
   },
-  friendProfileAvatar: { fontSize: 64, marginBottom: 12 },
   friendProfileName:   { fontSize: 22, fontWeight: "800", marginBottom: 4 },
-  friendProfileTag:    { fontSize: 14, marginBottom: 16 },
+  friendProfileTag:    { fontSize: 14, marginBottom: 8 },
+  friendBio:           { fontSize: 12, fontStyle: "italic", marginBottom: 12, textAlign: "center" },
   friendStats:         { flexDirection: "row", gap: 24 },
   friendStat:          { alignItems: "center" },
   friendStatNum:       { fontSize: 22, fontWeight: "800" },
@@ -583,9 +601,10 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: "#FED7AA",
   },
   nudgeBoxGood:   { backgroundColor: "#ECFDF5", borderColor: "#10B981" },
-  nudgeTitle:     { fontSize: 15, fontWeight: "700", color: "#9A3412", marginBottom: 4 },
+  nudgeBoxTitle:  { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
+  nudgeTitle:     { fontSize: 15, fontWeight: "700", color: "#9A3412" },
   nudgeSubtitle:  { fontSize: 13, marginBottom: 12 },
-  nudgeBtn:       { borderRadius: 12, padding: 12, alignItems: "center", marginBottom: 8 },
+  nudgeBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, padding: 12, alignSelf: "stretch", marginBottom: 8 },
   nudgeBtnText:   { color: "#fff", fontWeight: "700", fontSize: 14 },
   nudgeGoodText:  { fontWeight: "700", fontSize: 15 },
 
