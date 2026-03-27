@@ -11,12 +11,12 @@ import { useTheme } from "@/src/context/ThemeContext";
 import {
   type Friend,
   INITIAL_FRIENDS,
-  INITIAL_TASKS,
   INITIAL_TROPHIES,
   type Task,
   type Trophy,
   getColors,
 } from "@/src/types";
+import { INITIAL_TASKS } from "@/src/mockData";
 
 import AchievementsTab from "./achievements";
 import ProfileTab from "./profile";
