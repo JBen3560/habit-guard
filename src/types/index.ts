@@ -3,11 +3,11 @@
 export type Category =
   | 'Medication'
   | 'Exercise'
-  | 'Hygiene'
   | 'Hydration'
   | 'Nutrition'
-  | 'Sleep'
   | 'Mindfulness'
+  | 'Hygiene'
+  | 'Sleep'
   | 'Other';
 
 export type Task = {
@@ -47,11 +47,11 @@ export type Friend = {
 export const CATEGORIES: Category[] = [
   'Medication',
   'Exercise',
-  'Hygiene',
   'Hydration',
   'Nutrition',
-  'Sleep',
   'Mindfulness',
+  'Hygiene',
+  'Sleep',
   'Other',
 ];
 
@@ -71,12 +71,11 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 export const CATEGORY_ICONS: Record<Category, string> = {
   Medication: '💊',
   Exercise: '🏃',
-  Hygiene: '🧼',
   Hydration: '💧',
   Nutrition: '🥗',
-  // might swap for sleep emoji
-  Sleep: '🌙',
   Mindfulness: '🧘',
+  Hygiene: '🧼',
+  Sleep: '😴',
   Other: '⭐',
 };
 

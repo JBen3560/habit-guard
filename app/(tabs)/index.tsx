@@ -20,13 +20,13 @@ import {
 
 import AchievementsTab from "./achievements";
 import ProfileTab from "./profile";
-import TasksTab from "./tasks";
+import HabitsTab from "./habits";
 
 
-type Tab = "Tasks" | "Achievements" | "Profile";
+type Tab = "Habits" | "Achievements" | "Profile";
 
 const TAB_ICONS: Record<Tab, string> = {
-  Tasks: "📋",
+  Habits: "✅",
   Achievements: "🏆",
   Profile: "👤",
 };
@@ -40,14 +40,14 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [trophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
-  const [activeTab, setActiveTab] = useState<Tab>("Tasks");
+  const [activeTab, setActiveTab] = useState<Tab>("Habits");
 
   return (
 
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
 
-      <View style={[s.tab, activeTab === "Tasks" ? s.visible : s.hidden]}>
-        <TasksTab tasks={tasks} setTasks={setTasks} />
+      <View style={[s.tab, activeTab === "Habits" ? s.visible : s.hidden]}>
+        <HabitsTab tasks={tasks} setTasks={setTasks} />
       </View>
 
       <View style={[s.tab, activeTab === "Achievements" ? s.visible : s.hidden]}>
@@ -69,7 +69,7 @@ export default function App() {
           },
         ]}
       >
-        {(["Tasks", "Achievements", "Profile"] as Tab[]).map((tab) => {
+        {(["Habits", "Achievements", "Profile"] as Tab[]).map((tab) => {
           const active = activeTab === tab;
           return (
             <TouchableOpacity
