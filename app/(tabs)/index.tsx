@@ -6,29 +6,30 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { useTheme } from "@/src/context/ThemeContext";
 import {
   type Friend,
   INITIAL_FRIENDS,
-  INITIAL_TASKS,
   INITIAL_TROPHIES,
   type Task,
   type Trophy,
   getColors,
 } from "@/src/types";
+import { INITIAL_TASKS } from "@/src/mockData";
 
 import AchievementsTab from "./achievements";
 import ProfileTab from "./profile";
-import TasksTab from "./tasks";
+import HabitsTab from "./habits";
 
 
-type Tab = "Tasks" | "Achievements" | "Profile";
+type Tab = "Habits" | "Achievements" | "Profile";
 
-const TAB_ICONS: Record<Tab, string> = {
-  Tasks: "📋",
-  Achievements: "🏆",
-  Profile: "👤",
+const TAB_ICONS: Record<Tab, React.ComponentProps<typeof MaterialIcons>["name"]> = {
+  Habits:       "today",
+  Achievements: "emoji-events",
+  Profile:      "person",
 };
 
 export default function App() {
@@ -40,14 +41,14 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [trophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
-  const [activeTab, setActiveTab] = useState<Tab>("Tasks");
+  const [activeTab, setActiveTab] = useState<Tab>("Habits");
 
   return (
 
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
 
-      <View style={[s.tab, activeTab === "Tasks" ? s.visible : s.hidden]}>
-        <TasksTab tasks={tasks} setTasks={setTasks} />
+      <View style={[s.tab, activeTab === "Habits" ? s.visible : s.hidden]}>
+        <HabitsTab tasks={tasks} setTasks={setTasks} />
       </View>
 
       <View style={[s.tab, activeTab === "Achievements" ? s.visible : s.hidden]}>
@@ -69,7 +70,7 @@ export default function App() {
           },
         ]}
       >
-        {(["Tasks", "Achievements", "Profile"] as Tab[]).map((tab) => {
+        {(["Habits", "Achievements", "Profile"] as Tab[]).map((tab) => {
           const active = activeTab === tab;
           return (
             <TouchableOpacity
@@ -81,9 +82,11 @@ export default function App() {
               {active && (
                 <View style={[s.tabIndicator, { backgroundColor: C.blue }]} />
               )}
-              <Text style={[s.tabIcon, active && s.tabIconActive]}>
-                {TAB_ICONS[tab]}
-              </Text>
+              <MaterialIcons
+                name={TAB_ICONS[tab]}
+                size={24}
+                color={active ? C.blue : C.sub}
+              />
               <Text
                 style={[
                   s.tabLabel,
@@ -132,7 +135,5 @@ const s = StyleSheet.create({
     height: 3,
     borderRadius: 2,
   },
-  tabIcon: { fontSize: 22, marginBottom: 2, opacity: 0.4 },
-  tabIconActive: { opacity: 1 },
   tabLabel: { fontSize: 11, fontWeight: "500" },
 });

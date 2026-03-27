@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useTheme } from "@/src/context/ThemeContext";
-import { type Friend, genId, getColors } from "@/src/types/index";
+import { type Friend, getColors } from "@/src/types/index";
+import { genId } from "@/src/mockData";
 
 // Friend Profile
 
