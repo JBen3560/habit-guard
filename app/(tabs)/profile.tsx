@@ -1,3 +1,4 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -12,11 +13,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { useTheme } from "@/src/context/ThemeContext";
+import { buildHistory, genId, getCategoryStats, getWeeklyData, INITIAL_TASKS } from "@/src/mockData";
 import { type Friend, type Task, getColors } from "@/src/types/index";
-import { genId, buildHistory, getWeeklyData, getCategoryStats, INITIAL_TASKS } from "@/src/mockData";
 
 // ─── Heatmap color ────────────────────────────────────────────────────────────
 
@@ -98,7 +98,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       {categoryStats.map((cat) => (
         <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
-          <View style={[s.catIconWrap, { backgroundColor: cat.color + '18' }]}>
+          <View style={[s.catIconWrap, { backgroundColor: `${cat.color  }18` }]}>
             <MaterialIcons name={cat.icon as any} size={20} color={cat.color} />
           </View>
           <View style={s.catInfo}>
@@ -149,17 +149,21 @@ function FriendModal({
 
         <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]}>
           <View style={[s.friendProfileCard, { backgroundColor: C.card }]}>
-          <View style={[s.profileAvatarWrap, { marginBottom: 12 }]}>
-              {(friend.tag === '@cplaue' || friend.tag === '@agalean') ? (
-                <Image
-                  source={require('../../assets/images/android-icon-monochrome.png')}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                />
-              ) : (
-                <Text style={s.friendProfileAvatar}>{friend.avatar}</Text>
-              )}
-            </View>
+          <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
+            {(friend.tag === '@cplaue' || friend.tag === '@agalean') ? (
+              <Image
+                source={
+                  friend.tag === '@cplaue'
+                    ? require('../../assets/avatars/cplaue.png')
+                    : require('../../assets/avatars/agalean.png')
+                }
+                style={s.friendAvatarImg}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text style={{ fontSize: 28 }}>{friend.avatar}</Text>
+            )}
+          </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
             <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
             <View style={s.friendStats}>
@@ -350,9 +354,15 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               activeOpacity={0.8}
             >
               <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
-                {(friend.tag === '@cplaue' || friend.tag === '@agalean') ? (
+                {{
+                  '@cplaue': require('../../assets/avatars/cplaue.png'),
+                  '@agalean': require('../../assets/avatars/agalean.png'),
+                }[friend.tag] ? (
                   <Image
-                    source={require('../../assets/images/android-icon-monochrome.png')}
+                    source={{
+                      '@cplaue': require('../../assets/avatars/cplaue.png'),
+                      '@agalean': require('../../assets/avatars/agalean.png'),
+                    }[friend.tag]}
                     style={s.friendAvatarImg}
                     resizeMode="cover"
                   />
