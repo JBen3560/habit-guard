@@ -1,13 +1,14 @@
-import { useTheme } from "@/src/context/ThemeContext";
-import { Trophy, getColors } from "@/src/types/index";
 import React, { useState } from "react";
 import {
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+import { useTheme } from "@/src/context/ThemeContext";
+import { type Trophy, getColors } from "@/src/types/index";
 
 type Props = Readonly<{
   trophies: Trophy[];
@@ -29,7 +30,7 @@ const TYPE_LABEL: Record<Trophy["type"], string> = {
   streak: "Streak",
 };
 
-export default function BadgesTab({ trophies }: Props) {
+export default function AchievementsTab({ trophies }: Props) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [filter, setFilter] = useState<"All" | "Earned" | "Locked">("All");
@@ -113,7 +114,7 @@ export default function BadgesTab({ trophies }: Props) {
               <View
                 style={[
                   s.typeBadge,
-                  { backgroundColor: TYPE_COLOR[trophy.type] + "22" },
+                  { backgroundColor: `${TYPE_COLOR[trophy.type]  }22` },
                 ]}
               >
                 <Text style={[s.typeText, { color: TYPE_COLOR[trophy.type] }]}>

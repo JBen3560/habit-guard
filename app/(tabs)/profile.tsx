@@ -82,12 +82,6 @@ function FriendModal({
               >
                 <Text style={s.nudgeBtnText}>👋 Check In</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[s.nudgeBtn, { backgroundColor: C.green }]}
-                onPress={() => Alert.alert("Message sent!", `You sent a motivational message to ${firstName}! 🌟`)}
-              >
-                <Text style={s.nudgeBtnText}>🌟 Send Motivation</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             <View style={[s.nudgeBox, s.nudgeBoxGood]}>

@@ -1,32 +1,33 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
   StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useTheme } from "@/src/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import TasksTab from "./tasks";
-import BadgesTab from "./badges";
-import ProfileTab from "./profile";
-
+import { useTheme } from "@/src/context/ThemeContext";
 import {
-  Task,
-  Trophy,
-  Friend,
+  type Friend,
+  INITIAL_FRIENDS,
   INITIAL_TASKS,
   INITIAL_TROPHIES,
-  INITIAL_FRIENDS,
+  type Task,
+  type Trophy,
   getColors,
 } from "@/src/types";
 
-type Tab = "Tasks" | "Badges" | "Profile";
+import AchievementsTab from "./achievements";
+import ProfileTab from "./profile";
+import TasksTab from "./tasks";
+
+
+type Tab = "Tasks" | "Achievements" | "Profile";
 
 const TAB_ICONS: Record<Tab, string> = {
   Tasks: "📋",
-  Badges: "🏆",
+  Achievements: "🏆",
   Profile: "👤",
 };
 
@@ -42,15 +43,15 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("Tasks");
 
   return (
-    
+
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
 
       <View style={[s.tab, activeTab === "Tasks" ? s.visible : s.hidden]}>
         <TasksTab tasks={tasks} setTasks={setTasks} />
       </View>
 
-      <View style={[s.tab, activeTab === "Badges" ? s.visible : s.hidden]}>
-        <BadgesTab trophies={trophies} />
+      <View style={[s.tab, activeTab === "Achievements" ? s.visible : s.hidden]}>
+        <AchievementsTab trophies={trophies} />
       </View>
 
       <View style={[s.tab, activeTab === "Profile" ? s.visible : s.hidden]}>
@@ -68,7 +69,7 @@ export default function App() {
           },
         ]}
       >
-        {(["Tasks", "Badges", "Profile"] as Tab[]).map((tab) => {
+        {(["Tasks", "Achievements", "Profile"] as Tab[]).map((tab) => {
           const active = activeTab === tab;
           return (
             <TouchableOpacity

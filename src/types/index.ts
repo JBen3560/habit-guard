@@ -132,8 +132,8 @@ export const INITIAL_TASKS: Task[] = [
 ];
 
 export const INITIAL_TROPHIES: Trophy[] = [
-  { id: "t1", title: "First Step", description: "Complete your first task", icon: "🥉", type: "bronze", earned: true, earnedDate: "Mar 1" },
-  { id: "t2", title: "Week Warrior", description: "7-day streak on any task", icon: "🥈", type: "silver", earned: true, earnedDate: "Mar 8" },
+  { id: "t1", title: "First Step", description: "Complete your first task", icon: "👟", type: "bronze", earned: true, earnedDate: "Mar 1" },
+  { id: "t2", title: "Sennight Soldier", description: "7-day streak on any task", icon: "⚔️", type: "silver", earned: true, earnedDate: "Mar 8" },
   { id: "t3", title: "Hydration Hero", description: "10-day water streak", icon: "💧", type: "streak", earned: true, earnedDate: "Mar 15" },
   { id: "t4", title: "Month Master", description: "30-day streak on any task", icon: "🏆", type: "gold", earned: false },
   { id: "t5", title: "Early Bird", description: "Complete a task before 7am", icon: "🌅", type: "silver", earned: false },
