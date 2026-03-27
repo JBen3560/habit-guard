@@ -8,6 +8,12 @@
     "scheme": "habitguard",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#F9FAFB",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "imageWidth": 200,
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
