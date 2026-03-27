@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/src/context/ThemeContext";
 import { getColors } from "@/src/types/index";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
   View,
   Text,
@@ -18,19 +19,19 @@ type ThemeOption = {
 
 const OPTIONS: ThemeOption[] = [
   {
-    icon: "📱",
+    icon: "settings",
     label: "System Default",
     description: "Follows your device's light/dark setting",
     value: null,
   },
   {
-    icon: "☀️",
+    icon: 'wb-sunny',
     label: "Light",
     description: "Always use the light theme",
     value: "light",
   },
   {
-    icon: "🌙",
+    icon: 'nights-stay',
     label: "Dark",
     description: "Always use the dark theme",
     value: "dark",
@@ -77,14 +78,14 @@ export default function AppearanceScreen() {
               onPress={() => setOverride(opt.value)}
               activeOpacity={0.7}
             >
-              <Text style={s.rowIcon}>{opt.icon}</Text>
+              <MaterialIcons name={opt.icon as any} size={22} color={C.sub} style={{ marginRight: 14 }} />
               <View style={s.rowText}>
                 <Text style={[s.rowLabel, { color: C.text }]}>{opt.label}</Text>
                 <Text style={[s.rowDesc, { color: C.sub }]}>{opt.description}</Text>
               </View>
               {/* Checkmark on the active option */}
               {isActive && (
-                <Text style={[s.check, { color: C.blue }]}>✓</Text>
+                <MaterialIcons name="check" size={20} color={C.blue} />
               )}
             </TouchableOpacity>
           );
