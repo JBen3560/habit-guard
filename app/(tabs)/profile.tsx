@@ -1,18 +1,19 @@
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
   Alert,
+  Modal,
+  ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+
 import { useTheme } from "@/src/context/ThemeContext";
-import { Friend, getColors, genId } from "@/src/types/index";
+import { type Friend, genId, getColors } from "@/src/types/index";
 
 // Friend Profile
 
@@ -208,13 +209,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
           </View>
           <Text style={[s.profileName, { color: C.text }]}>You</Text>
           <View style={s.profileTagRow}>
-            <Text style={[s.profileTag, { color: C.blue, backgroundColor: C.blue + "18" }]}>{MY_TAG}</Text>
-            <TouchableOpacity
-              style={[s.shareBtn, { backgroundColor: C.green }]}
-              onPress={() => Alert.alert("Share", `Your tag is ${MY_TAG}! Share it with friends!`)}
-            >
-              <Text style={s.shareBtnText}>📤 Share</Text>
-            </TouchableOpacity>
+            <Text style={[s.profileTag, { color: C.blue, backgroundColor: `${C.blue  }18` }]}>{MY_TAG}</Text>
           </View>
 
           <View style={[s.profileStats, { borderTopColor: C.border }]}>
@@ -289,11 +284,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
         </View>
 
         {[
-          { icon: "🔔", label: "Notifications" },
           { icon: "🎨", label: "Appearance" },
-          { icon: "🔒", label: "Privacy" },
-          { icon: "❓", label: "Help & Support" },
-          { icon: "🚪", label: "Sign Out" },
         ].map((item) => (
           <TouchableOpacity
             key={item.label}
