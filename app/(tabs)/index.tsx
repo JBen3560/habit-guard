@@ -6,6 +6,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { useTheme } from "@/src/context/ThemeContext";
 import {
@@ -25,10 +26,10 @@ import HabitsTab from "./habits";
 
 type Tab = "Habits" | "Achievements" | "Profile";
 
-const TAB_ICONS: Record<Tab, string> = {
-  Habits: "✅",
-  Achievements: "🏆",
-  Profile: "👤",
+const TAB_ICONS: Record<Tab, React.ComponentProps<typeof MaterialIcons>["name"]> = {
+  Habits:       "today",
+  Achievements: "emoji-events",
+  Profile:      "person",
 };
 
 export default function App() {
@@ -81,9 +82,11 @@ export default function App() {
               {active && (
                 <View style={[s.tabIndicator, { backgroundColor: C.blue }]} />
               )}
-              <Text style={[s.tabIcon, active && s.tabIconActive]}>
-                {TAB_ICONS[tab]}
-              </Text>
+              <MaterialIcons
+                name={TAB_ICONS[tab]}
+                size={24}
+                color={active ? C.blue : C.sub}
+              />
               <Text
                 style={[
                   s.tabLabel,
@@ -132,7 +135,5 @@ const s = StyleSheet.create({
     height: 3,
     borderRadius: 2,
   },
-  tabIcon: { fontSize: 22, marginBottom: 2, opacity: 0.4 },
-  tabIconActive: { opacity: 1 },
   tabLabel: { fontSize: 11, fontWeight: "500" },
 });
