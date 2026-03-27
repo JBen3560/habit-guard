@@ -174,9 +174,12 @@ const s = StyleSheet.create({
     elevation: 3,
   },
   cardBadDark: {
-    backgroundColor: '#420606',
+    backgroundColor: '#1E0D0F',
     borderWidth: 1,
-    borderColor: '#420606',
+    borderColor: '#1E0D0F', // matches background
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
   cardBadLight: {
     backgroundColor: '#FEF2F2',
