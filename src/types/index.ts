@@ -76,10 +76,11 @@ export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't3', title: 'Hydration Hero',   description: '10-day water streak',           icon: '💧', type: 'streak', earned: true,  earnedDate: 'Mar 15' },
     { id: 't4', title: 'Month Master',     description: '30-day streak on any habit',    icon: '🏆', type: 'gold',   earned: false                       },
     { id: 't5', title: 'Early Bird',       description: 'Complete a habit before 7am',   icon: '🌅', type: 'silver', earned: false                       },
-    { id: 't6', title: 'Slacker',          description: 'Skipped 3 days in a row',       icon: '😴', type: 'bad',    earned: true,  earnedDate: 'Feb 20' },
+    { id: 't6', title: 'Slacker',          description: 'Skipped all tasks in a day',    icon: '😴', type: 'bad',    earned: false,                      },
     { id: 't7', title: 'Iron Will',        description: '100-day streak',                icon: '💪', type: 'gold',   earned: false                       },
-    { id: 't8', title: 'Streak Saver',     description: 'Used skip to save a streak',    icon: '🛡️', type: 'bronze', earned: true,  earnedDate: 'Mar 3'  },
-    { id: 't9', title: 'Social Butterfly', description: 'Add 3 friends',                 icon: '🦋', type: 'silver', earned: false                       },
+    { id: 't8', title: 'Streak Breaker',   description: 'Ended streak of at least 7 days', icon: '⛓️‍💥', type: 'bad', earned: false,                       },
+    { id: 't9', title: 'Gone Missing',     description: 'Skipped all tasks in a week',   icon: '🫥', type: 'bad',    earned: true, earnedDate: 'Mar 10'  },
+    { id: 't10', title: 'Social Butterfly', description: 'Add 3 friends',                 icon: '🦋', type: 'silver', earned: false                       },
 ];
 
 export const INITIAL_FRIENDS: Friend[] = [
