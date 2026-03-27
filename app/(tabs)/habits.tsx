@@ -313,9 +313,11 @@ function HabitModal({
 type Props = Readonly<{
     tasks: Task[];
     setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+    onToggleComplete: (id: string) => void;
+    onToggleSkip: (id: string) => void;
 }>;
 
-export default function HabitsTab({ tasks, setTasks }: Props) {
+export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleSkip }: Props) {
     const { isDark } = useTheme();
     const C = getColors(isDark);
     const [filter, setFilter] = useState<'All' | 'Pending' | 'Done'>('All');
@@ -331,33 +333,6 @@ export default function HabitsTab({ tasks, setTasks }: Props) {
     const progressPercent = Math.round(progress * 100);
     const allDone        = todayTasks.length > 0 && done.length === todayTasks.length;
     const ringColor      = allDone ? C.green : C.blue;
-
-    const toggleComplete = (id: string) =>
-        setTasks((ts) =>
-            ts.map((t) =>
-                t.id === id
-                    ? {
-                          ...t,
-                          completedToday: !t.completedToday,
-                          skippedToday:   t.completedToday ? t.skippedToday : false,
-                          streakCount:    !t.completedToday ? t.streakCount + 1 : Math.max(0, t.streakCount - 1),
-                      }
-                    : t,
-            ),
-        );
-
-    const toggleSkip = (id: string) =>
-        setTasks((ts) =>
-            ts.map((t) =>
-                t.id === id
-                    ? {
-                          ...t,
-                          skippedToday:   !t.skippedToday,
-                          completedToday: t.skippedToday ? t.completedToday : false,
-                      }
-                    : t,
-            ),
-        );
 
     const saveHabit = (form: HabitFormData) => {
         if (editTask) {
@@ -512,23 +487,23 @@ export default function HabitsTab({ tasks, setTasks }: Props) {
 
                             <View style={s.taskActions}>
                                 {isDone ? (
-                                    <TouchableOpacity style={s.completedBadge} onPress={() => toggleComplete(task.id)}>
+                                    <TouchableOpacity style={s.completedBadge} onPress={() => onToggleComplete(task.id)}>
                                         <MaterialIcons name="check-circle" size={14} color="#166534" />
                                         <Text style={s.completedText}>Done</Text>
                                         <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
                                     </TouchableOpacity>
                                 ) : isSkipped ? (
-                                    <TouchableOpacity style={[s.completedBadge, s.skippedBadge]} onPress={() => toggleSkip(task.id)}>
+                                    <TouchableOpacity style={[s.completedBadge, s.skippedBadge]} onPress={() => onToggleSkip(task.id)}>
                                         <MaterialIcons name="skip-next" size={14} color="#A16207" />
                                         <Text style={[s.completedText, s.skippedText]}>Skipped</Text>
                                         <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
                                     </TouchableOpacity>
                                 ) : (
                                     <View style={s.actionBtns}>
-                                        <TouchableOpacity style={[s.skipBtn, { borderColor: C.border }]} onPress={() => toggleSkip(task.id)}>
+                                        <TouchableOpacity style={[s.skipBtn, { borderColor: C.border }]} onPress={() => onToggleSkip(task.id)}>
                                             <Text style={[s.skipBtnText, { color: C.sub }]}>Skip</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={[s.doneBtn, { backgroundColor: C.blue }]} onPress={() => toggleComplete(task.id)}>
+                                        <TouchableOpacity style={[s.doneBtn, { backgroundColor: C.blue }]} onPress={() => onToggleComplete(task.id)}>
                                             <MaterialIcons name="check" size={13} color="#fff" />
                                             <Text style={s.doneBtnText}>Done</Text>
                                         </TouchableOpacity>
