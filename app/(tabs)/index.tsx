@@ -31,19 +31,35 @@ function formatEarnedDate(date: Date) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function evaluateTrophies(tasks: Task[], trophies: Trophy[]) {
-  const todayTasks = tasks.filter((task) => task.active && task.days[todayIdx]);
-  const skippedAllToday = todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
-
-  if (!skippedAllToday) {
+function unlockTrophyByTitle(trophies: Trophy[], title: string) {
+  const trophy = trophies.find((item) => item.title === title);
+  if (!trophy || trophy.earned) {
     return trophies;
   }
 
-  return trophies.map((trophy) =>
-    trophy.title === 'Slacker' && !trophy.earned
-      ? { ...trophy, earned: true, earnedDate: formatEarnedDate(new Date()) }
-      : trophy,
+  return trophies.map((item) =>
+    item.title === title
+      ? { ...item, earned: true, earnedDate: formatEarnedDate(new Date()) }
+      : item,
   );
+}
+
+function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) {
+  const todayTasks = tasks.filter((task) => task.active && task.days[todayIdx]);
+  const skippedAllToday = todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
+  const hasThreeFriends = friends.length >= 3;
+
+  let nextTrophies = trophies;
+
+  if (skippedAllToday) {
+    nextTrophies = unlockTrophyByTitle(nextTrophies, 'Slacker');
+  }
+
+  if (hasThreeFriends) {
+    nextTrophies = unlockTrophyByTitle(nextTrophies, 'Social Butterfly');
+  }
+
+  return nextTrophies;
 }
 
 export default function App() {
@@ -60,8 +76,20 @@ export default function App() {
   const updateTasks = (updater: (prev: Task[]) => Task[]) => {
     setTasks((prevTasks) => {
       const nextTasks = updater(prevTasks);
-      setTrophies((prevTrophies) => evaluateTrophies(nextTasks, prevTrophies));
+      setTrophies((prevTrophies) => evaluateTrophies(nextTasks, friends, prevTrophies));
       return nextTasks;
+    });
+  };
+
+  const updateFriends: React.Dispatch<React.SetStateAction<Friend[]>> = (updater) => {
+    setFriends((prevFriends) => {
+      const nextFriends =
+        typeof updater === 'function'
+          ? (updater as (prev: Friend[]) => Friend[])(prevFriends)
+          : updater;
+
+      setTrophies((prevTrophies) => evaluateTrophies(tasks, nextFriends, prevTrophies));
+      return nextFriends;
     });
   };
 
@@ -112,7 +140,7 @@ export default function App() {
       </View>
 
       <View style={[s.tab, activeTab === 'Profile' ? s.visible : s.hidden]}>
-        <ProfileTab friends={friends} setFriends={setFriends} />
+        <ProfileTab friends={friends} setFriends={updateFriends} />
       </View>
 
       {/* Bottom Tab Bar */}
