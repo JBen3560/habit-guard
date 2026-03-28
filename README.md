@@ -8,7 +8,14 @@ Joey Benich, Kylie Gilbert, Miles Rockow, Noah Samol, Stephanie Justus
  
 ## Getting Started
 In order to run the application, use the makefile commands. The makefile allows a workaround for the lack of npx on the School of Computing as discussed with Anna during our last standup.
+
 The first command is "make install" in order to retrieve all of the necessary dependencies. Please give this command some time to load. Afterwards, you should be prepared to start the application. The second command is "make run" which will display the instructions on how to run the application through Expo Go. Please leave your terminal running during use of the app, so that connection to the server is not lost. 
+
+To run without the makefile (although this will not work on the school of computing), run the following commands:
+- npm install expo
+- npx expo install
+- npx expo start
+- npx expo start --clear (to clear cache)
  
 ## iOS
 1. Download the Expo Go app through the App Store.
