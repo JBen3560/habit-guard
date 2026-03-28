@@ -1,6 +1,6 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Image,
@@ -11,12 +11,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from "@/src/context/ThemeContext";
-import { buildHistory, genId, getCategoryStats, getWeeklyData, INITIAL_TASKS } from "@/src/mockData";
-import { type Friend, type Task, getColors } from "@/src/types/index";
+import { useTheme } from '@/src/context/ThemeContext';
+import {
+  buildHistory,
+  genId,
+  getCategoryStats,
+  getWeeklyData,
+  INITIAL_TASKS,
+} from '@/src/mockData';
+import { type Friend, type Task, getColors } from '@/src/types/index';
 
 // ─── Heatmap color ────────────────────────────────────────────────────────────
 
@@ -34,8 +40,8 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
 
-  const history      = useMemo(() => buildHistory(tasks),           [tasks]);
-  const weeklyData   = useMemo(() => getWeeklyData(history),        [history]);
+  const history = useMemo(() => buildHistory(tasks), [tasks]);
+  const weeklyData = useMemo(() => getWeeklyData(history), [history]);
   const categoryStats = useMemo(() => getCategoryStats(tasks, history), [tasks, history]);
 
   const maxBarRate = Math.max(...weeklyData.map((d) => d.rate), 0.01);
@@ -50,7 +56,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       <View style={[s.chartCard, { backgroundColor: C.card }]}>
         <View style={s.chartBars}>
           {weeklyData.map((d, i) => {
-            const pct   = d.rate / maxBarRate;
+            const pct = d.rate / maxBarRate;
             const color = d.rate >= 0.8 ? C.green : d.rate >= 0.5 ? C.blue : C.yellow;
             return (
               <View key={i} style={s.barCol}>
@@ -58,7 +64,12 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
                   {d.total > 0 ? `${Math.round(d.rate * 100)}%` : '–'}
                 </Text>
                 <View style={[s.barTrack, { backgroundColor: C.border }]}>
-                  <View style={[s.barFill, { height: `${Math.max(pct * 100, 4)}%`, backgroundColor: color }]} />
+                  <View
+                    style={[
+                      s.barFill,
+                      { height: `${Math.max(pct * 100, 4)}%`, backgroundColor: color },
+                    ]}
+                  />
                 </View>
                 <Text style={[s.barDay, { color: C.sub }]}>{d.label}</Text>
               </View>
@@ -98,7 +109,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       {categoryStats.map((cat) => (
         <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
-          <View style={[s.catIconWrap, { backgroundColor: `${cat.color  }18` }]}>
+          <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
             <MaterialIcons name={cat.icon as any} size={20} color={cat.color} />
           </View>
           <View style={s.catInfo}>
@@ -134,10 +145,15 @@ function FriendModal({
   const C = getColors(isDark);
   if (!friend) return null;
   const needsNudge = friend.missedDays >= 2;
-  const firstName  = friend.name.split(" ")[0];
+  const firstName = friend.name.split(' ')[0];
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
         <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
           <TouchableOpacity onPress={onClose}>
@@ -149,21 +165,22 @@ function FriendModal({
 
         <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]}>
           <View style={[s.friendProfileCard, { backgroundColor: C.card }]}>
-          <View style={[s.friendProfileAvatarWrap, { backgroundColor: C.border }]}>
-            {friend.photo ? (
-              <Image
-                source={friend.photo}
-                style={s.friendAvatarImg}
-                resizeMode="cover"
-              />
-            ) : (
-              <MaterialIcons name="person" size={52} color={C.sub} />
-            )}
-          </View>
+            <View style={[s.friendProfileAvatarWrap, { backgroundColor: C.border }]}>
+              {friend.photo ? (
+                <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" />
+              ) : (
+                <MaterialIcons name="person" size={52} color={C.sub} />
+              )}
+            </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
             <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
             {friend.tag === '@cplaue' && (
               <Text style={[s.friendBio, { color: C.sub }]}>Enthusiast of greasy keyboards 🤌</Text>
+            )}
+            {friend.tag === '@agalean' && (
+              <Text style={[s.friendBio, { color: C.sub }]}>
+                Master snowboard artisan (actually built one from scratch. yes, really) 🏂
+              </Text>
             )}
             <View style={s.friendStats}>
               <View style={s.friendStat}>
@@ -187,12 +204,14 @@ function FriendModal({
             <View style={s.nudgeBox}>
               <View style={s.nudgeBoxTitle}>
                 <MaterialIcons name="warning" size={18} color="#9A3412" />
-                <Text style={s.nudgeTitle}>{firstName} has missed {friend.missedDays} days!</Text>
+                <Text style={s.nudgeTitle}>
+                  {firstName} has missed {friend.missedDays} days!
+                </Text>
               </View>
               <Text style={[s.nudgeSubtitle, { color: C.sub }]}>Send some encouragement</Text>
               <TouchableOpacity
                 style={[s.nudgeBtn, { backgroundColor: C.yellow }]}
-                onPress={() => Alert.alert("Nudge sent!", `${firstName} has been nudged!`)}
+                onPress={() => Alert.alert('Nudge sent!', `${firstName} has been nudged!`)}
               >
                 <MaterialIcons name="notifications-active" size={18} color="#fff" />
                 <Text style={s.nudgeBtnText}>Check In</Text>
@@ -204,7 +223,9 @@ function FriendModal({
                 <MaterialIcons name="local-fire-department" size={18} color={C.green} />
                 <Text style={[s.nudgeGoodText, { color: C.green }]}>{firstName} is on a roll!</Text>
               </View>
-              <Text style={{ color: C.sub, marginTop: 4 }}>{friend.streakDays}-day streak going strong</Text>
+              <Text style={{ color: C.sub, marginTop: 4 }}>
+                {friend.streakDays}-day streak going strong
+              </Text>
             </View>
           )}
           <View style={{ height: 40 }} />
@@ -227,14 +248,22 @@ function AddFriendModal({
 }>) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
-  const [tag, setTag] = useState("");
+  const [tag, setTag] = useState('');
 
   const handleAdd = () => {
-    if (tag.trim()) { onAdd(tag.trim()); setTag(""); }
+    if (tag.trim()) {
+      onAdd(tag.trim());
+      setTag('');
+    }
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
         <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
           <TouchableOpacity onPress={onClose}>
@@ -275,22 +304,25 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   const router = useRouter();
   const { isDark } = useTheme();
   const C = getColors(isDark);
-  const [selectedFriend, setSelectedFriend]     = useState<Friend | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
-  const [addFriendVisible, setAddFriendVisible]     = useState(false);
+  const [addFriendVisible, setAddFriendVisible] = useState(false);
 
-  const MY_NAME   = "You";
-  const MY_TAG    = "@your_habit";
+  const MY_NAME = 'You';
+  const MY_TAG = '@your_habit';
   const MY_STREAK = 13;
-  const MY_TASKS  = INITIAL_TASKS.filter((t) => t.active).length;
+  const MY_TASKS = INITIAL_TASKS.filter((t) => t.active).length;
 
-  const openFriend = (f: Friend) => { setSelectedFriend(f); setFriendModalVisible(true); };
+  const openFriend = (f: Friend) => {
+    setSelectedFriend(f);
+    setFriendModalVisible(true);
+  };
 
   const addFriend = (tag: string) => {
-    const normalized = tag.startsWith("@") ? tag : `@${tag}`;
+    const normalized = tag.startsWith('@') ? tag : `@${tag}`;
     const newFriend: Friend = {
       id: genId(),
-      name: normalized.replace("@", ""),
+      name: normalized.replace('@', ''),
       tag: normalized,
       streakDays: 0,
       missedDays: 0,
@@ -299,13 +331,12 @@ export default function ProfileTab({ friends, setFriends }: Props) {
     };
     setFriends((fs) => [...fs, newFriend]);
     setAddFriendVisible(false);
-    Alert.alert("Friend Request Sent!", `Request sent to ${normalized}`);
+    Alert.alert('Friend Request Sent!', `Request sent to ${normalized}`);
   };
 
   return (
     <View style={[s.container, { backgroundColor: C.bg }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-
         {/* ── My Profile card ── */}
         <View style={[s.profileCard, { backgroundColor: C.card }]}>
           <View style={s.profileAvatarWrap}>
@@ -313,7 +344,9 @@ export default function ProfileTab({ friends, setFriends }: Props) {
           </View>
           <Text style={[s.profileName, { color: C.text }]}>{MY_NAME}</Text>
           <View style={s.profileTagRow}>
-            <Text style={[s.profileTag, { color: C.blue, backgroundColor: `${C.blue}18` }]}>{MY_TAG}</Text>
+            <Text style={[s.profileTag, { color: C.blue, backgroundColor: `${C.blue}18` }]}>
+              {MY_TAG}
+            </Text>
           </View>
           <View style={[s.profileStats, { borderTopColor: C.border }]}>
             <View style={s.profileStat}>
@@ -361,11 +394,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
             >
               <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
                 {friend.photo ? (
-                  <Image
-                    source={friend.photo}
-                    style={s.friendAvatarImg}
-                    resizeMode="cover"
-                  />
+                  <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" />
                 ) : (
                   <MaterialIcons name="person" size={28} color={C.sub} />
                 )}
@@ -375,11 +404,15 @@ export default function ProfileTab({ friends, setFriends }: Props) {
                 <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
                 <View style={s.friendMeta}>
                   <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
-                  <Text style={[s.friendMetaText, { color: C.sub }]}>{friend.streakDays}-day streak</Text>
+                  <Text style={[s.friendMetaText, { color: C.sub }]}>
+                    {friend.streakDays}-day streak
+                  </Text>
                   {needsNudge && (
                     <View style={s.missedBadge}>
                       <MaterialIcons name="warning" size={11} color={C.red} />
-                      <Text style={[s.missedText, { color: C.red }]}>{friend.missedDays} missed</Text>
+                      <Text style={[s.missedText, { color: C.red }]}>
+                        {friend.missedDays} missed
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -387,7 +420,9 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               {needsNudge && (
                 <TouchableOpacity
                   style={s.nudgeSmallBtn}
-                  onPress={() => Alert.alert("Nudge sent!", `${friend.name.split(" ")[0]} has been nudged!`)}
+                  onPress={() =>
+                    Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
+                  }
                 >
                   <MaterialIcons name="notifications" size={18} color="#92400E" />
                 </TouchableOpacity>
@@ -404,7 +439,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
 
         <TouchableOpacity
           style={[s.settingsRow, { backgroundColor: C.card }]}
-          onPress={() => router.push("/appearance")}
+          onPress={() => router.push('/appearance')}
         >
           <MaterialIcons name="palette" size={20} color={C.sub} style={{ marginRight: 14 }} />
           <Text style={[s.settingsLabel, { color: C.text }]}>Appearance</Text>
@@ -438,8 +473,8 @@ const s = StyleSheet.create({
     margin: 20,
     borderRadius: 20,
     padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -449,107 +484,141 @@ const s = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
-    overflow: "hidden",
+    overflow: 'hidden',
     marginBottom: 12,
-    backgroundColor: "#EEF2FF",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   friendProfileAvatarWrap: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    overflow: "hidden",
+    overflow: 'hidden',
     marginBottom: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  profileName:     { fontSize: 22, fontWeight: "800", marginBottom: 6 },
-  profileTagRow:   { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
-  profileTag:      { fontSize: 14, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, fontWeight: "700" },
-  profileStats:    { flexDirection: "row", width: "100%", justifyContent: "space-around", borderTopWidth: 1, paddingTop: 16 },
-  profileStat:     { alignItems: "center" },
-  profileStatNum:  { fontSize: 22, fontWeight: "800" },
-  profileStatLabel:{ fontSize: 11, fontWeight: "600", marginTop: 2 },
-  statDivider:     { width: 1 },
+  profileName: { fontSize: 22, fontWeight: '800', marginBottom: 6 },
+  profileTagRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  profileTag: {
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontWeight: '700',
+  },
+  profileStats: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    paddingTop: 16,
+  },
+  profileStat: { alignItems: 'center' },
+  profileStatNum: { fontSize: 22, fontWeight: '800' },
+  profileStatLabel: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+  statDivider: { width: 1 },
 
   // Progress section wrapper
   progressSection: { paddingHorizontal: 20, marginBottom: 8 },
 
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 10,
     marginTop: 4,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "800" },
+  sectionTitle: { fontSize: 18, fontWeight: '800' },
 
   // 7-day bar chart
   chartCard: {
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
   },
-  chartBars: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", height: 140 },
-  barCol:    { flex: 1, alignItems: "center" },
-  barPct:    { fontSize: 9, fontWeight: "600", marginBottom: 4 },
-  barTrack:  { width: 28, flex: 1, borderRadius: 4, justifyContent: "flex-end", overflow: "hidden" },
-  barFill:   { width: "100%", borderRadius: 4 },
-  barDay:    { fontSize: 11, fontWeight: "600", marginTop: 6 },
+  chartBars: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: 140,
+  },
+  barCol: { flex: 1, alignItems: 'center' },
+  barPct: { fontSize: 9, fontWeight: '600', marginBottom: 4 },
+  barTrack: { width: 28, flex: 1, borderRadius: 4, justifyContent: 'flex-end', overflow: 'hidden' },
+  barFill: { width: '100%', borderRadius: 4 },
+  barDay: { fontSize: 11, fontWeight: '600', marginTop: 6 },
 
   // 28-day heatmap
   heatmapCard: {
     borderRadius: 16,
     padding: 14,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
   },
-  heatmapGrid: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
-  heatCell:    { width: "13%", alignItems: "center", marginBottom: 4 },
-  heatSquare:  { width: 32, height: 32, borderRadius: 6 },
-  heatNum:     { fontSize: 9, marginTop: 2 },
-  heatLegend:  { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 10 },
-  legendSquare:{ width: 14, height: 14, borderRadius: 3 },
+  heatmapGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  heatCell: { width: '13%', alignItems: 'center', marginBottom: 4 },
+  heatSquare: { width: 32, height: 32, borderRadius: 6 },
+  heatNum: { fontSize: 9, marginTop: 2 },
+  heatLegend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: 10,
+  },
+  legendSquare: { width: 14, height: 14, borderRadius: 3 },
   legendLabel: { fontSize: 10 },
 
   // Category breakdown
   catRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 14,
     padding: 12,
     marginBottom: 8,
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
-  catIconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  catInfo:     { flex: 1 },
-  catRowTop:   { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 },
-  catName:     { fontSize: 14, fontWeight: "700" },
-  catRate:     { fontSize: 14, fontWeight: "800" },
-  catBarTrack: { height: 6, borderRadius: 3, overflow: "hidden", marginBottom: 3 },
-  catBarFill:  { height: "100%", borderRadius: 3 },
-  catMeta:     { fontSize: 10 },
+  catIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catInfo: { flex: 1 },
+  catRowTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  catName: { fontSize: 14, fontWeight: '700' },
+  catRate: { fontSize: 14, fontWeight: '800' },
+  catBarTrack: { height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 3 },
+  catBarFill: { height: '100%', borderRadius: 3 },
+  catMeta: { fontSize: 10 },
 
   // Friend cards
   addBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -559,73 +628,124 @@ const s = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  addBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   friendCard: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginHorizontal: 20,
     marginBottom: 10,
     borderRadius: 16,
     padding: 14,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
   },
-  friendAvatar:   { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", marginRight: 12, overflow: "hidden" },
-  friendAvatarImg:{ width: "100%", height: "100%" },
-  friendInfo:     { flex: 1 },
-  friendName:     { fontSize: 15, fontWeight: "700" },
-  friendTagText:  { fontSize: 12, marginBottom: 4 },
-  friendMeta:     { flexDirection: "row", alignItems: "center", gap: 4 },
+  friendAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  friendAvatarImg: { width: '100%', height: '100%' },
+  friendInfo: { flex: 1 },
+  friendName: { fontSize: 15, fontWeight: '700' },
+  friendTagText: { fontSize: 12, marginBottom: 4 },
+  friendMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   friendMetaText: { fontSize: 12 },
-  missedBadge:    { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#FEF2F2", paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
-  missedText:     { fontSize: 11, fontWeight: "700" },
-  nudgeSmallBtn:  { width: 36, height: 36, borderRadius: 18, backgroundColor: "#FEF3C7", alignItems: "center", justifyContent: "center", marginRight: 8 },
+  missedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  missedText: { fontSize: 11, fontWeight: '700' },
+  nudgeSmallBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
 
   // Friend profile modal
   friendProfileCard: {
-    borderRadius: 20, padding: 24, alignItems: "center", marginBottom: 16,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 5,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
   },
-  friendProfileName:   { fontSize: 22, fontWeight: "800", marginBottom: 4 },
-  friendProfileTag:    { fontSize: 14, marginBottom: 8 },
-  friendBio:           { fontSize: 12, fontStyle: "italic", marginBottom: 12, textAlign: "center" },
-  friendStats:         { flexDirection: "row", gap: 24 },
-  friendStat:          { alignItems: "center" },
-  friendStatNum:       { fontSize: 22, fontWeight: "800" },
-  friendStatLabel:     { fontSize: 11, fontWeight: "600" },
+  friendProfileName: { fontSize: 22, fontWeight: '800', marginBottom: 4 },
+  friendProfileTag: { fontSize: 14, marginBottom: 8 },
+  friendBio: { fontSize: 12, fontStyle: 'italic', marginBottom: 12, textAlign: 'center' },
+  friendStats: { flexDirection: 'row', gap: 24 },
+  friendStat: { alignItems: 'center' },
+  friendStatNum: { fontSize: 22, fontWeight: '800' },
+  friendStatLabel: { fontSize: 11, fontWeight: '600' },
   nudgeBox: {
-    backgroundColor: "#FFF7ED", borderRadius: 16, padding: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: "#FED7AA",
+    backgroundColor: '#FFF7ED',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
   },
-  nudgeBoxGood:   { backgroundColor: "#ECFDF5", borderColor: "#10B981" },
-  nudgeBoxTitle:  { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
-  nudgeTitle:     { fontSize: 15, fontWeight: "700", color: "#9A3412" },
-  nudgeSubtitle:  { fontSize: 13, marginBottom: 12 },
-  nudgeBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, padding: 12, alignSelf: "stretch", marginBottom: 8 },
-  nudgeBtnText:   { color: "#fff", fontWeight: "700", fontSize: 14 },
-  nudgeGoodText:  { fontWeight: "700", fontSize: 15 },
+  nudgeBoxGood: { backgroundColor: '#ECFDF5', borderColor: '#10B981' },
+  nudgeBoxTitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  nudgeTitle: { fontSize: 15, fontWeight: '700', color: '#9A3412' },
+  nudgeSubtitle: { fontSize: 13, marginBottom: 12 },
+  nudgeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 12,
+    padding: 12,
+    alignSelf: 'stretch',
+    marginBottom: 8,
+  },
+  nudgeBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  nudgeGoodText: { fontWeight: '700', fontSize: 15 },
 
   // Settings
   settingsRow: {
-    flexDirection: "row", alignItems: "center",
-    marginHorizontal: 20, marginBottom: 2, padding: 16, borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 2,
+    padding: 16,
+    borderRadius: 12,
   },
-  settingsLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
+  settingsLabel: { flex: 1, fontSize: 15, fontWeight: '600' },
 
   // Modals
   modalSafe: { flex: 1 },
   modalHeader: {
-    flexDirection: "row", justifyContent: "space-between",
-    alignItems: "center", padding: 16, borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
   },
-  modalBack:  { fontSize: 16 },
-  modalTitle: { fontSize: 17, fontWeight: "700" },
-  modalSave:  { fontSize: 16, fontWeight: "700" },
-  modalBody:  { flex: 1, padding: 20 },
-  fieldLabel: { fontSize: 13, fontWeight: "700", marginBottom: 8, marginTop: 4 },
-  textInput:  { borderRadius: 12, borderWidth: 1, padding: 14, fontSize: 15, marginBottom: 16 },
+  modalBack: { fontSize: 16 },
+  modalTitle: { fontSize: 17, fontWeight: '700' },
+  modalSave: { fontSize: 16, fontWeight: '700' },
+  modalBody: { flex: 1, padding: 20 },
+  fieldLabel: { fontSize: 13, fontWeight: '700', marginBottom: 8, marginTop: 4 },
+  textInput: { borderRadius: 12, borderWidth: 1, padding: 14, fontSize: 15, marginBottom: 16 },
   addFriendHint: { fontSize: 13, marginTop: 4 },
 });
