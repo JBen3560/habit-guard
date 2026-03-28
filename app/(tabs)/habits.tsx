@@ -33,7 +33,7 @@ import {
 // CategoryPill component: small badge showing habit category with color and icon
 const CategoryPill = ({ cat }: { cat: Category }) => {
     const color = CATEGORY_COLORS[cat];
-    const icon  = CATEGORY_META[cat].icon as any;
+    const icon  = CATEGORY_META[cat].icon as React.ComponentProps<typeof MaterialIcons>['name'];
     return (
         <View style={[s.pill, { backgroundColor: `${color  }22` }]}>
             <MaterialIcons name={icon} size={11} color={color} />
@@ -218,7 +218,7 @@ function HabitModal({
                             {CATEGORIES.map((cat) => {
                                 const isSelected = form.category === cat;
                                 const color = CATEGORY_COLORS[cat];
-                                const icon  = CATEGORY_META[cat].icon as any;
+                                const icon  = CATEGORY_META[cat].icon as React.ComponentProps<typeof MaterialIcons>['name'];
                                 return (
                                     <TouchableOpacity
                                         key={cat}
@@ -372,7 +372,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                     <Text style={[s.dateText, { color: C.sub }]}>
                         {today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </Text>
-                    <Text style={[s.titleText, { color: C.text }]}>Today's Habits</Text>
+                    <Text style={[s.titleText, { color: C.text }]}>Today&apos;s Habits</Text>
                 </View>
                 <TouchableOpacity
                     style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]}
@@ -451,7 +451,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
 
                 {filtered.map((task) => {
                     const catColor = CATEGORY_COLORS[task.category];
-                    const catIcon  = CATEGORY_META[task.category].icon as any;
+                    const catIcon  = CATEGORY_META[task.category].icon as React.ComponentProps<typeof MaterialIcons>['name'];
                     const isDone   = task.completedToday;
                     const isSkipped = task.skippedToday;
 

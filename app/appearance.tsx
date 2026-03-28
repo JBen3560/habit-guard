@@ -1,5 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from "expo-router";
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -82,7 +83,7 @@ export default function AppearanceScreen() {
               onPress={() => setOverride(opt.value)}
               activeOpacity={0.7}
             >
-              <MaterialIcons name={opt.icon as any} size={22} color={C.sub} style={{ marginRight: 14 }} />
+              <MaterialIcons name={opt.icon as React.ComponentProps<typeof MaterialIcons>['name']} size={22} color={C.sub} style={{ marginRight: 14 }} />
               <View style={s.rowText}>
                 <Text style={[s.rowLabel, { color: C.text }]}>{opt.label}</Text>
                 <Text style={[s.rowDesc, { color: C.sub }]}>{opt.description}</Text>

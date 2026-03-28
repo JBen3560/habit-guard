@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
   useCallback,
@@ -6,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import { useColorScheme } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Storage key
 

@@ -110,7 +110,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       {categoryStats.map((cat) => (
         <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
           <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
-            <MaterialIcons name={cat.icon as any} size={20} color={cat.color} />
+            <MaterialIcons name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']} size={20} color={cat.color} />
           </View>
           <View style={s.catInfo}>
             <View style={s.catRowTop}>
