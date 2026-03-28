@@ -3,6 +3,7 @@ Habit-Guard is a mobile habit tracking app built with Expo and React Native (Typ
 
 ## Creators
 Team 1: Runtime Terrors
+
 Joey Benich, Kylie Gilbert, Miles Rockow, Noah Samol, Stephanie Justus
  
 ## Getting Started
