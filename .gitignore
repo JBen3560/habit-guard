@@ -6,6 +6,7 @@ node_modules/
 
 # Expo
 .expo/
+.expo/types/router.d.ts
 dist/
 web-build/
 expo-env.d.ts
