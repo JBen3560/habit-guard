@@ -1,15 +1,17 @@
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useTheme } from "@/src/context/ThemeContext";
-import { getColors } from "@/src/types/index";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useRouter } from "expo-router";
 import {
-  View,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useTheme } from "@/src/context/ThemeContext";
+import { getColors } from "@/src/types/index";
+
+// Appearance screen for selecting system, light, or dark theme behavior
 type ThemeOption = {
   label: string;
   description: string;
@@ -17,6 +19,7 @@ type ThemeOption = {
   icon: string;
 };
 
+// Predefined theme options with icons, labels, and descriptions
 const OPTIONS: ThemeOption[] = [
   {
     icon: "settings",
@@ -38,6 +41,7 @@ const OPTIONS: ThemeOption[] = [
   },
 ];
 
+// Main component for the Appearance screen
 export default function AppearanceScreen() {
   const router = useRouter();
   const { isDark, override, setOverride } = useTheme();
@@ -95,6 +99,7 @@ export default function AppearanceScreen() {
   );
 }
 
+// Styles
 const s = StyleSheet.create({
   root: { flex: 1 },
   header: {

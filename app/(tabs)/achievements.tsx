@@ -4,10 +4,13 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useTheme } from '@/src/context/ThemeContext';
 import { type Trophy, getColors } from '@/src/types/index';
 
+// Achievements tab shows earned, locked, and penalty trophies with filters
+
 type Props = Readonly<{
   trophies: Trophy[];
 }>;
 
+// Color mapping for trophy types
 const TYPE_COLOR: Record<Trophy['type'], string> = {
   gold: '#F59E0B',
   silver: '#9CA3AF',
@@ -16,6 +19,7 @@ const TYPE_COLOR: Record<Trophy['type'], string> = {
   streak: '#3B82F6',
 };
 
+// Label mapping for trophy types
 const TYPE_LABEL: Record<Trophy['type'], string> = {
   gold: 'Gold',
   silver: 'Silver',
@@ -24,16 +28,19 @@ const TYPE_LABEL: Record<Trophy['type'], string> = {
   streak: 'Streak',
 };
 
+// Main component for Achievements tab, displaying trophies with filtering options
 export default function AchievementsTab({ trophies }: Props) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [filter, setFilter] = useState<'All' | 'Earned' | 'Locked'>('All');
 
+  // Pre-compute filtered slices
   const earned = trophies.filter((t) => t.earned);
   const locked = trophies.filter((t) => !t.earned);
   const penalties = trophies.filter((t) => t.type === 'bad' && t.earned);
   const filtered = filter === 'All' ? trophies : filter === 'Earned' ? earned : locked;
 
+  // Render trophy cards in a 2-column grid with earned/locked status and type badges
   return (
     <View style={[s.container, { backgroundColor: C.bg }]}>
       {/* Header */}
@@ -118,7 +125,6 @@ export default function AchievementsTab({ trophies }: Props) {
 }
 
 // Styles
-
 const s = StyleSheet.create({
   container: { flex: 1 },
   header: {

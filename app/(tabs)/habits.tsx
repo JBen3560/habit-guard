@@ -1,47 +1,48 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    Modal,
-    Switch,
-    StyleSheet,
-    Platform,
     KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 import { useTheme } from '@/src/context/ThemeContext';
+import { CATEGORY_META, genId } from '@/src/mockData';
 import {
-    Task,
-    Category,
+    type Category,
+    type Task,
     CATEGORIES,
-    DAY_LABELS,
     CATEGORY_COLORS,
+    DAY_LABELS,
     getColors,
     today,
     todayIdx,
 } from '@/src/types';
-import { CATEGORY_META, genId } from '@/src/mockData';
 
-// ─── CategoryPill ─────────────────────────────────────────────────────────────
+// Habits tab: create/edit habits, track daily progress, and toggle completion state
 
+// CategoryPill component: small badge showing habit category with color and icon
 const CategoryPill = ({ cat }: { cat: Category }) => {
     const color = CATEGORY_COLORS[cat];
     const icon  = CATEGORY_META[cat].icon as any;
     return (
-        <View style={[s.pill, { backgroundColor: color + '22' }]}>
+        <View style={[s.pill, { backgroundColor: `${color  }22` }]}>
             <MaterialIcons name={icon} size={11} color={color} />
             <Text style={[s.pillText, { color }]}>{cat}</Text>
         </View>
     );
 };
 
-// ─── DayToggle ────────────────────────────────────────────────────────────────
-
+// DayToggle component: grid of day buttons for selecting active days
 const DayToggle = ({
     days,
     onChange,
@@ -70,8 +71,7 @@ const DayToggle = ({
     </View>
 );
 
-// ─── ProgressRing ─────────────────────────────────────────────────────────────
-
+// ProgressRing component: circular progress indicator using react-native-svg
 function ProgressRing({
     progress,
     size = 160,
@@ -115,10 +115,10 @@ function ProgressRing({
     );
 }
 
-// ─── HabitModal ───────────────────────────────────────────────────────────────
-
+//  HabitModal component: form for creating/editing habits
 type HabitFormData = Omit<Task, 'id' | 'streakCount' | 'completedToday' | 'skippedToday'>;
 
+// Default form values for new habit creation
 const EMPTY_FORM: HabitFormData = {
     title: '',
     category: 'Other',
@@ -127,6 +127,7 @@ const EMPTY_FORM: HabitFormData = {
     active: true,
 };
 
+// Predefined reminder time options for habit notifications
 const REMINDER_TIMES = [
     { value: '06:00', label: '06:00', sub: 'Early'   },
     { value: '08:00', label: '08:00', sub: 'Morning' },
@@ -135,6 +136,7 @@ const REMINDER_TIMES = [
     { value: '21:00', label: '21:00', sub: 'Night'   },
 ];
 
+// Modal component for creating or editing a habit
 function HabitModal({
     visible,
     initial,
@@ -176,6 +178,7 @@ function HabitModal({
 
     const canSave = form.title.trim().length > 0;
 
+    // Render modal with form fields for habit name, category, reminder time, active days, and active toggle
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
             <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
@@ -223,7 +226,7 @@ function HabitModal({
                                         style={[
                                             s.catCard,
                                             { backgroundColor: C.card, borderColor: C.border },
-                                            isSelected && { backgroundColor: color + '18', borderColor: color },
+                                            isSelected && { backgroundColor: `${color  }18`, borderColor: color },
                                         ]}
                                     >
                                         <MaterialIcons name={icon} size={18} color={isSelected ? color : C.sub} />
@@ -248,7 +251,7 @@ function HabitModal({
                                         style={[
                                             s.timeCard,
                                             { backgroundColor: C.card, borderColor: C.border },
-                                            isSelected && { borderColor: C.blue, backgroundColor: C.blue + '12' },
+                                            isSelected && { borderColor: C.blue, backgroundColor: `${C.blue  }12` },
                                         ]}
                                     >
                                         <MaterialIcons
@@ -308,7 +311,7 @@ function HabitModal({
     );
 }
 
-// ─── HabitsTab ────────────────────────────────────────────────────────────────
+// HabitsTab component: main screen for displaying today's habits, progress, and filter options
 
 type Props = Readonly<{
     tasks: Task[];
@@ -317,6 +320,7 @@ type Props = Readonly<{
     onToggleSkip: (id: string) => void;
 }>;
 
+// Categories and colors for habits
 export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleSkip }: Props) {
     const { isDark } = useTheme();
     const C = getColors(isDark);
@@ -347,15 +351,18 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
         setEditTask(null);
     };
 
+    // Delete habit and close modal
     const deleteHabit = () => {
         if (editTask) setTasks((ts) => ts.filter((t) => t.id !== editTask.id));
         setModalVisible(false);
         setEditTask(null);
     };
 
+    // Open modal for new habit creation or editing existing habit
     const openNew  = () => { setEditTask(null); setModalVisible(true); };
     const openEdit = (t: Task) => { setEditTask(t); setModalVisible(true); };
 
+    // Render main habits screen with progress ring, filter options, and list of today's habits with category pills and completion status
     return (
         <View style={[s.container, { backgroundColor: C.bg }]}>
 
@@ -458,7 +465,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                             <View style={[s.taskAccent, { backgroundColor: catColor }]} />
 
                             {/* Category icon */}
-                            <View style={[s.taskIconWrap, { backgroundColor: catColor + '18' }]}>
+                            <View style={[s.taskIconWrap, { backgroundColor: `${catColor  }18` }]}>
                                 <MaterialIcons name={catIcon} size={18} color={catColor} />
                             </View>
 
@@ -527,7 +534,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// Styles for HabitsTab and HabitModal components
 
 const s = StyleSheet.create({
     container: { flex: 1 },

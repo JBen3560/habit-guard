@@ -24,8 +24,9 @@ import {
 } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
 
-// ─── Heatmap color ────────────────────────────────────────────────────────────
+// Personal summary, social graph, and progress visualizations.
 
+//  Heatmap color based on completion rate
 function heatColor(rate: number, isDark: boolean): string {
   if (rate === 0) return isDark ? '#1F2937' : '#E5E7EB';
   if (rate < 0.4) return '#BFDBFE';
@@ -34,8 +35,7 @@ function heatColor(rate: number, isDark: boolean): string {
   return '#1D4ED8';
 }
 
-// ─── Progress section ─────────────────────────────────────────────────────────
-
+//  Progress section with a 7-day bar chart, 28-day heatmap, and category breakdowns with progress bars
 function ProgressSection({ tasks }: { tasks: Task[] }) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
@@ -130,8 +130,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
   );
 }
 
-// ─── Friend Modal ─────────────────────────────────────────────────────────────
-
+//  Friend Modal with ailed profile info, streak stats, and a nudge button
 function FriendModal({
   visible,
   friend,
@@ -147,6 +146,7 @@ function FriendModal({
   const needsNudge = friend.missedDays >= 2;
   const firstName = friend.name.split(' ')[0];
 
+  // Alert to simulate sending a nudge
   return (
     <Modal
       visible={visible}
@@ -235,8 +235,7 @@ function FriendModal({
   );
 }
 
-// ─── Add Friend Modal ─────────────────────────────────────────────────────────
-
+//  Add Friend Modal with input for friend's tag and instructions on how to find it
 function AddFriendModal({
   visible,
   onAdd,
@@ -257,6 +256,7 @@ function AddFriendModal({
     }
   };
 
+  // Render a modal with a text input for the friend's tag, instructions, and Add/Cancel buttons
   return (
     <Modal
       visible={visible}
@@ -293,13 +293,13 @@ function AddFriendModal({
   );
 }
 
-// ─── ProfileTab ───────────────────────────────────────────────────────────────
-
+//  ProfileTab with user summary, progress visualizations, friend list, and modals
 type Props = Readonly<{
   friends: Friend[];
   setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
 }>;
 
+// Main profile tab showing user info, progress charts, and friend list
 export default function ProfileTab({ friends, setFriends }: Props) {
   const router = useRouter();
   const { isDark } = useTheme();
@@ -463,8 +463,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
+//  Styles for the Profile tab
 const s = StyleSheet.create({
   container: { flex: 1 },
 

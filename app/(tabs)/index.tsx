@@ -19,6 +19,8 @@ import AchievementsTab from './achievements';
 import HabitsTab from './habits';
 import ProfileTab from './profile';
 
+// Main tab container: holds shared app state and routes props to each tab.
+
 type Tab = 'Habits' | 'Achievements' | 'Profile';
 
 const TAB_ICONS: Record<Tab, React.ComponentProps<typeof MaterialIcons>['name']> = {
@@ -31,6 +33,7 @@ function formatEarnedDate(date: Date) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+// Marks a trophy as earned once, preserving already-earned entries.
 function unlockTrophyByTitle(trophies: Trophy[], title: string) {
   const trophy = trophies.find((item) => item.title === title);
   if (!trophy || trophy.earned) {
@@ -44,6 +47,7 @@ function unlockTrophyByTitle(trophies: Trophy[], title: string) {
   );
 }
 
+// Evaluates conditions for unlocking trophies based on today's tasks and friends
 function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) {
   const todayTasks = tasks.filter((task) => task.active && task.days[todayIdx]);
   const skippedAllToday = todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
@@ -62,6 +66,7 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
   return nextTrophies;
 }
 
+// Main App component that manages state for tasks, trophies, and friends
 export default function App() {
   const { isDark } = useTheme();
   const C = getColors(isDark);
@@ -81,6 +86,7 @@ export default function App() {
     });
   };
 
+  // Update friends list and re-evaluate trophies based on new friend count
   const updateFriends: React.Dispatch<React.SetStateAction<Friend[]>> = (updater) => {
     setFriends((prevFriends) => {
       const nextFriends =
@@ -93,6 +99,7 @@ export default function App() {
     });
   };
 
+  // Toggle completion status of a habit, updating streak counts and ensuring skip/completion are mutually exclusive
   const toggleTaskComplete = (id: string) => {
     updateTasks((currentTasks) =>
       currentTasks.map((task) =>
@@ -110,6 +117,7 @@ export default function App() {
     );
   };
 
+  // Toggle skip status of a habit, ensuring it cannot be marked as both completed and skipped
   const toggleTaskSkip = (id: string) => {
     updateTasks((currentTasks) =>
       currentTasks.map((task) =>
@@ -124,6 +132,7 @@ export default function App() {
     );
   };
 
+  // Render the active tab and bottom navigation bar
   return (
     <View style={[s.root, { backgroundColor: C.bg, paddingTop: insets.top }]}>
       <View style={[s.tab, activeTab === 'Habits' ? s.visible : s.hidden]}>
@@ -182,6 +191,7 @@ export default function App() {
   );
 }
 
+// Styles for main App component and bottom tab navigation
 const s = StyleSheet.create({
   root: { flex: 1 },
 

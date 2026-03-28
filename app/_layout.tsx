@@ -1,10 +1,12 @@
-import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SystemUI from "expo-system-ui";
+import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
+
+// Root app layout that applies global providers and navigation shell.
 
 // Light and dark background colors
 const BG_LIGHT = "#F9FAFB";
