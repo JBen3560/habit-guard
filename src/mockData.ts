@@ -1,4 +1,4 @@
-import { Task, Category, CATEGORY_COLORS } from './types';
+import { type Category, CATEGORY_COLORS, type Task } from './types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -78,7 +78,7 @@ export const INITIAL_TASKS: Task[] = [
   makeTask({ title: 'Gratitude Check-In', category: 'Mindfulness', time: '08:00', streakCount: 3 }),
   makeTask({ title: 'Nature Break', category: 'Mindfulness', time: '19:00', streakCount: 2 }),
   // Hygiene
-  makeTask({ title: 'Brush Teeth (AM)', category: 'Hygiene', time: '07:15', streakCount: 30 }),
+  makeTask({ title: 'Brush Teeth (AM)', category: 'Hygiene', time: '07:15', streakCount: 0 }),
   makeTask({ title: 'Brush Teeth (PM)', category: 'Hygiene', time: '21:30', streakCount: 28 }),
   makeTask({ title: 'Shower', category: 'Hygiene', time: '07:00', streakCount: 18 }),
   makeTask({ title: 'Floss', category: 'Hygiene', time: '21:30', streakCount: 8 }),
