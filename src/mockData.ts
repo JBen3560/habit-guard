@@ -1,6 +1,6 @@
 import { type Category, CATEGORY_COLORS, type Task } from './types';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers 
 
 export const genId = () => Math.random().toString(36).slice(2);
 
@@ -22,7 +22,7 @@ function makeTask(
   };
 }
 
-// ─── Initial Tasks ────────────────────────────────────────────────────────────
+// Initial Tasks
 
 export const INITIAL_TASKS: Task[] = [
   // Medication
@@ -89,7 +89,7 @@ export const INITIAL_TASKS: Task[] = [
   makeTask({ title: 'No Caffeine After 2PM', category: 'Sleep', time: '14:00', streakCount: 4 }),
 ];
 
-// ─── Category metadata (MaterialIcons names) ─────────────────────────────────
+// Category metadata (MaterialIcons names)
 
 export const CATEGORY_META: Record<Category, { icon: string; color: string }> = {
   Medication: { icon: 'medication', color: CATEGORY_COLORS.Medication },
@@ -102,7 +102,7 @@ export const CATEGORY_META: Record<Category, { icon: string; color: string }> = 
   Other: { icon: 'star', color: CATEGORY_COLORS.Other },
 };
 
-// ─── Simulated history (28 days) ─────────────────────────────────────────────
+// Simulated history (28 days) 
 // Each entry: date string → fraction of tasks completed that day (0–1)
 // Used by the profile progress charts. Seeded deterministically so it looks
 // realistic but is always the same on re-render.
