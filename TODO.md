@@ -1,70 +1,125 @@
 # Habit-Guard — TODO
 
 **Team 1: Runtime Terrors**
-Last updated: 2026-03-30
+Last updated: 2026-03-30 (Supabase decision)
 
 ---
 
-## 🗄️ Data Persistence
+## 🗄️ Data Persistence — Supabase (PostgreSQL)
 
-The app currently resets all state on every reload. Everything below should
-survive a full app close and reopen.
+The app currently resets all state on every reload. The team has decided on
+**Supabase** as the backend — it's a hosted PostgreSQL instance with a
+generous free tier, a JS client that drops into the existing Expo setup, and
+built-in auth. Joey and others with SQL experience can work directly in the
+Supabase dashboard SQL editor to inspect and debug data during testing.
 
-The group has aligned on a **simple backend approach** (see Slack thread below)
-as the preferred path — this solves persistence, enables real historical data
-for streaks and the profile charts, and sets up account-based multi-device
-use all at once. AsyncStorage is the fallback if a backend isn't feasible
-before the usability test.
+> **Note:** Supabase free-tier projects pause after 1 week of inactivity.
+> Before handing the app to usability testers, log into the dashboard and
+> confirm the project is active.
 
-> **From Slack (2026-03-30):**
-> Joey: "we should probably try to hook it up to a simple backend so that we
-> can actually track previous days data. This would kind of solve both issues
-> at once, since we could pull from that for users when they close the app,
-> and also it would allow us to have real streaks and make all achievements
-> work."
-> Stephanie: "wouldn't take outrageously long to do that either since it would
-> be extremely basic backend design" / "permanent server I can handle, if we
-> want to implement docker"
+### 1. Supabase project setup
 
-### Option A — Backend (preferred)
+- [ ] Create a Supabase project at supabase.com and save the project URL and
+      anon key to a `.env` file (add `.env` to `.gitignore`)
+- [ ] Install the JS client:
+      `npx expo install @supabase/supabase-js @react-native-async-storage/async-storage`
+      (AsyncStorage is still needed as the auth token store for the Supabase
+      client — it just isn't used for app state anymore)
+- [ ] Create a `src/supabase.ts` file that initialises and exports the client:
+      `ts
+    import AsyncStorage from '@react-native-async-storage/async-storage';
+    import { createClient } from '@supabase/supabase-js';
+    const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+    const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+    export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true },
+    });
+    `
 
-- [ ] Stand up a simple backend server (Docker / Node or equivalent per
-      Stephanie's suggestion)
-- [ ] Design a minimal schema: users, tasks, daily completion records, friends,
-      trophies
-- [ ] Add an **account creation + login screen** shown on first app open
-      (Joey's suggestion: "it might require an account creation screen and
-      login screens, but that shouldn't be too bad either")
-- [ ] On each day's first completion toggle, write a completion record to the
-      backend so that real historical data accumulates over time
-- [ ] Pull historical data on app load to hydrate streaks, heatmap, and the
-      7-day chart with real values (replaces the seeded random data in
-      `buildHistory`)
+### 2. Schema
 
-### Option B — AsyncStorage (fallback / short-term)
+Run the following in the Supabase SQL editor to create the four core tables:
 
-- [ ] Install `@react-native-async-storage/async-storage`
-      (`npx expo install @react-native-async-storage/async-storage`)
-- [ ] Persist **tasks** (including `completedToday`, `skippedToday`,
-      `streakCount`, and the full task list with any user-added or deleted tasks)
-- [ ] Persist **trophies** (earned status and earned dates)
-- [ ] Persist **friends** (including any friends added via the Add Friend flow)
-- [ ] Persist **theme preference** (dark / light / system) — currently held in
-      ThemeContext but not saved to disk
-- [ ] On app load, hydrate all state from AsyncStorage before rendering (show a
-      brief loading state to avoid flash of default data)
-- [ ] Kylie noted phone cache as another angle ("we know it's possible from the
-      struggle with the image change for the launch icon") — AsyncStorage is
-      the standard Expo abstraction over this
+```sql
+-- Users (managed by Supabase Auth, this extends it with app-specific fields)
+create table profiles (
+  id uuid references auth.users primary key,
+  username text unique not null,
+  tag text unique not null,        -- e.g. '@your_habit'
+  created_at timestamptz default now()
+);
 
-### Either path
+-- Tasks (one row per habit per user)
+create table tasks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  title text not null,
+  category text not null,
+  time text not null,              -- 'HH:MM'
+  days boolean[7] not null,        -- Sun–Sat
+  active boolean default true,
+  created_at timestamptz default now()
+);
 
-- [ ] Add a daily **reset gate**: on first open of a new calendar day, clear
-      `completedToday` and `skippedToday` on all tasks (streaks persist — only
-      today's completion flags reset)
-- [ ] **Skipping a task should break its streak at end of day** — currently
-      skipping has no effect on `streakCount`. At the daily reset, if a task
-      was skipped (and not completed), set its streak to 0
+-- Completions (one row per task per calendar day)
+create table completions (
+  id uuid primary key default gen_random_uuid(),
+  task_id uuid references tasks(id) on delete cascade,
+  user_id uuid references profiles(id) on delete cascade,
+  date date not null,
+  status text not null check (status in ('done', 'skipped')),
+  unique (task_id, date)           -- prevent duplicate entries per day
+);
+
+-- Friends (directional: user_id follows friend_id)
+create table friends (
+  user_id uuid references profiles(id) on delete cascade,
+  friend_id uuid references profiles(id) on delete cascade,
+  primary key (user_id, friend_id)
+);
+```
+
+- [ ] Enable **Row Level Security** on all four tables and add policies so
+      users can only read/write their own rows (Supabase docs:
+      "Enable RLS" toggle in the table editor, then "New Policy")
+
+### 3. Auth — login & account creation screens
+
+- [ ] Add a **login/signup screen** that renders before the main tab view if
+      `supabase.auth.getSession()` returns null on app load
+- [ ] Sign-up flow: email + password via `supabase.auth.signUp()`, then insert
+      a row into `profiles` with the chosen `username` and `tag`
+- [ ] Sign-in flow: email + password via `supabase.auth.signInWithPassword()`
+- [ ] On successful auth, store the session (Supabase handles this via
+      AsyncStorage automatically with `persistSession: true`)
+- [ ] Add a sign-out option in the Settings section of the Profile tab
+
+### 4. Wiring app state to Supabase
+
+- [ ] On login, fetch the user's tasks from the `tasks` table and replace
+      `INITIAL_TASKS` as the initial `useState` value in `index.tsx`
+- [ ] On login, fetch the last 28 days of rows from `completions` and use them
+      to compute real `streakCount` per task and real history for the profile
+      charts (replaces `buildHistory`'s seeded random data)
+- [ ] When a user checks off or skips a habit, upsert a row into `completions`
+      (`status: 'done'` or `'skipped'`, `date: today`) in addition to updating
+      local React state
+- [ ] When a user adds or edits a habit, write the change to the `tasks` table
+- [ ] When a user deletes a habit, delete the row from `tasks` (cascade will
+      clean up `completions`)
+- [ ] When a user adds or removes a friend, insert/delete from `friends`
+- [ ] Fetch friend profile data (streak, missed days) from `completions` for
+      friends listed in the `friends` table so friend cards show real stats
+
+### 5. Daily reset gate
+
+- [ ] Add a daily **reset gate**: on app open, compare today's date to the last
+      stored session date. If it's a new calendar day, clear `completedToday`
+      and `skippedToday` on all local task state (the source of truth for
+      history is `completions`, so nothing is lost)
+- [ ] **Skipping a task should break its streak** — at the daily reset, any
+      task that has a `completions` row with `status: 'skipped'` for yesterday
+      (and no `status: 'done'` row) should have its streak reset to 0
 
 ---
 
