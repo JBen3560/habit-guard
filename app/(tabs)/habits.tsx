@@ -1,3 +1,8 @@
+<<<<<<< Updated upstream
+=======
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+>>>>>>> Stashed changes
 import React, { useState } from 'react';
 import {
     View,
@@ -27,6 +32,7 @@ import {
 } from '@/src/types';
 import { CATEGORY_META, genId } from '@/src/mockData';
 
+<<<<<<< Updated upstream
 // ─── CategoryPill ─────────────────────────────────────────────────────────────
 
 const CategoryPill = ({ cat }: { cat: Category }) => {
@@ -116,6 +122,20 @@ function ProgressRing({
 }
 
 // ─── HabitModal ───────────────────────────────────────────────────────────────
+=======
+// Helpers to convert between stored "HH:MM" strings and Date objects for the picker
+const dateFromHHMM = (hhmm: string): Date => {
+    const [h, m] = (hhmm || '08:00').split(':').map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+};
+
+const dateToHHMM = (date: Date): string =>
+    `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+// Habits tab: create/edit habits, track daily progress, and toggle completion state
+>>>>>>> Stashed changes
 
 type HabitFormData = Omit<Task, 'id' | 'streakCount' | 'completedToday' | 'skippedToday'>;
 
@@ -176,6 +196,14 @@ function HabitModal({
 
     const canSave = form.title.trim().length > 0;
 
+<<<<<<< Updated upstream
+=======
+    const canSave =
+        form.title.trim().length > 0 &&
+        (!customMode || Platform.OS === 'ios' || validTimeFormat.test(customText));
+
+    // Render modal with form fields for habit name, category, reminder time, active days, and active toggle
+>>>>>>> Stashed changes
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
             <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
@@ -265,7 +293,63 @@ function HabitModal({
                                     </TouchableOpacity>
                                 );
                             })}
+<<<<<<< Updated upstream
                         </View>
+=======
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setCustomMode(true);
+                                    setCustomText('');
+                                    if (Platform.OS !== 'ios') setForm({ ...form, time: '' });
+                                }}
+                                style={[
+                                    s.timeCard,
+                                    { backgroundColor: C.card, borderColor: C.border },
+                                    customMode && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
+                                ]}
+                            >
+                                <MaterialIcons name="edit" size={18} color={customMode ? C.blue : C.sub} />
+                                <Text style={[s.timeCardLabel, { color: C.sub }, customMode && { color: C.blue, fontWeight: '700' }]}>
+                                    Custom
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                        {customMode && Platform.OS === 'ios' && (
+                            <DateTimePicker
+                                mode="time"
+                                display="spinner"
+                                value={dateFromHHMM(form.time || '08:00')}
+                                onChange={(_, date) => {
+                                    if (date) setForm({ ...form, time: dateToHHMM(date) });
+                                }}
+                                textColor={C.text}
+                                style={{ marginTop: 8 }}
+                            />
+                        )}
+                        {customMode && Platform.OS !== 'ios' && (
+                            <View style={s.customTimeRow}>
+                                <MaterialIcons name="schedule" size={18} color={C.sub} />
+                                <TextInput
+                                    style={[
+                                        s.customTimeInput,
+                                        { backgroundColor: C.card, borderColor: C.border, color: C.text },
+                                        validTimeFormat.test(customText) && { borderColor: C.green },
+                                        customText.length > 0 && !validTimeFormat.test(customText) && { borderColor: '#DC2626' },
+                                    ]}
+                                    value={customText}
+                                    onChangeText={handleCustomTimeChange}
+                                    placeholder="HH:MM"
+                                    placeholderTextColor={C.sub}
+                                    keyboardType="numbers-and-punctuation"
+                                    maxLength={5}
+                                    autoFocus
+                                />
+                                {customText.length > 0 && !validTimeFormat.test(customText) && (
+                                    <Text style={s.customTimeError}>Use HH:MM (e.g. 14:30)</Text>
+                                )}
+                            </View>
+                        )}
+>>>>>>> Stashed changes
 
                         {/* Active Days */}
                         <Text style={[s.fieldLabel, { color: C.sub }]}>ACTIVE DAYS</Text>
