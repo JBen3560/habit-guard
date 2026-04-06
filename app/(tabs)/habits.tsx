@@ -13,107 +13,22 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle } from 'react-native-svg';
 
+import CategoryPill from '@/components/CategoryPill';
+import DayToggle from '@/components/DayToggle';
+import ProgressRing from '@/components/ProgressRing';
 import { useTheme } from '@/src/context/ThemeContext';
 import { CATEGORY_META, genId } from '@/src/mockData';
 import {
-    type Category,
     type Task,
     CATEGORIES,
     CATEGORY_COLORS,
-    DAY_LABELS,
     getColors,
     today,
     todayIdx,
 } from '@/src/types';
 
 // Habits tab: create/edit habits, track daily progress, and toggle completion state
-
-// CategoryPill component: small badge showing habit category with color and icon
-const CategoryPill = ({ cat }: { cat: Category }) => {
-    const color = CATEGORY_COLORS[cat];
-    const icon  = CATEGORY_META[cat].icon as React.ComponentProps<typeof MaterialIcons>['name'];
-    return (
-        <View style={[s.pill, { backgroundColor: `${color  }22` }]}>
-            <MaterialIcons name={icon} size={11} color={color} />
-            <Text style={[s.pillText, { color }]}>{cat}</Text>
-        </View>
-    );
-};
-
-// DayToggle component: grid of day buttons for selecting active days
-const DayToggle = ({
-    days,
-    onChange,
-    C,
-}: Readonly<{
-    days: boolean[];
-    onChange: (i: number) => void;
-    C: ReturnType<typeof getColors>;
-}>) => (
-    <View style={s.dayRow}>
-        {DAY_LABELS.map((d, i) => (
-            <TouchableOpacity
-                key={i}
-                onPress={() => onChange(i)}
-                style={[
-                    s.dayBtn,
-                    { borderColor: C.border, backgroundColor: C.card },
-                    days[i] && { backgroundColor: C.blue, borderColor: C.blue },
-                ]}
-            >
-                <Text style={[s.dayBtnText, { color: C.sub }, days[i] && { color: '#fff' }]}>
-                    {d}
-                </Text>
-            </TouchableOpacity>
-        ))}
-    </View>
-);
-
-// ProgressRing component: circular progress indicator using react-native-svg
-function ProgressRing({
-    progress,
-    size = 160,
-    strokeWidth = 11,
-    color,
-    trackColor,
-    children,
-}: Readonly<{
-    progress: number;
-    size?: number;
-    strokeWidth?: number;
-    color: string;
-    trackColor: string;
-    children?: React.ReactNode;
-}>) {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const clamped = Math.min(Math.max(progress, 0), 1);
-    const offset  = circumference - clamped * circumference;
-    const cx = size / 2;
-    const cy = size / 2;
-
-    return (
-        <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-            <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-                <Circle cx={cx} cy={cy} r={radius} stroke={trackColor} strokeWidth={strokeWidth} fill="none" />
-                <Circle
-                    cx={cx} cy={cy} r={radius}
-                    stroke={color}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circumference}`}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    fill="none"
-                    rotation="-90"
-                    origin={`${cx},${cy}`}
-                />
-            </Svg>
-            <View style={{ alignItems: 'center', justifyContent: 'center' }}>{children}</View>
-        </View>
-    );
-}
 
 //  HabitModal component: form for creating/editing habits
 type HabitFormData = Omit<Task, 'id' | 'streakCount' | 'completedToday' | 'skippedToday'>;
@@ -650,17 +565,6 @@ const s = StyleSheet.create({
     completedText: { fontSize: 12, color: '#166534', fontWeight: '700' },
     skippedText:   { color: '#A16207' },
     undoHint:      { fontSize: 9 },
-    pill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 3,
-        alignSelf: 'flex-start',
-        paddingHorizontal: 7,
-        paddingVertical: 3,
-        borderRadius: 8,
-    },
-    pillText: { fontSize: 10, fontWeight: '700' },
-
     // Empty state
     emptyState: { alignItems: 'center', paddingVertical: 48, gap: 8 },
     emptyTitle: { fontSize: 17, fontWeight: '700' },
@@ -706,10 +610,6 @@ const s = StyleSheet.create({
     },
     timeCardLabel: { fontSize: 12, fontWeight: '600' },
     timeCardSub:   { fontSize: 10 },
-
-    dayRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
-    dayBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
-    dayBtnText: { fontSize: 13, fontWeight: '600' },
 
     switchRow: {
         flexDirection: 'row',
