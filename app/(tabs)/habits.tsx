@@ -334,16 +334,22 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
   const { isDark } = useTheme();
   const { formatTime } = useTimeFormat();
   const C = getColors(isDark);
-  const [filter, setFilter] = useState<'All' | 'Pending' | 'Done'>('All');
+  const [filter, setFilter] = useState<'All' | 'Pending' | 'Done' | 'Skipped'>('All');
   const [modalVisible, setModalVisible] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
   const swipeOpenId = useRef<string | null>(null);
 
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
-  const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
-  const done = todayTasks.filter((t) => t.completedToday || t.skippedToday);
+  const pending  = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
+  const skipped  = todayTasks.filter((t) => t.skippedToday);
+  const done     = todayTasks.filter((t) => t.completedToday);
   const byTime = (a: Task, b: Task) => a.time.localeCompare(b.time);
-  const filtered = (filter === 'All' ? todayTasks : filter === 'Pending' ? pending : done).slice().sort(byTime);
+  const filtered = (
+    filter === 'All'     ? todayTasks :
+    filter === 'Pending' ? pending :
+    filter === 'Skipped' ? skipped :
+    done
+  ).slice().sort(byTime);
 
   const progress = todayTasks.length > 0 ? done.length / todayTasks.length : 0;
   const progressPercent = Math.round(progress * 100);
@@ -434,7 +440,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
 
       {/* Filter chips */}
       <View style={s.filterRow}>
-        {(['All', 'Pending', 'Done'] as const).map((f) => (
+        {(['All', 'Pending', 'Done', 'Skipped'] as const).map((f) => (
           <TouchableOpacity
             key={f}
             onPress={() => setFilter(f)}
@@ -446,11 +452,10 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           >
             <Text style={[s.filterTabText, { color: C.sub }, filter === f && { color: '#fff' }]}>
               {f}{' '}
-              {f === 'All'
-                ? `(${todayTasks.length})`
-                : f === 'Pending'
-                  ? `(${pending.length})`
-                  : `(${done.length})`}
+              {f === 'All'     ? `(${todayTasks.length})` :
+               f === 'Pending' ? `(${pending.length})`    :
+               f === 'Skipped' ? `(${skipped.length})`    :
+                                 `(${done.length})`}
             </Text>
           </TouchableOpacity>
         ))}
