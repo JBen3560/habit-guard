@@ -1,6 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/src/context/ThemeContext';
@@ -307,6 +308,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [addFriendVisible, setAddFriendVisible] = useState(false);
+  const swipeOpenId = useRef<string | null>(null);
 
   const MY_NAME = 'You';
   const MY_TAG = '@your_habit';
@@ -385,16 +387,42 @@ export default function ProfileTab({ friends, setFriends }: Props) {
 
         {friends.map((friend) => {
           const needsNudge = friend.missedDays >= 2;
-          return (
+
+          const renderRightActions = () => (
             <TouchableOpacity
+              style={s.swipeDelete}
+              onPress={() =>
+                Alert.alert('Remove Friend', `Remove ${friend.name}?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: () => setFriends((fs) => fs.filter((f) => f.id !== friend.id)),
+                  },
+                ])
+              }
+            >
+              <MaterialIcons name="person-remove" size={22} color="#fff" />
+              <Text style={s.swipeDeleteText}>Remove</Text>
+            </TouchableOpacity>
+          );
+
+          return (
+            <Swipeable
               key={friend.id}
+              renderRightActions={renderRightActions}
+              overshootRight={false}
+              onSwipeableOpen={() => { swipeOpenId.current = friend.id; }}
+              onSwipeableClose={() => { swipeOpenId.current = null; }}
+            >
+            <TouchableOpacity
               style={[s.friendCard, { backgroundColor: C.card }]}
-              onPress={() => openFriend(friend)}
+              onPress={() => { if (swipeOpenId.current === null) openFriend(friend); }}
               activeOpacity={0.8}
             >
               <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
                 {friend.photo ? (
-                  <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" />
+                  <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" pointerEvents="none" />
                 ) : (
                   <MaterialIcons name="person" size={28} color={C.sub} />
                 )}
@@ -429,6 +457,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
               )}
               <MaterialIcons name="chevron-right" size={22} color={C.sub} />
             </TouchableOpacity>
+            </Swipeable>
           );
         })}
 
@@ -666,6 +695,17 @@ const s = StyleSheet.create({
     borderRadius: 8,
   },
   missedText: { fontSize: 11, fontWeight: '700' },
+  swipeDelete: {
+    backgroundColor: '#DC2626',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    borderRadius: 16,
+    marginBottom: 10,
+    marginRight: 20,
+    gap: 4,
+  },
+  swipeDeleteText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   nudgeSmallBtn: {
     width: 36,
     height: 36,
