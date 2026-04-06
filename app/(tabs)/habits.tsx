@@ -340,16 +340,21 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
   const swipeOpenId = useRef<string | null>(null);
 
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
-  const pending  = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
-  const skipped  = todayTasks.filter((t) => t.skippedToday);
-  const done     = todayTasks.filter((t) => t.completedToday);
+  const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
+  const skipped = todayTasks.filter((t) => t.skippedToday);
+  const done = todayTasks.filter((t) => t.completedToday);
   const byTime = (a: Task, b: Task) => a.time.localeCompare(b.time);
   const filtered = (
-    filter === 'All'     ? todayTasks :
-    filter === 'Pending' ? pending :
-    filter === 'Skipped' ? skipped :
-    done
-  ).slice().sort(byTime);
+    filter === 'All'
+      ? todayTasks
+      : filter === 'Pending'
+        ? pending
+        : filter === 'Skipped'
+          ? skipped
+          : done
+  )
+    .slice()
+    .sort(byTime);
 
   const progress = todayTasks.length > 0 ? done.length / todayTasks.length : 0;
   const progressPercent = Math.round(progress * 100);
@@ -439,7 +444,12 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
       </View>
 
       {/* Filter chips */}
-      <View style={s.filterRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={s.filterRow}
+        contentContainerStyle={s.filterRowContent}
+      >
         {(['All', 'Pending', 'Done', 'Skipped'] as const).map((f) => (
           <TouchableOpacity
             key={f}
@@ -452,14 +462,17 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           >
             <Text style={[s.filterTabText, { color: C.sub }, filter === f && { color: '#fff' }]}>
               {f}{' '}
-              {f === 'All'     ? `(${todayTasks.length})` :
-               f === 'Pending' ? `(${pending.length})`    :
-               f === 'Skipped' ? `(${skipped.length})`    :
-                                 `(${done.length})`}
+              {f === 'All'
+                ? `(${todayTasks.length})`
+                : f === 'Pending'
+                  ? `(${pending.length})`
+                  : f === 'Skipped'
+                    ? `(${skipped.length})`
+                    : `(${done.length})`}
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       {/* Habit list */}
       <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
@@ -513,82 +526,88 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
               key={task.id}
               renderRightActions={renderRightActions}
               overshootRight={false}
-              onSwipeableOpen={() => { swipeOpenId.current = task.id; }}
-              onSwipeableClose={() => { swipeOpenId.current = null; }}
+              onSwipeableOpen={() => {
+                swipeOpenId.current = task.id;
+              }}
+              onSwipeableClose={() => {
+                swipeOpenId.current = null;
+              }}
             >
-            <TouchableOpacity
-              style={[s.taskCard, { backgroundColor: C.card }]}
-              onPress={() => { if (swipeOpenId.current === null) openEdit(task); }}
-              activeOpacity={0.8}
-            >
-              <View style={[s.taskAccent, { backgroundColor: catColor }]} />
+              <TouchableOpacity
+                style={[s.taskCard, { backgroundColor: C.card }]}
+                onPress={() => {
+                  if (swipeOpenId.current === null) openEdit(task);
+                }}
+                activeOpacity={0.8}
+              >
+                <View style={[s.taskAccent, { backgroundColor: catColor }]} />
 
-              {/* Category icon */}
-              <View style={[s.taskIconWrap, { backgroundColor: `${catColor}18` }]}>
-                <MaterialIcons name={catIcon} size={18} color={catColor} />
-              </View>
+                {/* Category icon */}
+                <View style={[s.taskIconWrap, { backgroundColor: `${catColor}18` }]}>
+                  <MaterialIcons name={catIcon} size={18} color={catColor} />
+                </View>
 
-              <View style={s.taskInfo}>
-                <Text
-                  style={[
-                    s.taskTitle,
-                    { color: C.text },
-                    (isDone || isSkipped) && { color: C.sub, textDecorationLine: 'line-through' },
-                  ]}
-                >
-                  {task.title}
-                </Text>
-                <View style={s.taskMeta}>
-                  <MaterialIcons name="schedule" size={11} color={C.sub} />
-                  <Text style={[s.taskTime, { color: C.sub }]}>{formatTime(task.time)}</Text>
-                  {task.streakCount > 0 && (
-                    <View style={s.streakBadge}>
-                      <MaterialIcons name="local-fire-department" size={11} color="#92400E" />
-                      <Text style={s.streakText}>{task.streakCount}</Text>
+                <View style={s.taskInfo}>
+                  <Text
+                    style={[
+                      s.taskTitle,
+                      { color: C.text },
+                      (isDone || isSkipped) && { color: C.sub, textDecorationLine: 'line-through' },
+                    ]}
+                  >
+                    {task.title}
+                  </Text>
+                  <View style={s.taskMeta}>
+                    <MaterialIcons name="schedule" size={11} color={C.sub} />
+                    <Text style={[s.taskTime, { color: C.sub }]}>{formatTime(task.time)}</Text>
+                    {task.streakCount > 0 && (
+                      <View style={s.streakBadge}>
+                        <MaterialIcons name="local-fire-department" size={11} color="#92400E" />
+                        <Text style={s.streakText}>{task.streakCount}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <CategoryPill cat={task.category} />
+                </View>
+
+                <View style={s.taskActions}>
+                  {isDone ? (
+                    <TouchableOpacity
+                      style={s.completedBadge}
+                      onPress={() => onToggleComplete(task.id)}
+                    >
+                      <MaterialIcons name="check-circle" size={14} color="#166534" />
+                      <Text style={s.completedText}>Done</Text>
+                      <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
+                    </TouchableOpacity>
+                  ) : isSkipped ? (
+                    <TouchableOpacity
+                      style={[s.completedBadge, s.skippedBadge]}
+                      onPress={() => onToggleSkip(task.id)}
+                    >
+                      <MaterialIcons name="skip-next" size={14} color="#A16207" />
+                      <Text style={[s.completedText, s.skippedText]}>Skipped</Text>
+                      <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={s.actionBtns}>
+                      <TouchableOpacity
+                        style={[s.skipBtn, { borderColor: C.border }]}
+                        onPress={() => onToggleSkip(task.id)}
+                      >
+                        <Text style={[s.skipBtnText, { color: C.sub }]}>Skip</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[s.doneBtn, { backgroundColor: C.blue }]}
+                        onPress={() => onToggleComplete(task.id)}
+                      >
+                        <MaterialIcons name="check" size={13} color="#fff" />
+                        <Text style={s.doneBtnText}>Done</Text>
+                      </TouchableOpacity>
                     </View>
                   )}
                 </View>
-                <CategoryPill cat={task.category} />
-              </View>
-
-              <View style={s.taskActions}>
-                {isDone ? (
-                  <TouchableOpacity
-                    style={s.completedBadge}
-                    onPress={() => onToggleComplete(task.id)}
-                  >
-                    <MaterialIcons name="check-circle" size={14} color="#166534" />
-                    <Text style={s.completedText}>Done</Text>
-                    <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
-                  </TouchableOpacity>
-                ) : isSkipped ? (
-                  <TouchableOpacity
-                    style={[s.completedBadge, s.skippedBadge]}
-                    onPress={() => onToggleSkip(task.id)}
-                  >
-                    <MaterialIcons name="skip-next" size={14} color="#A16207" />
-                    <Text style={[s.completedText, s.skippedText]}>Skipped</Text>
-                    <Text style={[s.undoHint, { color: C.sub }]}>undo</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View style={s.actionBtns}>
-                    <TouchableOpacity
-                      style={[s.skipBtn, { borderColor: C.border }]}
-                      onPress={() => onToggleSkip(task.id)}
-                    >
-                      <Text style={[s.skipBtnText, { color: C.sub }]}>Skip</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[s.doneBtn, { backgroundColor: C.blue }]}
-                      onPress={() => onToggleComplete(task.id)}
-                    >
-                      <MaterialIcons name="check" size={13} color="#fff" />
-                      <Text style={s.doneBtnText}>Done</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
             </Swipeable>
           );
         })}
@@ -664,8 +683,9 @@ const s = StyleSheet.create({
   miniStatLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
 
   // Filters
-  filterRow: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 12, gap: 8 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  filterRow: { paddingHorizontal: 20, marginBottom: 12, flexGrow: 0 },
+  filterRowContent: { flexDirection: 'row', gap: 8 },
+  filterTab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, alignSelf: 'flex-start' },
   filterTabText: { fontSize: 13, fontWeight: '600' },
 
   // Habit cards
