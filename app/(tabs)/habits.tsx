@@ -68,9 +68,16 @@ function HabitModal({
     const { isDark } = useTheme();
     const C = getColors(isDark);
     const [form, setForm] = useState<HabitFormData>(EMPTY_FORM);
+    const [customMode, setCustomMode] = useState(false);
+    const [customText, setCustomText] = useState('');
+
+    const isPresetTime = (t: string) => REMINDER_TIMES.some((r) => r.value === t);
+    const validTimeFormat = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     React.useEffect(() => {
         if (visible) {
+            const t = initial?.time ?? EMPTY_FORM.time;
+            const isCustom = !isPresetTime(t);
             setForm(
                 initial
                     ? {
@@ -82,6 +89,8 @@ function HabitModal({
                       }
                     : { ...EMPTY_FORM, days: [true, true, true, true, true, true, true] },
             );
+            setCustomMode(isCustom);
+            setCustomText(isCustom ? t : '');
         }
     }, [visible, initial]);
 
@@ -91,7 +100,16 @@ function HabitModal({
         setForm({ ...form, days: d });
     };
 
-    const canSave = form.title.trim().length > 0;
+    const handleCustomTimeChange = (text: string) => {
+        setCustomText(text);
+        if (validTimeFormat.test(text)) {
+            setForm({ ...form, time: text });
+        }
+    };
+
+    const canSave =
+        form.title.trim().length > 0 &&
+        (!customMode || validTimeFormat.test(customText));
 
     // Render modal with form fields for habit name, category, reminder time, active days, and active toggle
     return (
@@ -155,18 +173,22 @@ function HabitModal({
 
                         {/* Reminder Time */}
                         <Text style={[s.fieldLabel, { color: C.sub }]}>REMINDER TIME</Text>
-                        <Text style={[s.fieldHint, { color: C.sub }]}>Select when you want to be reminded</Text>
+                        <Text style={[s.fieldHint, { color: C.sub }]}>Select a preset or enter a custom time</Text>
                         <View style={s.timeGrid}>
                             {REMINDER_TIMES.map(({ value, label, sub }) => {
-                                const isSelected = form.time === value;
+                                const isSelected = !customMode && form.time === value;
                                 return (
                                     <TouchableOpacity
                                         key={value}
-                                        onPress={() => setForm({ ...form, time: value })}
+                                        onPress={() => {
+                                            setCustomMode(false);
+                                            setCustomText('');
+                                            setForm({ ...form, time: value });
+                                        }}
                                         style={[
                                             s.timeCard,
                                             { backgroundColor: C.card, borderColor: C.border },
-                                            isSelected && { borderColor: C.blue, backgroundColor: `${C.blue  }12` },
+                                            isSelected && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
                                         ]}
                                     >
                                         <MaterialIcons
@@ -183,7 +205,47 @@ function HabitModal({
                                     </TouchableOpacity>
                                 );
                             })}
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setCustomMode(true);
+                                    setCustomText('');
+                                    setForm({ ...form, time: '' });
+                                }}
+                                style={[
+                                    s.timeCard,
+                                    { backgroundColor: C.card, borderColor: C.border },
+                                    customMode && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
+                                ]}
+                            >
+                                <MaterialIcons name="edit" size={18} color={customMode ? C.blue : C.sub} />
+                                <Text style={[s.timeCardLabel, { color: C.sub }, customMode && { color: C.blue, fontWeight: '700' }]}>
+                                    Custom
+                                </Text>
+                            </TouchableOpacity>
                         </View>
+                        {customMode && (
+                            <View style={s.customTimeRow}>
+                                <MaterialIcons name="schedule" size={18} color={C.sub} />
+                                <TextInput
+                                    style={[
+                                        s.customTimeInput,
+                                        { backgroundColor: C.card, borderColor: C.border, color: C.text },
+                                        validTimeFormat.test(customText) && { borderColor: C.green },
+                                        customText.length > 0 && !validTimeFormat.test(customText) && { borderColor: '#DC2626' },
+                                    ]}
+                                    value={customText}
+                                    onChangeText={handleCustomTimeChange}
+                                    placeholder="HH:MM"
+                                    placeholderTextColor={C.sub}
+                                    keyboardType="numbers-and-punctuation"
+                                    maxLength={5}
+                                    autoFocus
+                                />
+                                {customText.length > 0 && !validTimeFormat.test(customText) && (
+                                    <Text style={s.customTimeError}>Use HH:MM (e.g. 14:30)</Text>
+                                )}
+                            </View>
+                        )}
 
                         {/* Active Days */}
                         <Text style={[s.fieldLabel, { color: C.sub }]}>ACTIVE DAYS</Text>
@@ -610,6 +672,25 @@ const s = StyleSheet.create({
     },
     timeCardLabel: { fontSize: 12, fontWeight: '600' },
     timeCardSub:   { fontSize: 10 },
+    customTimeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginTop: 10,
+        flexWrap: 'wrap',
+    },
+    customTimeInput: {
+        borderRadius: 10,
+        borderWidth: 1.5,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        fontSize: 18,
+        fontWeight: '700',
+        width: 90,
+        textAlign: 'center',
+        letterSpacing: 2,
+    },
+    customTimeError: { fontSize: 12, color: '#DC2626', flex: 1 },
 
     switchRow: {
         flexDirection: 'row',

@@ -141,6 +141,10 @@ create table friends (
       at the top of the Habits tab should animate out as the user scrolls down
       the task list, giving more screen space to the list. Use an
       `Animated.ScrollView` with a scroll offset listener to drive opacity/scale
+- [x] **Custom reminder time** — replaced the fixed preset cards with a "Custom"
+      option in the time picker that reveals a validated HH:MM text input.
+      Presets still work as quick picks; loading a habit with a non-preset time
+      automatically opens custom mode
 - [ ] Add a **swipe-to-delete** or long-press delete affordance on habit cards
       as a faster alternative to tapping into the edit modal (the delete button
       is already in the modal, but it requires several taps)
