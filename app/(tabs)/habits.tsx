@@ -18,6 +18,7 @@ import CategoryPill from '@/components/CategoryPill';
 import DayToggle from '@/components/DayToggle';
 import ProgressRing from '@/components/ProgressRing';
 import { useTheme } from '@/src/context/ThemeContext';
+import { useTimeFormat } from '@/src/context/TimeFormatContext';
 import { CATEGORY_META, genId } from '@/src/mockData';
 import {
     type Task,
@@ -66,6 +67,7 @@ function HabitModal({
     onClose: () => void;
 }>) {
     const { isDark } = useTheme();
+    const { formatTime } = useTimeFormat();
     const C = getColors(isDark);
     const [form, setForm] = useState<HabitFormData>(EMPTY_FORM);
     const [customMode, setCustomMode] = useState(false);
@@ -175,7 +177,7 @@ function HabitModal({
                         <Text style={[s.fieldLabel, { color: C.sub }]}>REMINDER TIME</Text>
                         <Text style={[s.fieldHint, { color: C.sub }]}>Select a preset or enter a custom time</Text>
                         <View style={s.timeGrid}>
-                            {REMINDER_TIMES.map(({ value, label, sub }) => {
+                            {REMINDER_TIMES.map(({ value, sub }) => {
                                 const isSelected = !customMode && form.time === value;
                                 return (
                                     <TouchableOpacity
@@ -197,7 +199,7 @@ function HabitModal({
                                             color={isSelected ? C.blue : C.sub}
                                         />
                                         <Text style={[s.timeCardLabel, { color: C.sub }, isSelected && { color: C.blue, fontWeight: '700' }]}>
-                                            {label}
+                                            {formatTime(value)}
                                         </Text>
                                         <Text style={[s.timeCardSub, { color: C.sub }, isSelected && { color: C.blue }]}>
                                             {sub}
@@ -300,6 +302,7 @@ type Props = Readonly<{
 // Categories and colors for habits
 export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleSkip }: Props) {
     const { isDark } = useTheme();
+    const { formatTime } = useTimeFormat();
     const C = getColors(isDark);
     const [filter, setFilter] = useState<'All' | 'Pending' | 'Done'>('All');
     const [modalVisible, setModalVisible] = useState(false);
@@ -458,7 +461,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                                 </Text>
                                 <View style={s.taskMeta}>
                                     <MaterialIcons name="schedule" size={11} color={C.sub} />
-                                    <Text style={[s.taskTime, { color: C.sub }]}>{task.time}</Text>
+                                    <Text style={[s.taskTime, { color: C.sub }]}>{formatTime(task.time)}</Text>
                                     {task.streakCount > 0 && (
                                         <View style={s.streakBadge}>
                                             <MaterialIcons name="local-fire-department" size={11} color="#92400E" />

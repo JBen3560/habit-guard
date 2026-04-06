@@ -141,6 +141,12 @@ create table friends (
       at the top of the Habits tab should animate out as the user scrolls down
       the task list, giving more screen space to the list. Use an
       `Animated.ScrollView` with a scroll offset listener to drive opacity/scale
+- [x] **System time format detection** — app reads device locale to determine
+      12hr vs 24hr preference and displays all habit times accordingly.
+      Implemented via `TimeFormatContext` (mirrors `ThemeContext` pattern) with
+      a `formatTime(HH:MM)` helper. User can override the system default.
+      Custom time input (HH:MM entry) still uses 24hr internally as storage
+      format; display-side formatting is handled by the context
 - [x] **Custom reminder time** — replaced the fixed preset cards with a "Custom"
       option in the time picker that reveals a validated HH:MM text input.
       Presets still work as quick picks; loading a habit with a non-preset time

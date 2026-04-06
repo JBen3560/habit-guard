@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
+import { TimeFormatProvider } from "@/src/context/TimeFormatContext";
 
 // Root app layout that applies global providers and navigation shell.
 
@@ -33,7 +34,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AppShell />
+        <TimeFormatProvider>
+          <AppShell />
+        </TimeFormatProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
