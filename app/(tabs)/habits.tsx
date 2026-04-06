@@ -1,6 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CategoryPill from '@/components/CategoryPill';
@@ -481,9 +483,28 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           const isDone = task.completedToday;
           const isSkipped = task.skippedToday;
 
-          return (
+          const renderRightActions = () => (
             <TouchableOpacity
-              key={task.id}
+              style={s.swipeDelete}
+              onPress={() =>
+                Alert.alert('Delete Habit', `Delete "${task.title}"?`, [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => setTasks((ts) => ts.filter((t) => t.id !== task.id)),
+                  },
+                ])
+              }
+            >
+              <MaterialIcons name="delete-outline" size={22} color="#fff" />
+              <Text style={s.swipeDeleteText}>Delete</Text>
+            </TouchableOpacity>
+          );
+
+          return (
+            <Swipeable key={task.id} renderRightActions={renderRightActions} overshootRight={false}>
+            <TouchableOpacity
               style={[s.taskCard, { backgroundColor: C.card }]}
               onPress={() => openEdit(task)}
               activeOpacity={0.8}
@@ -556,6 +577,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                 )}
               </View>
             </TouchableOpacity>
+            </Swipeable>
           );
         })}
         <View style={{ height: 20 }} />
@@ -673,6 +695,16 @@ const s = StyleSheet.create({
   },
   streakText: { fontSize: 11, color: '#92400E', fontWeight: '700' },
   taskActions: { alignItems: 'flex-end' },
+  swipeDelete: {
+    backgroundColor: '#DC2626',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    borderRadius: 16,
+    marginBottom: 12,
+    gap: 4,
+  },
+  swipeDeleteText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   actionBtns: { gap: 6 },
   skipBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1 },
   skipBtnText: { fontSize: 12, fontWeight: '600' },
