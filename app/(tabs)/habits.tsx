@@ -339,7 +339,8 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
   const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
   const done = todayTasks.filter((t) => t.completedToday || t.skippedToday);
-  const filtered = filter === 'All' ? todayTasks : filter === 'Pending' ? pending : done;
+  const byTime = (a: Task, b: Task) => a.time.localeCompare(b.time);
+  const filtered = (filter === 'All' ? todayTasks : filter === 'Pending' ? pending : done).slice().sort(byTime);
 
   const progress = todayTasks.length > 0 ? done.length / todayTasks.length : 0;
   const progressPercent = Math.round(progress * 100);
