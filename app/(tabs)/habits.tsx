@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -337,6 +337,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
   const [filter, setFilter] = useState<'All' | 'Pending' | 'Done'>('All');
   const [modalVisible, setModalVisible] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const swipeOpenId = useRef<string | null>(null);
 
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
   const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
@@ -503,10 +504,16 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           );
 
           return (
-            <Swipeable key={task.id} renderRightActions={renderRightActions} overshootRight={false}>
+            <Swipeable
+              key={task.id}
+              renderRightActions={renderRightActions}
+              overshootRight={false}
+              onSwipeableOpen={() => { swipeOpenId.current = task.id; }}
+              onSwipeableClose={() => { swipeOpenId.current = null; }}
+            >
             <TouchableOpacity
               style={[s.taskCard, { backgroundColor: C.card }]}
-              onPress={() => openEdit(task)}
+              onPress={() => { if (swipeOpenId.current === null) openEdit(task); }}
               activeOpacity={0.8}
             >
               <View style={[s.taskAccent, { backgroundColor: catColor }]} />
