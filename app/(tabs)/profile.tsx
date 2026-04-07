@@ -1,6 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -15,6 +15,7 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
@@ -312,9 +313,22 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const [addFriendVisible, setAddFriendVisible] = useState(false);
   const swipeOpenId = useRef<string | null>(null);
 
-  const accountName = user?.email?.split('@')[0] ?? 'You';
-  const MY_NAME = accountName.charAt(0).toUpperCase() + accountName.slice(1);
-  const MY_TAG = user?.email ? `@${user.email.split('@')[0]}` : '@your_habit';
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.username) setUsername(data.username);
+      });
+  }, [user]);
+
+  const MY_NAME = username ?? user?.email?.split('@')[0] ?? 'You';
+  const MY_TAG = username ? `@${username}` : user?.email ? `@${user.email.split('@')[0]}` : '@your_habit';
   const MY_STREAK = 13;
   const MY_TASKS = tasks.filter((t) => t.active).length;
 
