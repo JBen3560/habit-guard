@@ -12,7 +12,14 @@ export async function signUp(email: string, password: string, options: SignUpOpt
       data: options,
     },
   });
-  return { data, error };
+  if (error || !data.user) return { data, error };
+
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({ username: options.username ?? email.split('@')[0] })
+    .eq('id', data.user.id);
+
+  return { data, error: profileError ?? null };
 }
 
 export async function signIn(email: string, password: string) {
