@@ -34,24 +34,16 @@ function AppShell() {
 
 export default function RootLayout() {
   return (
-<<<<<<< HEAD
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <AppShell />
-        </AuthProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
-=======
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
           <TimeFormatProvider>
-            <AppShell />
+            <AuthProvider>
+              <AppShell />
+            </AuthProvider>
           </TimeFormatProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
->>>>>>> 8a27bf494b447b256fbf4eb173557edba45894e4
   );
 }
