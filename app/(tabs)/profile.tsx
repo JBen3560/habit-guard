@@ -1,6 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -15,13 +15,14 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
   buildHistory,
   genId,
   getCategoryStats,
   getWeeklyData,
-  INITIAL_TASKS,
 } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
 
@@ -296,13 +297,15 @@ function AddFriendModal({
 
 //  ProfileTab with user summary, progress visualizations, friend list, and modals
 type Props = Readonly<{
+  tasks: Task[];
   friends: Friend[];
   setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
 }>;
 
 // Main profile tab showing user info, progress charts, and friend list
-export default function ProfileTab({ friends, setFriends }: Props) {
+export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const router = useRouter();
+  const { user, signOut } = useAuth();
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
@@ -310,10 +313,24 @@ export default function ProfileTab({ friends, setFriends }: Props) {
   const [addFriendVisible, setAddFriendVisible] = useState(false);
   const swipeOpenId = useRef<string | null>(null);
 
-  const MY_NAME = 'You';
-  const MY_TAG = '@your_habit';
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.username) setUsername(data.username);
+      });
+  }, [user]);
+
+  const MY_NAME = username ?? user?.email?.split('@')[0] ?? 'You';
+  const MY_TAG = username ? `@${username}` : user?.email ? `@${user.email.split('@')[0]}` : '@your_habit';
   const MY_STREAK = 13;
-  const MY_TASKS = INITIAL_TASKS.filter((t) => t.active).length;
+  const MY_TASKS = tasks.filter((t) => t.active).length;
 
   const openFriend = (f: Friend) => {
     setSelectedFriend(f);
@@ -370,7 +387,7 @@ export default function ProfileTab({ friends, setFriends }: Props) {
 
         {/* ── Progress charts ── */}
         <View style={s.progressSection}>
-          <ProgressSection tasks={INITIAL_TASKS} />
+          <ProgressSection tasks={tasks} />
         </View>
 
         {/* ── Friends ── */}
@@ -472,6 +489,12 @@ export default function ProfileTab({ friends, setFriends }: Props) {
         >
           <MaterialIcons name="palette" size={20} color={C.sub} style={{ marginRight: 14 }} />
           <Text style={[s.settingsLabel, { color: C.text }]}>Appearance</Text>
+          <MaterialIcons name="chevron-right" size={22} color={C.sub} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[s.settingsRow, { backgroundColor: C.card }]} onPress={() => { void signOut(); }}>
+          <MaterialIcons name="logout" size={20} color={C.red} style={{ marginRight: 14 }} />
+          <Text style={[s.settingsLabel, { color: C.text }]}>Sign Out</Text>
           <MaterialIcons name="chevron-right" size={22} color={C.sub} />
         </TouchableOpacity>
 

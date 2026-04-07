@@ -43,10 +43,9 @@ Run the following in the Supabase SQL editor to create the four core tables:
 ```sql
 -- Users (managed by Supabase Auth, this extends it with app-specific fields)
 create table profiles (
-  id uuid references auth.users primary key,
-  username text unique not null,
-  tag text unique not null,        -- e.g. '@your_habit'
-  created_at timestamptz default now()
+      id uuid primary key references auth.users(id) on delete cascade,
+      username text,
+      created_at timestamp default now()
 );
 
 -- Tasks (one row per habit per user)
@@ -88,7 +87,7 @@ create table friends (
 - [ ] Add a **login/signup screen** that renders before the main tab view if
       `supabase.auth.getSession()` returns null on app load
 - [ ] Sign-up flow: email + password via `supabase.auth.signUp()`, then insert
-      a row into `profiles` with the chosen `username` and `tag`
+      a row into `profiles` with the chosen `username`
 - [ ] Sign-in flow: email + password via `supabase.auth.signInWithPassword()`
 - [ ] On successful auth, store the session (Supabase handles this via
       AsyncStorage automatically with `persistSession: true`)

@@ -42,10 +42,9 @@ The foundation. Nothing else in this track can start until done.
 
 ```sql
 create table profiles (
-  id uuid references auth.users primary key,
-  username text unique not null,
-  tag text unique not null,
-  created_at timestamptz default now()
+      id uuid primary key references auth.users(id) on delete cascade,
+      username text,
+      created_at timestamp default now()
 );
 
 create table tasks (
@@ -92,7 +91,7 @@ fixes once a real `user_id` exists at runtime.
 - [ ] Add a login/signup screen that renders if `supabase.auth.getSession()`
       returns null on app load
 - [ ] Sign-up: email + password via `supabase.auth.signUp()`, then insert a
-      row into `profiles` with chosen `username` and `tag`
+      row into `profiles` with the chosen `username`
 - [ ] Sign-in: email + password via `supabase.auth.signInWithPassword()`
 - [ ] Add sign-out to the Settings section of the Profile tab
 - [ ] Confirm session persists across app close/reopen (Supabase handles this
@@ -173,8 +172,8 @@ These touch nothing related to data and can be done in any order.
 
 - [ ] **Web bar chart bug** — 7-day progress bars show percentages but bars
       don't fill on web. The likely cause is `height: \`${pct}%\``inside a
-    flex container behaving differently on web. Switch to an explicit pixel
-    height calculated from a fixed container height, or use an`Animated`
+  flex container behaving differently on web. Switch to an explicit pixel
+  height calculated from a fixed container height, or use an`Animated`
       value
 - [ ] **Sort habits by time** — sort the `todayTasks` array by `task.time`
       (HH:MM string sort) before rendering, regardless of order in state

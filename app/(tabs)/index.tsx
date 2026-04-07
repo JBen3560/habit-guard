@@ -1,8 +1,10 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import AuthScreen from '@/components/AuthScreen';
+import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import { INITIAL_TASKS } from '@/src/mockData';
 import {
@@ -68,6 +70,7 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
 
 // Main App component that manages state for tasks, trophies, and friends
 export default function App() {
+  const { loading, session } = useAuth();
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const insets = useSafeAreaInsets();
@@ -77,6 +80,19 @@ export default function App() {
   const [trophies, setTrophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [activeTab, setActiveTab] = useState<Tab>('Habits');
+
+  if (loading) {
+    return (
+      <View style={[s.loadingScreen, { backgroundColor: C.bg }]}>
+        <ActivityIndicator size="large" color={C.blue} />
+        <Text style={[s.loadingText, { color: C.sub }]}>Checking your account...</Text>
+      </View>
+    );
+  }
+
+  if (!session) {
+    return <AuthScreen />;
+  }
 
   const updateTasks = (updater: (prev: Task[]) => Task[]) => {
     setTasks((prevTasks) => {
@@ -149,7 +165,7 @@ export default function App() {
       </View>
 
       <View style={[s.tab, activeTab === 'Profile' ? s.visible : s.hidden]}>
-        <ProfileTab friends={friends} setFriends={updateFriends} />
+        <ProfileTab tasks={tasks} friends={friends} setFriends={updateFriends} />
       </View>
 
       {/* Bottom Tab Bar */}
@@ -199,6 +215,9 @@ const s = StyleSheet.create({
   tab: { flex: 1 },
   visible: { display: 'flex' },
   hidden: { display: 'none' },
+
+  loadingScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
+  loadingText: { fontSize: 14, fontWeight: '600' },
 
   tabBar: {
     flexDirection: 'row',
