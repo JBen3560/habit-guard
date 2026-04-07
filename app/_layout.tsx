@@ -4,6 +4,7 @@ import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AuthProvider } from "@/src/context/AuthContext";
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
 
 // Root app layout that applies global providers and navigation shell.
@@ -33,7 +34,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AppShell />
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
