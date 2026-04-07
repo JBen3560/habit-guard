@@ -2,10 +2,12 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider } from "@/src/context/AuthContext";
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
+import { TimeFormatProvider } from "@/src/context/TimeFormatContext";
 
 // Root app layout that applies global providers and navigation shell.
 
@@ -32,6 +34,7 @@ function AppShell() {
 
 export default function RootLayout() {
   return (
+<<<<<<< HEAD
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
@@ -39,5 +42,16 @@ export default function RootLayout() {
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
+=======
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <TimeFormatProvider>
+            <AppShell />
+          </TimeFormatProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+>>>>>>> 8a27bf494b447b256fbf4eb173557edba45894e4
   );
 }
