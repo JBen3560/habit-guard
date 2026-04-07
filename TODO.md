@@ -27,14 +27,14 @@ Supabase dashboard SQL editor to inspect and debug data during testing.
       client — it just isn't used for app state anymore)
 - [ ] Create a `src/supabase.ts` file that initialises and exports the client:
       `ts
-    import AsyncStorage from '@react-native-async-storage/async-storage';
-    import { createClient } from '@supabase/supabase-js';
-    const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-    const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
-    export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true },
-    });
-    `
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true },
+});
+`
 
 ### 2. Schema
 
@@ -132,9 +132,9 @@ create table friends (
 - [ ] **Bug: "Done" count in the header counts skipped tasks as done** — confirm
       whether skipped should count toward the progress ring or not, and make it
       consistent
-- [ ] **Add a "Skipped" filter tab** alongside All / Pending / Done so skipped
+- [x] **Add a "Skipped" filter tab** alongside All / Pending / Done so skipped
       tasks have their own view rather than appearing mixed into other lists
-- [ ] **Sort tasks by scheduled time** regardless of their order in `mockData`
+- [x] **Sort tasks by scheduled time** regardless of their order in `mockData`
       (or the order they were added) — sort the `todayTasks` array by
       `task.time` (HH:MM string sort works fine here) before rendering
 - [ ] **Progress ring should hide on scroll** — the circular progress indicator
@@ -151,7 +151,7 @@ create table friends (
       option in the time picker that reveals a validated HH:MM text input.
       Presets still work as quick picks; loading a habit with a non-preset time
       automatically opens custom mode
-- [ ] Add a **swipe-to-delete** or long-press delete affordance on habit cards
+- [x] Add a **swipe-to-delete** or long-press delete affordance on habit cards
       as a faster alternative to tapping into the edit modal (the delete button
       is already in the modal, but it requires several taps)
 
@@ -166,8 +166,8 @@ create table friends (
 - [ ] **Bug: 7-day progress bars not rendering on web** — completion percentages
       display correctly but the filled bars themselves don't appear in the web
       version. Investigate whether `flex`-based bar height (`height: \`${pct}%\``)
-    behaves differently on web and switch to an explicit pixel height or
-    `Animated` value if needed
+behaves differently on web and switch to an explicit pixel height or
+`Animated` value if needed
 - [ ] **`MY_STREAK` is hard-coded to 13.** Replace with a value derived from
       the user's task data (e.g. the longest current `streakCount` among active
       tasks, or a dedicated "overall streak" concept)
