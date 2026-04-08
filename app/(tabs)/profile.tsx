@@ -314,6 +314,8 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const swipeOpenId = useRef<string | null>(null);
 
   const [username, setUsername] = useState<string | null>(null);
+  const displayName = (user?.user_metadata?.display_name as string | undefined) ?? undefined;
+  const description = (user?.user_metadata?.description as string | undefined) ?? undefined;
 
   useEffect(() => {
     if (!user) return;
@@ -327,8 +329,8 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       });
   }, [user]);
 
-  const MY_NAME = username ?? user?.email?.split('@')[0] ?? 'You';
-  const MY_TAG = username ? `@${username}` : user?.email ? `@${user.email.split('@')[0]}` : '@your_habit';
+  const MY_NAME = displayName ?? username ?? 'You';
+  const MY_TAG = username ? `@${username}` : '@your_habit';
   const MY_STREAK = 13;
   const MY_TASKS = tasks.filter((t) => t.active).length;
 
@@ -367,6 +369,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               {MY_TAG}
             </Text>
           </View>
+          {description ? <Text style={[s.profileBio, { color: C.sub }]}>{description}</Text> : null}
           <View style={[s.profileStats, { borderTopColor: C.border }]}>
             <View style={s.profileStat}>
               <Text style={[s.profileStatNum, { color: C.text }]}>{MY_STREAK}</Text>
@@ -559,6 +562,7 @@ const s = StyleSheet.create({
     borderRadius: 12,
     fontWeight: '700',
   },
+  profileBio: { fontSize: 13, lineHeight: 18, textAlign: 'center', marginBottom: 16 },
   profileStats: {
     flexDirection: 'row',
     width: '100%',

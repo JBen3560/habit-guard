@@ -1,7 +1,9 @@
 import { supabase } from './supabase';
 
 type SignUpOptions = {
+  displayName?: string;
   username?: string;
+  description?: string;
 };
 
 export async function signUp(email: string, password: string, options: SignUpOptions = {}) {
