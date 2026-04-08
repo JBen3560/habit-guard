@@ -153,6 +153,7 @@ create table friends (
 - [x] Add a **swipe-to-delete** or long-press delete affordance on habit cards
       as a faster alternative to tapping into the edit modal (the delete button
       is already in the modal, but it requires several taps)
+- [x] Add a **pop up to confirm delete** when deleting from the edit page
 
 ---
 
