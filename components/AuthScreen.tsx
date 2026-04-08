@@ -24,7 +24,9 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
+  const [description, setDescription] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [messageTone, setMessageTone] = useState<'neutral' | 'error' | 'success'>('neutral');
@@ -36,15 +38,17 @@ export default function AuthScreen() {
 
   const handleSubmit = async () => {
     const trimmedEmail = email.trim().toLowerCase();
+    const trimmedDisplayName = displayName.trim();
     const trimmedUsername = username.trim();
+    const trimmedDescription = description.trim();
 
     if (!trimmedEmail || !password.trim()) {
       showMessage('Enter an email and password to continue.', 'error');
       return;
     }
 
-    if (mode === 'sign-up' && !trimmedUsername) {
-      showMessage('Enter a username to create your account.', 'error');
+    if (mode === 'sign-up' && (!trimmedDisplayName || !trimmedUsername)) {
+      showMessage('Enter a display name and username to create your account.', 'error');
       return;
     }
 
@@ -64,7 +68,9 @@ export default function AuthScreen() {
       }
 
       const { data, error } = await signUp(trimmedEmail, password, {
+        displayName: trimmedDisplayName,
         username: trimmedUsername,
+        description: trimmedDescription,
       });
       if (error) {
         showMessage(error.message, 'error');
@@ -126,6 +132,18 @@ export default function AuthScreen() {
 
             {mode === 'sign-up' ? (
               <>
+                <Text style={[s.fieldLabel, { color: C.sub }]}>DISPLAY NAME</Text>
+                <TextInput
+                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                  placeholder="How you want your name shown"
+                  placeholderTextColor={C.sub}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                />
+
                 <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
                 <TextInput
                   style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
@@ -136,6 +154,20 @@ export default function AuthScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   returnKeyType="next"
+                />
+
+                <Text style={[s.fieldLabel, { color: C.sub }]}>DESCRIPTION</Text>
+                <TextInput
+                  style={[s.textArea, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="A short bio for your profile"
+                  placeholderTextColor={C.sub}
+                  autoCapitalize="sentences"
+                  autoCorrect={false}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
                 />
 
               </>
@@ -206,7 +238,9 @@ export default function AuthScreen() {
                 setMode(nextMode);
                 setMessage(null);
                 if (nextMode === 'sign-in') {
+                  setDisplayName('');
                   setUsername('');
+                  setDescription('');
                 }
               }}
             >
@@ -292,6 +326,14 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     fontSize: 15,
+  },
+  textArea: {
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    fontSize: 15,
+    minHeight: 92,
   },
   messageBox: {
     borderWidth: 1,
