@@ -1,6 +1,6 @@
 import { type Category, CATEGORY_COLORS, type Task } from './types';
 
-// Helpers 
+// Helpers
 
 export const genId = () => Math.random().toString(36).slice(2);
 
@@ -56,7 +56,7 @@ export const INITIAL_TASKS: Task[] = [
   // Hydration
   makeTask({ title: 'Morning Water', category: 'Hydration', time: '07:00', streakCount: 21 }),
   makeTask({ title: 'Afternoon Water', category: 'Hydration', time: '14:00', streakCount: 13 }),
-  makeTask({ title: 'Evening Water', category: 'Hydration', time: '20:00', streakCount: 9 }),
+  makeTask({ title: 'Evening Water', category: 'Hydration', time: '20:00', streakCount: 102 }),
   // Nutrition
   makeTask({ title: 'Eat Breakfast', category: 'Nutrition', time: '08:30', streakCount: 6 }),
   makeTask({
@@ -102,7 +102,7 @@ export const CATEGORY_META: Record<Category, { icon: string; color: string }> = 
   Other: { icon: 'star', color: CATEGORY_COLORS.Other },
 };
 
-// Simulated history (28 days) 
+// Simulated history (28 days)
 // Each entry: date string → fraction of tasks completed that day (0–1)
 // Used by the profile progress charts. Seeded deterministically so it looks
 // realistic but is always the same on re-render.

@@ -55,15 +55,38 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
   const skippedAllToday = todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
   const hasThreeFriends = friends.length >= 3;
 
+  // First Step: any habit ever completed or has a streak started
+  const hasCompletedAny = tasks.some((task) => task.completedToday || task.streakCount >= 1);
+
+  // Sennight Soldier: any task with a 7+ day streak
+  const hasSeven = tasks.some((task) => task.streakCount >= 7);
+
+  // Hydration Hero: any Hydration task with a 10+ day streak
+  const hydrationHero = tasks.some(
+    (task) => task.category === 'Hydration' && task.streakCount >= 10,
+  );
+
+  // Month Master: any task with a 30+ day streak
+  const monthMaster = tasks.some((task) => task.streakCount >= 30);
+
+  // Iron Will: any task with a 100+ day streak
+  const ironWill = tasks.some((task) => task.streakCount >= 100);
+
+  // Early Bird: a habit was completed and it's currently before 7:00 AM
+  const earlyBird = new Date().getHours() < 7 && tasks.some((task) => task.completedToday);
+
+  // Streak Breaker and Gone Missing require per-day history (tie to persistence)
+
   let nextTrophies = trophies;
 
-  if (skippedAllToday) {
-    nextTrophies = unlockTrophyByTitle(nextTrophies, 'Slacker');
-  }
-
-  if (hasThreeFriends) {
-    nextTrophies = unlockTrophyByTitle(nextTrophies, 'Social Butterfly');
-  }
+  if (hasCompletedAny) nextTrophies = unlockTrophyByTitle(nextTrophies, 'First Step');
+  if (hasSeven)        nextTrophies = unlockTrophyByTitle(nextTrophies, 'Sennight Soldier');
+  if (hydrationHero)   nextTrophies = unlockTrophyByTitle(nextTrophies, 'Hydration Hero');
+  if (monthMaster)     nextTrophies = unlockTrophyByTitle(nextTrophies, 'Month Master');
+  if (ironWill)        nextTrophies = unlockTrophyByTitle(nextTrophies, 'Iron Will');
+  if (earlyBird)       nextTrophies = unlockTrophyByTitle(nextTrophies, 'Early Bird');
+  if (skippedAllToday) nextTrophies = unlockTrophyByTitle(nextTrophies, 'Slacker');
+  if (hasThreeFriends) nextTrophies = unlockTrophyByTitle(nextTrophies, 'Social Butterfly');
 
   return nextTrophies;
 }
