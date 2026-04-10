@@ -15,16 +15,12 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import {
-  buildHistory,
-  getCategoryStats,
-  getWeeklyData,
-} from '@/src/mockData';
+import { buildHistory, getCategoryStats, getWeeklyData } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
-import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
 
 // Personal summary, social graph, and progress visualizations.
 
@@ -112,7 +108,11 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       {categoryStats.map((cat) => (
         <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
           <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
-            <MaterialIcons name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']} size={20} color={cat.color} />
+            <MaterialIcons
+              name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']}
+              size={20}
+              color={cat.color}
+            />
           </View>
           <View style={s.catInfo}>
             <View style={s.catRowTop}>
@@ -325,9 +325,9 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
-        if (data?.username)     setUsername(data.username);
+        if (data?.username) setUsername(data.username);
         if (data?.display_name) setDisplayName(data.display_name);
-        if (data?.description)  setDescription(data.description);
+        if (data?.description) setDescription(data.description);
       });
   }, [user]);
 
@@ -472,12 +472,18 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               key={friend.id}
               renderRightActions={renderRightActions}
               overshootRight={false}
-              onSwipeableOpen={() => { swipeOpenId.current = friend.id; }}
-              onSwipeableClose={() => { swipeOpenId.current = null; }}
+              onSwipeableOpen={() => {
+                swipeOpenId.current = friend.id;
+              }}
+              onSwipeableClose={() => {
+                swipeOpenId.current = null;
+              }}
             >
               <TouchableOpacity
                 style={[s.friendCard, { backgroundColor: C.card }]}
-                onPress={() => { if (swipeOpenId.current === null) openFriend(friend); }}
+                onPress={() => {
+                  if (swipeOpenId.current === null) openFriend(friend);
+                }}
                 activeOpacity={0.8}
               >
                 <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
@@ -490,7 +496,9 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                 <View style={s.friendInfo}>
                   <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
                   <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
-                  {friend.bio ? <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text> : null}
+                  {friend.bio ? (
+                    <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text>
+                  ) : null}
                   <View style={s.friendMeta}>
                     <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
                     <Text style={[s.friendMetaText, { color: C.sub }]}>
@@ -522,7 +530,26 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           );
         })}
 
-        <TouchableOpacity style={[s.settingsRow, { backgroundColor: C.card }]} onPress={() => { void signOut(); }}>
+        {/* ── Settings ── */}
+        <View style={[s.sectionHeader, { marginTop: 8 }]}>
+          <Text style={[s.sectionTitle, { color: C.text }]}>Settings</Text>
+        </View>
+
+        <TouchableOpacity
+          style={[s.settingsRow, { backgroundColor: C.card }]}
+          onPress={() => router.push('/appearance')}
+        >
+          <MaterialIcons name="palette" size={20} color={C.sub} style={{ marginRight: 14 }} />
+          <Text style={[s.settingsLabel, { color: C.text }]}>Appearance</Text>
+          <MaterialIcons name="chevron-right" size={22} color={C.sub} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[s.settingsRow, { backgroundColor: C.card }]}
+          onPress={() => {
+            void signOut();
+          }}
+        >
           <MaterialIcons name="logout" size={20} color={C.red} style={{ marginRight: 14 }} />
           <Text style={[s.settingsLabel, { color: C.text }]}>Sign Out</Text>
           <MaterialIcons name="chevron-right" size={22} color={C.sub} />
@@ -581,7 +608,13 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   profileName: { fontSize: 22, fontWeight: '800', marginBottom: 6, textAlign: 'center' },
-  profileTagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 6 },
+  profileTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 6,
+  },
   profileTag: {
     fontSize: 14,
     paddingHorizontal: 12,
@@ -589,7 +622,13 @@ const s = StyleSheet.create({
     borderRadius: 12,
     fontWeight: '700',
   },
-  profileBio: { fontSize: 13, lineHeight: 18, textAlign: 'center', marginBottom: 16, fontStyle: 'italic' },
+  profileBio: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginBottom: 16,
+    fontStyle: 'italic',
+  },
   profileStats: {
     flexDirection: 'row',
     width: '100%',
