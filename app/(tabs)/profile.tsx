@@ -20,11 +20,11 @@ import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
   buildHistory,
-  genId,
   getCategoryStats,
   getWeeklyData,
 } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
+import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
 
 // Personal summary, social graph, and progress visualizations.
 
@@ -244,7 +244,7 @@ function AddFriendModal({
   onClose,
 }: Readonly<{
   visible: boolean;
-  onAdd: (tag: string) => void;
+  onAdd: (tag: string) => void | Promise<void>;
   onClose: () => void;
 }>) {
   const { isDark } = useTheme();
@@ -253,7 +253,7 @@ function AddFriendModal({
 
   const handleAdd = () => {
     if (tag.trim()) {
-      onAdd(tag.trim());
+      void onAdd(tag.trim());
       setTag('');
     }
   };
@@ -287,7 +287,7 @@ function AddFriendModal({
             autoFocus
           />
           <Text style={[s.addFriendHint, { color: C.sub }]}>
-            Enter your friend&apos;s unique tag to send a friend request.
+            Enter your friend&apos;s unique username to connect with their profile.
           </Text>
         </View>
       </SafeAreaView>
@@ -331,6 +331,31 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       });
   }, [user]);
 
+  useEffect(() => {
+    let active = true;
+
+    if (!user) {
+      setFriends([]);
+      return () => {
+        active = false;
+      };
+    }
+
+    void getFriends()
+      .then((nextFriends) => {
+        if (active) {
+          setFriends(nextFriends);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load friends', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [setFriends, user]);
+
   const MY_NAME = displayName ?? username ?? 'You';
   const MY_TAG = username ? `@${username}` : '@your_habit';
   const MY_STREAK = 13;
@@ -341,20 +366,21 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
     setFriendModalVisible(true);
   };
 
-  const addFriend = (tag: string) => {
-    const normalized = tag.startsWith('@') ? tag : `@${tag}`;
-    const newFriend: Friend = {
-      id: genId(),
-      name: normalized.replace('@', ''),
-      tag: normalized,
-      streakDays: 0,
-      missedDays: 0,
-      photo: undefined,
-      tasks: 0,
-    };
-    setFriends((fs) => [...fs, newFriend]);
-    setAddFriendVisible(false);
-    Alert.alert('Friend Request Sent!', `Request sent to ${normalized}`);
+  const refreshFriends = async () => {
+    const nextFriends = await getFriends();
+    setFriends(nextFriends);
+  };
+
+  const addFriend = async (tag: string) => {
+    try {
+      const normalizedTag = tag.startsWith('@') ? tag : `@${tag}`;
+      await addFriendByTag(tag);
+      await refreshFriends();
+      setAddFriendVisible(false);
+      Alert.alert('Friend added', `Connected with ${normalizedTag}`);
+    } catch (error) {
+      Alert.alert('Could not add friend', error instanceof Error ? error.message : 'Try again.');
+    }
   };
 
   return (
@@ -419,7 +445,19 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                   {
                     text: 'Remove',
                     style: 'destructive',
-                    onPress: () => setFriends((fs) => fs.filter((f) => f.id !== friend.id)),
+                    onPress: () => {
+                      void (async () => {
+                        try {
+                          await removeFriend(friend.relationId ?? friend.profileId ?? friend.id);
+                          await refreshFriends();
+                        } catch (error) {
+                          Alert.alert(
+                            'Could not remove friend',
+                            error instanceof Error ? error.message : 'Try again.',
+                          );
+                        }
+                      })();
+                    },
                   },
                 ])
               }
@@ -437,65 +475,52 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               onSwipeableOpen={() => { swipeOpenId.current = friend.id; }}
               onSwipeableClose={() => { swipeOpenId.current = null; }}
             >
-            <TouchableOpacity
-              style={[s.friendCard, { backgroundColor: C.card }]}
-              onPress={() => { if (swipeOpenId.current === null) openFriend(friend); }}
-              activeOpacity={0.8}
-            >
-              <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
-                {friend.photo ? (
-                  <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" pointerEvents="none" />
-                ) : (
-                  <MaterialIcons name="person" size={28} color={C.sub} />
-                )}
-              </View>
-              <View style={s.friendInfo}>
-                <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
-                <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
-                <View style={s.friendMeta}>
-                  <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
-                  <Text style={[s.friendMetaText, { color: C.sub }]}>
-                    {friend.streakDays}-day streak
-                  </Text>
-                  {needsNudge && (
-                    <View style={s.missedBadge}>
-                      <MaterialIcons name="warning" size={11} color={C.red} />
-                      <Text style={[s.missedText, { color: C.red }]}>
-                        {friend.missedDays} missed
-                      </Text>
-                    </View>
+              <TouchableOpacity
+                style={[s.friendCard, { backgroundColor: C.card }]}
+                onPress={() => { if (swipeOpenId.current === null) openFriend(friend); }}
+                activeOpacity={0.8}
+              >
+                <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
+                  {friend.photo ? (
+                    <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" />
+                  ) : (
+                    <MaterialIcons name="person" size={28} color={C.sub} />
                   )}
                 </View>
-              </View>
-              {needsNudge && (
-                <TouchableOpacity
-                  style={s.nudgeSmallBtn}
-                  onPress={() =>
-                    Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
-                  }
-                >
-                  <MaterialIcons name="notifications" size={18} color="#92400E" />
-                </TouchableOpacity>
-              )}
-              <MaterialIcons name="chevron-right" size={22} color={C.sub} />
-            </TouchableOpacity>
+                <View style={s.friendInfo}>
+                  <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
+                  <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
+                  {friend.bio ? <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text> : null}
+                  <View style={s.friendMeta}>
+                    <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
+                    <Text style={[s.friendMetaText, { color: C.sub }]}>
+                      {friend.streakDays}-day streak
+                    </Text>
+                    {needsNudge && (
+                      <View style={s.missedBadge}>
+                        <MaterialIcons name="warning" size={11} color={C.red} />
+                        <Text style={[s.missedText, { color: C.red }]}>
+                          {friend.missedDays} missed
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                {needsNudge && (
+                  <TouchableOpacity
+                    style={s.nudgeSmallBtn}
+                    onPress={() =>
+                      Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
+                    }
+                  >
+                    <MaterialIcons name="notifications" size={18} color="#92400E" />
+                  </TouchableOpacity>
+                )}
+                <MaterialIcons name="chevron-right" size={22} color={C.sub} />
+              </TouchableOpacity>
             </Swipeable>
           );
         })}
-
-        {/* ── Settings ── */}
-        <View style={[s.sectionHeader, { marginTop: 8 }]}>
-          <Text style={[s.sectionTitle, { color: C.text }]}>Settings</Text>
-        </View>
-
-        <TouchableOpacity
-          style={[s.settingsRow, { backgroundColor: C.card }]}
-          onPress={() => router.push('/appearance')}
-        >
-          <MaterialIcons name="palette" size={20} color={C.sub} style={{ marginRight: 14 }} />
-          <Text style={[s.settingsLabel, { color: C.text }]}>Appearance</Text>
-          <MaterialIcons name="chevron-right" size={22} color={C.sub} />
-        </TouchableOpacity>
 
         <TouchableOpacity style={[s.settingsRow, { backgroundColor: C.card }]} onPress={() => { void signOut(); }}>
           <MaterialIcons name="logout" size={20} color={C.red} style={{ marginRight: 14 }} />

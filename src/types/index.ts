@@ -42,6 +42,9 @@ export type Friend = {
     missedDays: number;
     photo?: ImageSourcePropType;
     tasks: number;
+    bio?: string;
+    profileId?: string;
+    relationId?: string;
 };
 
 // Constants
@@ -90,10 +93,7 @@ export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't10', title: 'Social Butterfly', description: 'Add 3 friends',                 icon: '🦋', type: 'silver', earned: false                       },
 ];
 
-export const INITIAL_FRIENDS: Friend[] = [
-    { id: 'f1', name: 'Doc Plaue',    tag: '@cplaue',  streakDays: 182, missedDays: 0, photo: PROFILE_PHOTOS.cplaue, tasks: 10 },
-    { id: 'f2', name: 'Anna Galeano', tag: '@agalean', streakDays: 91,  missedDays: 3, photo: PROFILE_PHOTOS.agalean, tasks: 5  },
-];
+export const INITIAL_FRIENDS: Friend[] = [];
 
 // Helpers
 
