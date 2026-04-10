@@ -314,18 +314,20 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const swipeOpenId = useRef<string | null>(null);
 
   const [username, setUsername] = useState<string | null>(null);
-  const displayName = (user?.user_metadata?.display_name as string | undefined) ?? undefined;
-  const description = (user?.user_metadata?.description as string | undefined) ?? undefined;
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from('profiles')
-      .select('username')
+      .select('username, display_name, description')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
-        if (data?.username) setUsername(data.username);
+        if (data?.username)     setUsername(data.username);
+        if (data?.display_name) setDisplayName(data.display_name);
+        if (data?.description)  setDescription(data.description);
       });
   }, [user]);
 
@@ -553,8 +555,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileName: { fontSize: 22, fontWeight: '800', marginBottom: 6 },
-  profileTagRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  profileName: { fontSize: 22, fontWeight: '800', marginBottom: 6, textAlign: 'center' },
+  profileTagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 16 },
   profileTag: {
     fontSize: 14,
     paddingHorizontal: 12,
@@ -562,7 +564,7 @@ const s = StyleSheet.create({
     borderRadius: 12,
     fontWeight: '700',
   },
-  profileBio: { fontSize: 13, lineHeight: 18, textAlign: 'center', marginBottom: 16 },
+  profileBio: { fontSize: 13, lineHeight: 18, textAlign: 'center', marginBottom: 16, fontStyle: 'italic' },
   profileStats: {
     flexDirection: 'row',
     width: '100%',
