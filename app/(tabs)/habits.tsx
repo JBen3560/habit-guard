@@ -454,6 +454,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           <TouchableOpacity
             key={f}
             onPress={() => setFilter(f)}
+            activeOpacity={1}
             style={[
               s.filterTab,
               { backgroundColor: C.card, borderColor: C.border },
