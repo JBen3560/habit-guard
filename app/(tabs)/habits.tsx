@@ -601,7 +601,6 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                         style={[s.doneBtn, { backgroundColor: C.blue }]}
                         onPress={() => onToggleComplete(task.id)}
                       >
-                        <MaterialIcons name="check" size={13} color="#fff" />
                         <Text style={s.doneBtnText}>Done</Text>
                       </TouchableOpacity>
                     </View>
