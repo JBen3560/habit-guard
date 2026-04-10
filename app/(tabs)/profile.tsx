@@ -176,14 +176,9 @@ function FriendModal({
             </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
             <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
-            {friend.tag === '@cplaue' && (
-              <Text style={[s.friendBio, { color: C.sub }]}>Enthusiast of greasy keyboards 🤌</Text>
-            )}
-            {friend.tag === '@agalean' && (
-              <Text style={[s.friendBio, { color: C.sub }]}>
-                Master snowboard artisan (actually built one from scratch. yes, really) 🏂
-              </Text>
-            )}
+            {friend.bio ? (
+              <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text>
+            ) : null}
             <View style={s.friendStats}>
               <View style={s.friendStat}>
                 <Text style={[s.friendStatNum, { color: C.text }]}>{friend.streakDays}</Text>
@@ -496,9 +491,6 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                 <View style={s.friendInfo}>
                   <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
                   <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
-                  {friend.bio ? (
-                    <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text>
-                  ) : null}
                   <View style={s.friendMeta}>
                     <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
                     <Text style={[s.friendMetaText, { color: C.sub }]}>

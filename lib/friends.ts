@@ -240,6 +240,18 @@ export async function getFriends(): Promise<Friend[]> {
   );
   const profileMap = await getProfilesByIds(profileIds);
 
+  // Fetch active task counts for all friends
+  const { data: taskData } = await supabase
+    .from('tasks')
+    .select('user_id')
+    .in('user_id', profileIds)
+    .eq('active', true);
+
+  const taskCountMap = new Map<string, number>();
+  for (const t of (taskData ?? []) as { user_id: string }[]) {
+    taskCountMap.set(t.user_id, (taskCountMap.get(t.user_id) ?? 0) + 1);
+  }
+
   return relationRows
     .map((relation) => {
       const profileId = relation.user_id === userId ? relation.friend_id : relation.user_id;
@@ -247,7 +259,9 @@ export async function getFriends(): Promise<Friend[]> {
 
       if (!profile) return null;
 
-      return relationToFriend(relation, profile, userId);
+      const friend = relationToFriend(relation, profile, userId);
+      friend.tasks = taskCountMap.get(profileId) ?? 0;
+      return friend;
     })
     .filter((friend): friend is Friend => friend !== null);
 }
