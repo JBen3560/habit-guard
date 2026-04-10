@@ -556,7 +556,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   profileName: { fontSize: 22, fontWeight: '800', marginBottom: 6, textAlign: 'center' },
-  profileTagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 16 },
+  profileTagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 6 },
   profileTag: {
     fontSize: 14,
     paddingHorizontal: 12,
