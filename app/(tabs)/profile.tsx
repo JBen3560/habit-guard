@@ -736,10 +736,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   friendCard: {
