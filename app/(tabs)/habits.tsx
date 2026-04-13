@@ -403,7 +403,7 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
           <Text style={[s.titleText, { color: C.text }]}>Today&apos;s Habits</Text>
         </View>
         <TouchableOpacity
-          style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]}
+          style={[s.addBtn, { backgroundColor: C.blue }]}
           onPress={openNew}
         >
           <MaterialIcons name="add" size={20} color="#fff" />
@@ -649,10 +649,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 
