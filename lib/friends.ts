@@ -1,3 +1,4 @@
+import { type Friend, PROFILE_PHOTOS } from '@/src/types';
 import { supabase } from './supabase';
 
 export type FriendRequest = {
@@ -7,6 +8,46 @@ export type FriendRequest = {
   status: 'pending' | 'accepted';
   created_at: string;
 };
+
+type FriendRow = FriendRequest;
+
+type ProfileRow = {
+  id: string;
+  username: string | null;
+};
+
+const avatarByUsername: Record<string, Friend['photo']> = {
+  cplaue: PROFILE_PHOTOS.cplaue,
+  agalean: PROFILE_PHOTOS.agalean,
+};
+
+async function getProfilesByIds(profileIds: string[]): Promise<Map<string, ProfileRow>> {
+  if (profileIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .in('id', profileIds);
+
+  if (error) throw error;
+
+  return new Map((data as ProfileRow[]).map((profile) => [profile.id, profile]));
+}
+
+function relationToFriend(relation: FriendRow, profile: ProfileRow): Friend {
+  const username = profile.username?.trim() || 'friend';
+
+  return {
+    id: relation.id,
+    profileId: profile.id,
+    name: username,
+    tag: `@${username}`,
+    streakDays: 0,
+    missedDays: 0,
+    photo: avatarByUsername[username.toLowerCase()],
+    tasks: 0,
+  };
+}
 
 async function getUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -52,7 +93,7 @@ export async function getIncomingRequests(): Promise<FriendRequest[]> {
 }
 
 // Get accepted friends
-export async function getFriends(): Promise<FriendRequest[]> {
+export async function getFriends(): Promise<Friend[]> {
   const userId = await getUserId();
 
   const { data, error } = await supabase
@@ -88,11 +129,48 @@ export async function getFriends(): Promise<FriendRequest[]> {
 
       if (!profile) return null;
 
-      const friend = relationToFriend(relation, profile, userId);
+      const friend = relationToFriend(relation, profile);
       friend.tasks = taskCountMap.get(profileId) ?? 0;
       return friend;
     })
     .filter((friend): friend is Friend => friend !== null);
+}
+
+export async function sendFriendRequestByTag(tag: string): Promise<void> {
+  const userId = await getUserId();
+  const username = tag.replace(/^@/, '').trim().toLowerCase();
+
+  if (!username) {
+    throw new Error('Enter a valid username tag.');
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('username', username)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  if (!profile) throw new Error('No user found for that tag.');
+  if (profile.id === userId) throw new Error('You cannot add yourself.');
+
+  const { data: existing, error: existingError } = await supabase
+    .from('friends')
+    .select('id, status')
+    .or(
+      `and(user_id.eq.${userId},friend_id.eq.${profile.id}),and(user_id.eq.${profile.id},friend_id.eq.${userId})`,
+    )
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (existing?.status === 'accepted') {
+    throw new Error('You are already friends with this user.');
+  }
+  if (existing?.status === 'pending') {
+    throw new Error('A friend request already exists for this user.');
+  }
+
+  await sendFriendRequest(profile.id);
 }
 
 // Remove a friendship — tries both directions since either user may have initiated it.

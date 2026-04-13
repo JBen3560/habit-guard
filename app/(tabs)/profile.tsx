@@ -15,10 +15,11 @@ import {
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getFriends, removeFriend, sendFriendRequestByTag } from '@/lib/friends';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import { buildHistory, genId, getCategoryStats, getWeeklyData } from '@/src/mockData';
+import { buildHistory, getCategoryStats, getWeeklyData } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
 
 // Personal summary, social graph, and progress visualizations.
@@ -271,9 +272,7 @@ function AddFriendModal({
             <Text style={[s.modalBack, { color: C.sub }]}>Cancel</Text>
           </TouchableOpacity>
           <Text style={[s.modalTitle, { color: C.text }]}>Add Friend</Text>
-          <TouchableOpacity onPress={handleAdd}>
-            <Text style={[s.modalSave, { color: C.blue }]}>Add</Text>
-          </TouchableOpacity>
+          <View style={{ width: 40 }} />
         </View>
         <View style={[s.modalBody, { backgroundColor: C.bg }]}>
           <Text style={[s.fieldLabel, { color: C.sub }]}>Friend&apos;s Tag</Text>
@@ -281,12 +280,14 @@ function AddFriendModal({
             style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
             value={tag}
             onChangeText={setTag}
+            onSubmitEditing={handleAdd}
             placeholder="@username"
             placeholderTextColor={C.sub}
+            returnKeyType="done"
             autoFocus
           />
           <Text style={[s.addFriendHint, { color: C.sub }]}>
-            Enter your friend&apos;s unique tag to send a friend request.
+            Enter a friend&apos;s tag and press Done to add instantly.
           </Text>
         </View>
       </SafeAreaView>
@@ -326,6 +327,20 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       });
   }, [user]);
 
+  const refreshFriends = async () => {
+    try {
+      const dbFriends = await getFriends();
+      setFriends(dbFriends);
+    } catch (error) {
+      Alert.alert('Could not load friends', error instanceof Error ? error.message : 'Try again.');
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    void refreshFriends();
+  }, [user]);
+
   const MY_NAME = username ?? user?.email?.split('@')[0] ?? 'You';
   const MY_TAG = username
     ? `@${username}`
@@ -342,18 +357,18 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
 
   const addFriend = (tag: string) => {
     const normalized = tag.startsWith('@') ? tag : `@${tag}`;
-    const newFriend: Friend = {
-      id: genId(),
-      name: normalized.replace('@', ''),
-      tag: normalized,
-      streakDays: 0,
-      missedDays: 0,
-      photo: undefined,
-      tasks: 0,
-    };
-    setFriends((fs) => [...fs, newFriend]);
-    setAddFriendVisible(false);
-    Alert.alert('Friend Request Sent!', `Request sent to ${normalized}`);
+    void (async () => {
+      try {
+        await sendFriendRequestByTag(normalized);
+        setAddFriendVisible(false);
+        await refreshFriends();
+      } catch (error) {
+        Alert.alert(
+          'Could not send request',
+          error instanceof Error ? error.message : 'Try again.',
+        );
+      }
+    })();
   };
 
   return (
@@ -411,28 +426,19 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           const renderRightActions = () => (
             <TouchableOpacity
               style={s.swipeDelete}
-              onPress={() =>
-                Alert.alert('Remove Friend', `Remove ${friend.name}?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Remove',
-                    style: 'destructive',
-                    onPress: () => {
-                      void (async () => {
-                        try {
-                          await removeFriend(friend.profileId ?? friend.id);
-                          await refreshFriends();
-                        } catch (error) {
-                          Alert.alert(
-                            'Could not remove friend',
-                            error instanceof Error ? error.message : 'Try again.',
-                          );
-                        }
-                      })();
-                    },
-                  },
-                ])
-              }
+              onPress={() => {
+                void (async () => {
+                  try {
+                    await removeFriend(friend.profileId ?? friend.id);
+                    await refreshFriends();
+                  } catch (error) {
+                    Alert.alert(
+                      'Could not remove friend',
+                      error instanceof Error ? error.message : 'Try again.',
+                    );
+                  }
+                })();
+              }}
             >
               <MaterialIcons name="person-remove" size={22} color="#fff" />
               <Text style={s.swipeDeleteText}>Remove</Text>
@@ -460,12 +466,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               >
                 <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
                   {friend.photo ? (
-                    <Image
-                      source={friend.photo}
-                      style={s.friendAvatarImg}
-                      resizeMode="cover"
-                      pointerEvents="none"
-                    />
+                    <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" />
                   ) : (
                     <MaterialIcons name="person" size={28} color={C.sub} />
                   )}

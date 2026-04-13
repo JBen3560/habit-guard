@@ -4,12 +4,12 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
+import { getFriends } from '@/lib/friends';
 import { loadTasks, removeCompletion, updateStreakCount, upsertCompletion } from '@/lib/tasks';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
   type Friend,
-  INITIAL_FRIENDS,
   INITIAL_TROPHIES,
   type Task,
   type Trophy,
@@ -77,7 +77,7 @@ export default function App() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [trophies, setTrophies] = useState<Trophy[]>(INITIAL_TROPHIES);
-  const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>('Habits');
 
   // Load tasks from DB whenever the session changes (login / logout)
@@ -89,6 +89,17 @@ export default function App() {
     loadTasks()
       .then((dbTasks) => setTasks(dbTasks))
       .catch((err) => console.error('Failed to load tasks:', err));
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) {
+      setFriends([]);
+      return;
+    }
+
+    getFriends()
+      .then((dbFriends) => setFriends(dbFriends))
+      .catch((err) => console.error('Failed to load friends:', err));
   }, [session]);
 
   if (loading) {
