@@ -1,12 +1,12 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
+import { loadTasks, removeCompletion, updateStreakCount, upsertCompletion } from '@/lib/tasks';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import { INITIAL_TASKS } from '@/src/mockData';
 import {
   type Friend,
   INITIAL_FRIENDS,
@@ -75,11 +75,21 @@ export default function App() {
   const C = getColors(isDark);
   const insets = useSafeAreaInsets();
 
-  // Save current state
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [trophies, setTrophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [activeTab, setActiveTab] = useState<Tab>('Habits');
+
+  // Load tasks from DB whenever the session changes (login / logout)
+  useEffect(() => {
+    if (!session) {
+      setTasks([]);
+      return;
+    }
+    loadTasks()
+      .then((dbTasks) => setTasks(dbTasks))
+      .catch((err) => console.error('Failed to load tasks:', err));
+  }, [session]);
 
   if (loading) {
     return (
@@ -115,37 +125,45 @@ export default function App() {
     });
   };
 
-  // Toggle completion status of a habit, updating streak counts and ensuring skip/completion are mutually exclusive
+  // Toggle completion status of a habit, updating streak counts and persisting to DB
   const toggleTaskComplete = (id: string) => {
-    updateTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === id
+    updateTasks((currentTasks) => {
+      const task = currentTasks.find((t) => t.id === id);
+      if (!task) return currentTasks;
+      const nowDone = !task.completedToday;
+      const newStreak = nowDone ? task.streakCount + 1 : Math.max(0, task.streakCount - 1);
+      void (nowDone ? upsertCompletion(id, 'done') : removeCompletion(id));
+      void updateStreakCount(id, newStreak);
+      return currentTasks.map((t) =>
+        t.id === id
           ? {
-              ...task,
-              completedToday: !task.completedToday,
-              skippedToday: task.completedToday ? task.skippedToday : false,
-              streakCount: !task.completedToday
-                ? task.streakCount + 1
-                : Math.max(0, task.streakCount - 1),
+              ...t,
+              completedToday: nowDone,
+              skippedToday: nowDone ? false : t.skippedToday,
+              streakCount: newStreak,
             }
-          : task,
-      ),
-    );
+          : t,
+      );
+    });
   };
 
   // Toggle skip status of a habit, ensuring it cannot be marked as both completed and skipped
   const toggleTaskSkip = (id: string) => {
-    updateTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === id
+    updateTasks((currentTasks) => {
+      const task = currentTasks.find((t) => t.id === id);
+      if (!task) return currentTasks;
+      const nowSkipped = !task.skippedToday;
+      void (nowSkipped ? upsertCompletion(id, 'skipped') : removeCompletion(id));
+      return currentTasks.map((t) =>
+        t.id === id
           ? {
-              ...task,
-              skippedToday: !task.skippedToday,
-              completedToday: task.skippedToday ? task.completedToday : false,
+              ...t,
+              skippedToday: nowSkipped,
+              completedToday: nowSkipped ? false : t.completedToday,
             }
-          : task,
-      ),
-    );
+          : t,
+      );
+    });
   };
 
   // Render the active tab and bottom navigation bar

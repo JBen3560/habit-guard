@@ -18,12 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import {
-  buildHistory,
-  genId,
-  getCategoryStats,
-  getWeeklyData,
-} from '@/src/mockData';
+import { buildHistory, genId, getCategoryStats, getWeeklyData } from '@/src/mockData';
 import { type Friend, type Task, getColors } from '@/src/types/index';
 
 // Personal summary, social graph, and progress visualizations.
@@ -112,7 +107,11 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       {categoryStats.map((cat) => (
         <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
           <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
-            <MaterialIcons name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']} size={20} color={cat.color} />
+            <MaterialIcons
+              name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']}
+              size={20}
+              color={cat.color}
+            />
           </View>
           <View style={s.catInfo}>
             <View style={s.catRowTop}>
@@ -328,7 +327,11 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   }, [user]);
 
   const MY_NAME = username ?? user?.email?.split('@')[0] ?? 'You';
-  const MY_TAG = username ? `@${username}` : user?.email ? `@${user.email.split('@')[0]}` : '@your_habit';
+  const MY_TAG = username
+    ? `@${username}`
+    : user?.email
+      ? `@${user.email.split('@')[0]}`
+      : '@your_habit';
   const MY_STREAK = 13;
   const MY_TASKS = tasks.filter((t) => t.active).length;
 
@@ -414,7 +417,19 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                   {
                     text: 'Remove',
                     style: 'destructive',
-                    onPress: () => setFriends((fs) => fs.filter((f) => f.id !== friend.id)),
+                    onPress: () => {
+                      void (async () => {
+                        try {
+                          await removeFriend(friend.profileId ?? friend.id);
+                          await refreshFriends();
+                        } catch (error) {
+                          Alert.alert(
+                            'Could not remove friend',
+                            error instanceof Error ? error.message : 'Try again.',
+                          );
+                        }
+                      })();
+                    },
                   },
                 ])
               }
@@ -429,51 +444,62 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               key={friend.id}
               renderRightActions={renderRightActions}
               overshootRight={false}
-              onSwipeableOpen={() => { swipeOpenId.current = friend.id; }}
-              onSwipeableClose={() => { swipeOpenId.current = null; }}
+              onSwipeableOpen={() => {
+                swipeOpenId.current = friend.id;
+              }}
+              onSwipeableClose={() => {
+                swipeOpenId.current = null;
+              }}
             >
-            <TouchableOpacity
-              style={[s.friendCard, { backgroundColor: C.card }]}
-              onPress={() => { if (swipeOpenId.current === null) openFriend(friend); }}
-              activeOpacity={0.8}
-            >
-              <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
-                {friend.photo ? (
-                  <Image source={friend.photo} style={s.friendAvatarImg} resizeMode="cover" pointerEvents="none" />
-                ) : (
-                  <MaterialIcons name="person" size={28} color={C.sub} />
-                )}
-              </View>
-              <View style={s.friendInfo}>
-                <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
-                <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
-                <View style={s.friendMeta}>
-                  <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
-                  <Text style={[s.friendMetaText, { color: C.sub }]}>
-                    {friend.streakDays}-day streak
-                  </Text>
-                  {needsNudge && (
-                    <View style={s.missedBadge}>
-                      <MaterialIcons name="warning" size={11} color={C.red} />
-                      <Text style={[s.missedText, { color: C.red }]}>
-                        {friend.missedDays} missed
-                      </Text>
-                    </View>
+              <TouchableOpacity
+                style={[s.friendCard, { backgroundColor: C.card }]}
+                onPress={() => {
+                  if (swipeOpenId.current === null) openFriend(friend);
+                }}
+                activeOpacity={0.8}
+              >
+                <View style={[s.friendAvatar, { backgroundColor: C.border }]}>
+                  {friend.photo ? (
+                    <Image
+                      source={friend.photo}
+                      style={s.friendAvatarImg}
+                      resizeMode="cover"
+                      pointerEvents="none"
+                    />
+                  ) : (
+                    <MaterialIcons name="person" size={28} color={C.sub} />
                   )}
                 </View>
-              </View>
-              {needsNudge && (
-                <TouchableOpacity
-                  style={s.nudgeSmallBtn}
-                  onPress={() =>
-                    Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
-                  }
-                >
-                  <MaterialIcons name="notifications" size={18} color="#92400E" />
-                </TouchableOpacity>
-              )}
-              <MaterialIcons name="chevron-right" size={22} color={C.sub} />
-            </TouchableOpacity>
+                <View style={s.friendInfo}>
+                  <Text style={[s.friendName, { color: C.text }]}>{friend.name}</Text>
+                  <Text style={[s.friendTagText, { color: C.sub }]}>{friend.tag}</Text>
+                  <View style={s.friendMeta}>
+                    <MaterialIcons name="local-fire-department" size={13} color={C.yellow} />
+                    <Text style={[s.friendMetaText, { color: C.sub }]}>
+                      {friend.streakDays}-day streak
+                    </Text>
+                    {needsNudge && (
+                      <View style={s.missedBadge}>
+                        <MaterialIcons name="warning" size={11} color={C.red} />
+                        <Text style={[s.missedText, { color: C.red }]}>
+                          {friend.missedDays} missed
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                {needsNudge && (
+                  <TouchableOpacity
+                    style={s.nudgeSmallBtn}
+                    onPress={() =>
+                      Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
+                    }
+                  >
+                    <MaterialIcons name="notifications" size={18} color="#92400E" />
+                  </TouchableOpacity>
+                )}
+                <MaterialIcons name="chevron-right" size={22} color={C.sub} />
+              </TouchableOpacity>
             </Swipeable>
           );
         })}
@@ -492,7 +518,12 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           <MaterialIcons name="chevron-right" size={22} color={C.sub} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[s.settingsRow, { backgroundColor: C.card }]} onPress={() => { void signOut(); }}>
+        <TouchableOpacity
+          style={[s.settingsRow, { backgroundColor: C.card }]}
+          onPress={() => {
+            void signOut();
+          }}
+        >
           <MaterialIcons name="logout" size={20} color={C.red} style={{ marginRight: 14 }} />
           <Text style={[s.settingsLabel, { color: C.text }]}>Sign Out</Text>
           <MaterialIcons name="chevron-right" size={22} color={C.sub} />

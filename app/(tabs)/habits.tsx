@@ -19,9 +19,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CategoryPill from '@/components/CategoryPill';
 import DayToggle from '@/components/DayToggle';
 import ProgressRing from '@/components/ProgressRing';
+import { deleteTask as dbDeleteTask, insertTask, updateTask } from '@/lib/tasks';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useTimeFormat } from '@/src/context/TimeFormatContext';
-import { CATEGORY_META, genId } from '@/src/mockData';
+import { CATEGORY_META } from '@/src/mockData';
 import { type Task, CATEGORIES, CATEGORY_COLORS, getColors, today, todayIdx } from '@/src/types';
 
 // Habits tab: create/edit habits, track daily progress, and toggle completion state
@@ -361,22 +362,30 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
   const allDone = todayTasks.length > 0 && done.length === todayTasks.length;
   const ringColor = allDone ? C.green : C.blue;
 
-  const saveHabit = (form: HabitFormData) => {
+  const saveHabit = async (form: HabitFormData) => {
     if (editTask) {
+      // Optimistic update, then persist
       setTasks((ts) => ts.map((t) => (t.id === editTask.id ? { ...t, ...form } : t)));
+      updateTask(editTask.id, form).catch(console.error);
     } else {
-      setTasks((ts) => [
-        ...ts,
-        { ...form, id: genId(), streakCount: 0, completedToday: false, skippedToday: false },
-      ]);
+      // Insert into DB first so we get the real UUID back
+      try {
+        const newTask = await insertTask(form);
+        setTasks((ts) => [...ts, newTask]);
+      } catch (err) {
+        console.error('Failed to save habit:', err);
+      }
     }
     setModalVisible(false);
     setEditTask(null);
   };
 
-  // Delete habit and close modal
+  // Delete habit from DB and local state, then close modal
   const deleteHabit = () => {
-    if (editTask) setTasks((ts) => ts.filter((t) => t.id !== editTask.id));
+    if (editTask) {
+      setTasks((ts) => ts.filter((t) => t.id !== editTask.id));
+      dbDeleteTask(editTask.id).catch(console.error);
+    }
     setModalVisible(false);
     setEditTask(null);
   };
@@ -511,7 +520,10 @@ export default function HabitsTab({ tasks, setTasks, onToggleComplete, onToggleS
                   {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: () => setTasks((ts) => ts.filter((t) => t.id !== task.id)),
+                    onPress: () => {
+                      setTasks((ts) => ts.filter((t) => t.id !== task.id));
+                      dbDeleteTask(task.id).catch(console.error);
+                    },
                   },
                 ])
               }
