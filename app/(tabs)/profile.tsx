@@ -289,6 +289,99 @@ function AddFriendModal({
   );
 }
 
+// Edit Profile Modal – lets the user update their display name and bio
+function EditProfileModal({
+  visible,
+  initialDisplayName,
+  initialDescription,
+  onSave,
+  onClose,
+}: Readonly<{
+  visible: boolean;
+  initialDisplayName: string | null;
+  initialDescription: string | null;
+  onSave: (displayName: string, description: string) => Promise<void>;
+  onClose: () => void;
+}>) {
+  const { isDark } = useTheme();
+  const C = getColors(isDark);
+  const [displayName, setDisplayName] = useState('');
+  const [description, setDescription] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  React.useEffect(() => {
+    if (visible) {
+      setDisplayName(initialDisplayName ?? '');
+      setDescription(initialDescription ?? '');
+    }
+  }, [visible, initialDisplayName, initialDescription]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(displayName.trim(), description.trim());
+      onClose();
+    } catch {
+      Alert.alert('Error', 'Could not save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const canSave = displayName.trim().length > 0 && !saving;
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={[s.modalSafe, { backgroundColor: C.bg }]}>
+        <View style={[s.modalHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={[s.modalBack, { color: C.sub }]}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={[s.modalTitle, { color: C.text }]}>Edit Profile</Text>
+          <TouchableOpacity onPress={handleSave} disabled={!canSave}>
+            <Text style={[s.modalSave, { color: canSave ? C.blue : C.sub }]}>Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]} keyboardShouldPersistTaps="handled">
+          <Text style={[s.fieldLabel, { color: C.sub }]}>DISPLAY NAME</Text>
+          <TextInput
+            style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="Your name"
+            placeholderTextColor={C.sub}
+            maxLength={30}
+            autoFocus
+          />
+
+          <Text style={[s.fieldLabel, { color: C.sub }]}>BIO</Text>
+          <TextInput
+            style={[
+              s.textInput,
+              s.bioInput,
+              { backgroundColor: C.card, borderColor: C.border, color: C.text },
+            ]}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="A short bio…"
+            placeholderTextColor={C.sub}
+            maxLength={120}
+            multiline
+            textAlignVertical="top"
+          />
+          <Text style={[s.charCount, { color: C.sub }]}>{description.length}/120</Text>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
 //  ProfileTab with user summary, progress visualizations, friend list, and modals
 type Props = Readonly<{
   tasks: Task[];
@@ -305,6 +398,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [friendModalVisible, setFriendModalVisible] = useState(false);
   const [addFriendVisible, setAddFriendVisible] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
   const swipeOpenId = useRef<string | null>(null);
 
   const [username, setUsername] = useState<string | null>(null);
@@ -365,6 +459,17 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
     setFriends(nextFriends);
   };
 
+  const saveProfile = async (newDisplayName: string, newDescription: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: newDisplayName, description: newDescription })
+      .eq('id', user.id);
+    if (error) throw error;
+    setDisplayName(newDisplayName);
+    setDescription(newDescription);
+  };
+
   const addFriend = async (tag: string) => {
     try {
       const normalizedTag = tag.startsWith('@') ? tag : `@${tag}`;
@@ -382,6 +487,12 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── My Profile card ── */}
         <View style={[s.profileCard, { backgroundColor: C.card }]}>
+          <TouchableOpacity
+            style={s.editProfileBtn}
+            onPress={() => setEditProfileVisible(true)}
+          >
+            <MaterialIcons name="edit" size={18} color={C.sub} />
+          </TouchableOpacity>
           <View style={s.profileAvatarWrap}>
             <MaterialIcons name="person" size={48} color="#6366F1" />
           </View>
@@ -559,6 +670,13 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
         onAdd={addFriend}
         onClose={() => setAddFriendVisible(false)}
       />
+      <EditProfileModal
+        visible={editProfileVisible}
+        initialDisplayName={displayName}
+        initialDescription={description}
+        onSave={saveProfile}
+        onClose={() => setEditProfileVisible(false)}
+      />
     </View>
   );
 }
@@ -568,6 +686,13 @@ const s = StyleSheet.create({
   container: { flex: 1 },
 
   // Profile card
+  editProfileBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    padding: 6,
+    borderRadius: 20,
+  },
   profileCard: {
     margin: 20,
     borderRadius: 20,
@@ -867,4 +992,6 @@ const s = StyleSheet.create({
   fieldLabel: { fontSize: 13, fontWeight: '700', marginBottom: 8, marginTop: 4 },
   textInput: { borderRadius: 12, borderWidth: 1, padding: 14, fontSize: 15, marginBottom: 16 },
   addFriendHint: { fontSize: 13, marginTop: 4 },
+  bioInput: { height: 96, paddingTop: 12 },
+  charCount: { fontSize: 11, textAlign: 'right', marginTop: -10, marginBottom: 8 },
 });
