@@ -293,7 +293,15 @@ function HabitModal({
             </View>
 
             {initial && onDelete && (
-              <TouchableOpacity style={s.deleteBtn} onPress={onDelete}>
+              <TouchableOpacity
+                style={s.deleteBtn}
+                onPress={() =>
+                  Alert.alert('Delete Habit', `Delete "${initial.title}"?`, [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Delete', style: 'destructive', onPress: onDelete },
+                  ])
+                }
+              >
                 <MaterialIcons name="delete-outline" size={18} color="#DC2626" />
                 <Text style={[s.deleteBtnText, { color: '#DC2626' }]}>Delete Habit</Text>
               </TouchableOpacity>
