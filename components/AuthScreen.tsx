@@ -12,11 +12,11 @@ import {
   View,
 } from 'react-native';
 
-import { signIn, signUp } from '@/lib/auth';
+import { sendPasswordReset, signIn, signUp } from '@/lib/auth';
 import { useTheme } from '@/src/context/ThemeContext';
 import { getColors } from '@/src/types';
 
-type Mode = 'sign-in' | 'sign-up';
+type Mode = 'sign-in' | 'sign-up' | 'reset';
 
 export default function AuthScreen() {
   const { isDark } = useTheme();
@@ -56,13 +56,22 @@ export default function AuthScreen() {
     setMessage(null);
 
     try {
+      if (mode === 'reset') {
+        const { error } = await sendPasswordReset(trimmedEmail);
+        if (error) {
+          showMessage(error.message, 'error');
+        } else {
+          showMessage('Check your email for a password reset link.', 'success');
+        }
+        return;
+      }
+
       if (mode === 'sign-in') {
         const { error } = await signIn(trimmedEmail, password);
         if (error) {
           showMessage(error.message, 'error');
           return;
         }
-
         showMessage('Signed in. Loading your account...', 'success');
         return;
       }
@@ -88,11 +97,14 @@ export default function AuthScreen() {
     }
   };
 
-  const title = mode === 'sign-in' ? 'Sign in to Habit-Guard' : 'Create your account';
+  const title =
+    mode === 'sign-in' ? 'Sign in to Habit-Guard' :
+    mode === 'sign-up' ? 'Create your account' :
+    'Reset your password';
   const subtitle =
-    mode === 'sign-in'
-      ? 'Pick up your habits on any device with a real Supabase account.'
-      : 'Create your account once and keep your habit history tied to you.';
+    mode === 'sign-in' ? 'Pick up your habits on any device with a real Supabase account.' :
+    mode === 'sign-up' ? 'Create your account once and keep your habit history tied to you.' :
+    'Enter your email and we\'ll send you a link to reset your password.';
 
   return (
     <View style={[s.shell, { backgroundColor: C.bg }]}>
@@ -226,15 +238,24 @@ export default function AuthScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={s.submitText}>
-                  {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
+                  {mode === 'sign-in' ? 'Sign In' : mode === 'sign-up' ? 'Create Account' : 'Send Reset Link'}
                 </Text>
               )}
             </TouchableOpacity>
 
+            {mode === 'sign-in' && (
+              <TouchableOpacity
+                style={s.forgotBtn}
+                onPress={() => { setMode('reset'); setMessage(null); }}
+              >
+                <Text style={[s.forgotText, { color: C.sub }]}>Forgot password?</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               style={[s.switchBtn, { borderColor: C.border, backgroundColor: C.bg }]}
               onPress={() => {
-                const nextMode = mode === 'sign-in' ? 'sign-up' : 'sign-in';
+                const nextMode = mode === 'sign-up' ? 'sign-in' : mode === 'reset' ? 'sign-in' : 'sign-up';
                 setMode(nextMode);
                 setMessage(null);
                 if (nextMode === 'sign-in') {
@@ -245,9 +266,9 @@ export default function AuthScreen() {
               }}
             >
               <Text style={[s.switchText, { color: C.sub }]}>
-                {mode === 'sign-in'
-                  ? 'Need an account? Create one'
-                  : 'Already have an account? Sign in'}
+                {mode === 'sign-in' ? 'Need an account? Create one' :
+                 mode === 'sign-up' ? 'Already have an account? Sign in' :
+                 'Back to sign in'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -351,6 +372,8 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   submitText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  forgotBtn: { alignItems: 'center', marginTop: 10 },
+  forgotText: { fontSize: 13 },
   switchBtn: {
     marginTop: 12,
     borderRadius: 16,
