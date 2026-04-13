@@ -420,7 +420,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
         <View style={s.sectionHeader}>
           <Text style={[s.sectionTitle, { color: C.text }]}>Friends</Text>
           <TouchableOpacity
-            style={[s.addBtn, { backgroundColor: C.blue, shadowColor: C.blue }]}
+            style={[s.addBtn, { backgroundColor: C.blue }]}
             onPress={() => setAddFriendVisible(true)}
           >
             <MaterialIcons name="person-add" size={16} color="#fff" />
