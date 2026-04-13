@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
 import { getTasks, upsertCompletion, updateStreakCount } from '@/lib/tasks';
+import { loadTrophies, unlockTrophy } from '@/lib/trophies';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
@@ -92,6 +93,17 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
   return nextTrophies;
 }
 
+// Fire-and-forget: persist any trophy that transitioned from locked → earned
+function persistNewlyUnlocked(prev: Trophy[], next: Trophy[]) {
+  for (const t of next) {
+    if (t.earned && !prev.find((p) => p.id === t.id)?.earned) {
+      unlockTrophy(t.title, t.description, t.icon).catch((err) =>
+        console.error('unlockTrophy error:', err),
+      );
+    }
+  }
+}
+
 // Main App component that manages state for tasks, trophies, and friends
 export default function App() {
   const { loading, session } = useAuth();
@@ -116,8 +128,12 @@ export default function App() {
   useEffect(() => {
     if (session) {
       loadTasks();
+      loadTrophies()
+        .then(setTrophies)
+        .catch((err) => console.error('Failed to load trophies:', err));
     } else {
       setTasks([]);
+      setTrophies(INITIAL_TROPHIES.map((t) => ({ ...t, earned: false, earnedDate: undefined, earnedAt: undefined })));
     }
   }, [session, loadTasks]);
 
@@ -137,7 +153,11 @@ export default function App() {
   const updateTasks = (updater: (prev: Task[]) => Task[]) => {
     setTasks((prevTasks) => {
       const nextTasks = updater(prevTasks);
-      setTrophies((prevTrophies) => evaluateTrophies(nextTasks, friends, prevTrophies));
+      setTrophies((prevTrophies) => {
+        const nextTrophies = evaluateTrophies(nextTasks, friends, prevTrophies);
+        persistNewlyUnlocked(prevTrophies, nextTrophies);
+        return nextTrophies;
+      });
       return nextTasks;
     });
   };
@@ -150,7 +170,11 @@ export default function App() {
           ? (updater as (prev: Friend[]) => Friend[])(prevFriends)
           : updater;
 
-      setTrophies((prevTrophies) => evaluateTrophies(tasks, nextFriends, prevTrophies));
+      setTrophies((prevTrophies) => {
+        const nextTrophies = evaluateTrophies(tasks, nextFriends, prevTrophies);
+        persistNewlyUnlocked(prevTrophies, nextTrophies);
+        return nextTrophies;
+      });
       return nextFriends;
     });
   };
