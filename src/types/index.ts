@@ -32,6 +32,7 @@ export type Trophy = {
     type: 'gold' | 'silver' | 'bronze' | 'bad' | 'streak';
     earned: boolean;
     earnedDate?: string;
+    earnedAt?: number; // ms timestamp for sorting
 };
 
 export type Friend = {
@@ -81,14 +82,14 @@ export const PROFILE_PHOTOS = {
 };
 
 export const INITIAL_TROPHIES: Trophy[] = [
-    { id: 't1', title: 'First Step',       description: 'Complete your first habit',     icon: '👟', type: 'bronze', earned: true,  earnedDate: 'Mar 1'  },
-    { id: 't2', title: 'Sennight Soldier', description: '7-day streak on any habit',     icon: '⚔️', type: 'silver', earned: true,  earnedDate: 'Mar 8'  },
-    { id: 't3', title: 'Hydration Hero',   description: '10-day water streak',           icon: '💧', type: 'streak', earned: true,  earnedDate: 'Mar 15' },
-    { id: 't4', title: 'Month Master',     description: '30-day streak on any habit',    icon: '🏆', type: 'gold',   earned: false                       },
-    { id: 't5', title: 'Early Bird',       description: 'Complete a habit before 7am',   icon: '🌅', type: 'silver', earned: false                       },
-    { id: 't6', title: 'Slacker',          description: 'Skipped all tasks in a day',    icon: '😴', type: 'bad',    earned: false,                      },
-    { id: 't7', title: 'Iron Will',        description: '100-day streak',                icon: '💪', type: 'gold',   earned: false                       },
-    { id: 't8', title: 'Streak Breaker',   description: 'Ended streak of at least 7 days', icon: '⛓️‍💥', type: 'bad', earned: true,                       },
+    { id: 't1', title: 'First Step',       description: 'Complete your first habit',        icon: '👟',   type: 'bronze', earned: true,  earnedDate: 'Mar 1',  earnedAt: new Date('2026-03-01').getTime() },
+    { id: 't2', title: 'Sennight Soldier', description: '7-day streak on any habit',        icon: '⚔️',  type: 'silver', earned: true,  earnedDate: 'Mar 8',  earnedAt: new Date('2026-03-08').getTime() },
+    { id: 't3', title: 'Hydration Hero',   description: '10-day water streak',              icon: '💧',   type: 'streak', earned: true,  earnedDate: 'Mar 15', earnedAt: new Date('2026-03-15').getTime() },
+    { id: 't4', title: 'Month Master',     description: '30-day streak on any habit',       icon: '🏆',   type: 'gold',   earned: false                                                                    },
+    { id: 't5', title: 'Early Bird',       description: 'Complete a habit before 7am',      icon: '🌅',   type: 'silver', earned: false                                                                    },
+    { id: 't6', title: 'Slacker',          description: 'Skipped all tasks in a day',       icon: '😴',   type: 'bad',    earned: false                                                                    },
+    { id: 't7', title: 'Iron Will',        description: '100-day streak',                   icon: '💪',   type: 'gold',   earned: false                                                                    },
+    { id: 't8', title: 'Streak Breaker',   description: 'Ended streak of at least 7 days',  icon: '⛓️‍💥', type: 'bad',    earned: true,  earnedDate: 'Mar 22', earnedAt: new Date('2026-03-22').getTime() },
     { id: 't9', title: 'Gone Missing',     description: 'Skipped all tasks in a week',   icon: '🫥', type: 'bad',    earned: false,                      },
     { id: 't10', title: 'Social Butterfly', description: 'Add 3 friends',                 icon: '🦋', type: 'silver', earned: false                       },
 ];

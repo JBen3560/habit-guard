@@ -42,9 +42,10 @@ function unlockTrophyByTitle(trophies: Trophy[], title: string) {
     return trophies;
   }
 
+  const now = new Date();
   return trophies.map((item) =>
     item.title === title
-      ? { ...item, earned: true, earnedDate: formatEarnedDate(new Date()) }
+      ? { ...item, earned: true, earnedDate: formatEarnedDate(now), earnedAt: now.getTime() }
       : item,
   );
 }

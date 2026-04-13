@@ -38,7 +38,24 @@ export default function AchievementsTab({ trophies }: Props) {
   const earned = trophies.filter((t) => t.earned);
   const locked = trophies.filter((t) => !t.earned);
   const penalties = trophies.filter((t) => t.type === 'bad' && t.earned);
-  const filtered = filter === 'All' ? trophies : filter === 'Earned' ? earned : locked;
+
+  // Sort order: earned (newest first) → locked non-penalty (A–Z) → locked penalty (A–Z)
+  function sortedTrophies(list: typeof trophies) {
+    const earnedItems = list
+      .filter((t) => t.earned)
+      .sort((a, b) => (b.earnedAt ?? 0) - (a.earnedAt ?? 0));
+    const lockedNormal = list
+      .filter((t) => !t.earned && t.type !== 'bad')
+      .sort((a, b) => a.title.localeCompare(b.title));
+    const lockedBad = list
+      .filter((t) => !t.earned && t.type === 'bad')
+      .sort((a, b) => a.title.localeCompare(b.title));
+    return [...earnedItems, ...lockedNormal, ...lockedBad];
+  }
+
+  const filtered = sortedTrophies(
+    filter === 'All' ? trophies : filter === 'Earned' ? earned : locked,
+  );
 
   // Render trophy cards in a 2-column grid with earned/locked status and type badges
   return (
