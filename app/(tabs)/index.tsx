@@ -1,12 +1,12 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
+import { getTasks, upsertCompletion, updateStreakCount } from '@/lib/tasks';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import { INITIAL_TASKS } from '@/src/mockData';
 import {
   type Friend,
   INITIAL_FRIENDS,
@@ -99,11 +99,27 @@ export default function App() {
   const C = getColors(isDark);
   const insets = useSafeAreaInsets();
 
-  // Save current state
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [trophies, setTrophies] = useState<Trophy[]>(INITIAL_TROPHIES);
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [activeTab, setActiveTab] = useState<Tab>('Habits');
+
+  const loadTasks = useCallback(async () => {
+    try {
+      const data = await getTasks();
+      setTasks(data);
+    } catch (err) {
+      console.error('Failed to load tasks:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session) {
+      loadTasks();
+    } else {
+      setTasks([]);
+    }
+  }, [session, loadTasks]);
 
   if (loading) {
     return (
@@ -141,35 +157,48 @@ export default function App() {
 
   // Toggle completion status of a habit, updating streak counts and ensuring skip/completion are mutually exclusive
   const toggleTaskComplete = (id: string) => {
-    updateTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              completedToday: !task.completedToday,
-              skippedToday: task.completedToday ? task.skippedToday : false,
-              streakCount: !task.completedToday
-                ? task.streakCount + 1
-                : Math.max(0, task.streakCount - 1),
-            }
-          : task,
-      ),
-    );
+    updateTasks((currentTasks) => {
+      const task = currentTasks.find((t) => t.id === id);
+      if (!task) return currentTasks;
+
+      const nextCompleted = !task.completedToday;
+      const nextSkipped = nextCompleted ? false : task.skippedToday;
+      const nextStreak = nextCompleted
+        ? task.streakCount + 1
+        : Math.max(0, task.streakCount - 1);
+
+      upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
+        console.error('upsertCompletion error:', err),
+      );
+      updateStreakCount(id, nextStreak).catch((err) =>
+        console.error('updateStreakCount error:', err),
+      );
+
+      return currentTasks.map((t) =>
+        t.id === id
+          ? { ...t, completedToday: nextCompleted, skippedToday: nextSkipped, streakCount: nextStreak }
+          : t,
+      );
+    });
   };
 
   // Toggle skip status of a habit, ensuring it cannot be marked as both completed and skipped
   const toggleTaskSkip = (id: string) => {
-    updateTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              skippedToday: !task.skippedToday,
-              completedToday: task.skippedToday ? task.completedToday : false,
-            }
-          : task,
-      ),
-    );
+    updateTasks((currentTasks) => {
+      const task = currentTasks.find((t) => t.id === id);
+      if (!task) return currentTasks;
+
+      const nextSkipped = !task.skippedToday;
+      const nextCompleted = nextSkipped ? false : task.completedToday;
+
+      upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
+        console.error('upsertCompletion error:', err),
+      );
+
+      return currentTasks.map((t) =>
+        t.id === id ? { ...t, skippedToday: nextSkipped, completedToday: nextCompleted } : t,
+      );
+    });
   };
 
   // Render the active tab and bottom navigation bar
@@ -178,7 +207,7 @@ export default function App() {
       <View style={[s.tab, activeTab === 'Habits' ? s.visible : s.hidden]}>
         <HabitsTab
           tasks={tasks}
-          setTasks={setTasks}
+          refreshTasks={loadTasks}
           onToggleComplete={toggleTaskComplete}
           onToggleSkip={toggleTaskSkip}
         />
