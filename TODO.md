@@ -97,17 +97,17 @@ create table friends (
 
 - [ ] On login, fetch the user's tasks from the `tasks` table and replace
       `INITIAL_TASKS` as the initial `useState` value in `index.tsx`
-- [ ] On login, fetch the last 28 days of rows from `completions` and use them
+- [ ] On login, fetch the last 28 days of rows from `task_completions` and use them
       to compute real `streakCount` per task and real history for the profile
       charts (replaces `buildHistory`'s seeded random data)
-- [ ] When a user checks off or skips a habit, upsert a row into `completions`
+- [ ] When a user checks off or skips a habit, upsert a row into `task_completions`
       (`status: 'done'` or `'skipped'`, `date: today`) in addition to updating
       local React state
 - [ ] When a user adds or edits a habit, write the change to the `tasks` table
 - [ ] When a user deletes a habit, delete the row from `tasks` (cascade will
-      clean up `completions`)
+      clean up `task_completions`)
 - [ ] When a user adds or removes a friend, insert/delete from `friends`
-- [ ] Fetch friend profile data (streak, missed days) from `completions` for
+- [ ] Fetch friend profile data (streak, missed days) from `task_completions` for
       friends listed in the `friends` table so friend cards show real stats
 
 ### 5. Daily reset gate
@@ -115,9 +115,9 @@ create table friends (
 - [ ] Add a daily **reset gate**: on app open, compare today's date to the last
       stored session date. If it's a new calendar day, clear `completedToday`
       and `skippedToday` on all local task state (the source of truth for
-      history is `completions`, so nothing is lost)
+      history is `task_completions`, so nothing is lost)
 - [ ] **Skipping a task should break its streak** — at the daily reset, any
-      task that has a `completions` row with `status: 'skipped'` for yesterday
+      task that has a `task_completions` row with `status: 'skipped'` for yesterday
       (and no `status: 'done'` row) should have its streak reset to 0
 
 ---
@@ -128,7 +128,7 @@ create table friends (
       `streakCount` by 1 on each tap, but if a user un-checks a habit multiple
       times it can go negative or drift. Tie streak logic to the daily reset gate
       (see Persistence above) rather than to the toggle button
-- [ ] **Bug: "Done" count in the header counts skipped tasks as done** — confirm
+- [x] **Bug: "Done" count in the header counts skipped tasks as done** — confirm
       whether skipped should count toward the progress ring or not, and make it
       consistent
 - [x] **Add a "Skipped" filter tab** alongside All / Pending / Done so skipped
