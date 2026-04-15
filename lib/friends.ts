@@ -17,6 +17,7 @@ export type ProfileRow = {
   username: string | null;
   display_name: string | null;
   description: string | null;
+  needs_nudge: boolean | null;
 };
 
 export type FriendRequest = FriendRow;
@@ -42,7 +43,7 @@ async function getProfileByUsername(username: string): Promise<ProfileRow | null
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, display_name, description')
+    .select('id, username, display_name, description, needs_nudge')
     .ilike('username', normalizedUsername)
     .maybeSingle();
 
@@ -55,7 +56,7 @@ async function getProfilesByIds(profileIds: string[]): Promise<Map<string, Profi
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, display_name, description')
+    .select('id, username, display_name, description, needs_nudge')
     .in('id', profileIds);
 
   if (error) throw error;
@@ -80,7 +81,7 @@ function relationToFriend(relation: FriendRow, profile: ProfileRow, userId: stri
     name: friendName,
     tag: `@${normalizeUsername(friendUsername)}`,
     streakDays: 0,
-    missedDays: 0,
+    needsNudge: profile.needs_nudge ?? false,
     photo: resolvePhoto(profile.username),
     tasks: 0,
     bio: profile.description ?? undefined,

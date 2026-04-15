@@ -1,21 +1,49 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Alert,
+    AppState,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
-import { getTasks, upsertCompletion, updateStreakCount } from '@/lib/tasks';
-import { loadTrophies, unlockTrophy } from '@/lib/trophies';
+import {
+    type NudgeRow,
+    listPendingNudges,
+    markNudgeSeen,
+    markNudgesDelivered,
+    subscribeToIncomingNudges,
+} from '@/lib/nudges';
+import {
+    getConsecutiveAllSkippedDays,
+    getTasks,
+    incrementTaskSkippedCount,
+    updateStreakCount,
+    upsertCompletion,
+} from '@/lib/tasks';
+import {
+    type PenaltyTrophyTitle,
+    loadTrophies,
+    resetPenaltyStateForCurrentUser,
+    unlockPenaltyTrophy,
+    unlockTrophy,
+} from '@/lib/trophies';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
-  type Friend,
-  INITIAL_FRIENDS,
-  INITIAL_TROPHIES,
-  type Task,
-  type Trophy,
-  getColors,
-  todayIdx,
+    type Friend,
+    INITIAL_FRIENDS,
+    INITIAL_TROPHIES,
+    type Task,
+    type Trophy,
+    getColors,
+    todayIdx,
 } from '@/src/types';
 
 import AchievementsTab from './achievements';
@@ -31,6 +59,8 @@ const TAB_ICONS: Record<Tab, React.ComponentProps<typeof MaterialIcons>['name']>
   Achievements: 'emoji-events',
   Profile: 'person',
 };
+
+const PENALTY_RESET_STORAGE_KEY = 'habit-guard:last-penalty-reset-date';
 
 function formatEarnedDate(date: Date) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -53,8 +83,6 @@ function unlockTrophyByTitle(trophies: Trophy[], title: string) {
 
 // Evaluates conditions for unlocking trophies based on today's tasks and friends
 function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) {
-  const todayTasks = tasks.filter((task) => task.active && task.days[todayIdx]);
-  const skippedAllToday = todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
   const hasThreeFriends = friends.length >= 3;
 
   // First Step: any habit ever completed or has a streak started
@@ -77,8 +105,6 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
   // Early Bird: a habit was completed and it's currently before 7:00 AM
   const earlyBird = new Date().getHours() < 7 && tasks.some((task) => task.completedToday);
 
-  // Streak Breaker and Gone Missing require per-day history (tie to persistence)
-
   let nextTrophies = trophies;
 
   if (hasCompletedAny) nextTrophies = unlockTrophyByTitle(nextTrophies, 'First Step');
@@ -87,7 +113,6 @@ function evaluateTrophies(tasks: Task[], friends: Friend[], trophies: Trophy[]) 
   if (monthMaster)     nextTrophies = unlockTrophyByTitle(nextTrophies, 'Month Master');
   if (ironWill)        nextTrophies = unlockTrophyByTitle(nextTrophies, 'Iron Will');
   if (earlyBird)       nextTrophies = unlockTrophyByTitle(nextTrophies, 'Early Bird');
-  if (skippedAllToday) nextTrophies = unlockTrophyByTitle(nextTrophies, 'Slacker');
   if (hasThreeFriends) nextTrophies = unlockTrophyByTitle(nextTrophies, 'Social Butterfly');
 
   return nextTrophies;
@@ -116,6 +141,60 @@ export default function App() {
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [activeTab, setActiveTab] = useState<Tab>('Habits');
 
+  const processedNudgeIdsRef = React.useRef<Set<string>>(new Set());
+  const nudgeQueueRef = React.useRef<NudgeRow[]>([]);
+  const showingNudgeRef = React.useRef(false);
+
+  const showNextNudge = useCallback(() => {
+    if (showingNudgeRef.current) return;
+    const nextNudge = nudgeQueueRef.current.shift();
+    if (!nextNudge) return;
+
+    showingNudgeRef.current = true;
+
+    const senderName = nextNudge.sender_display_name?.trim() || 'A friend';
+    const message =
+      nextNudge.message?.trim() || `${senderName} nudged you to check in today.`;
+
+    Alert.alert('Nudge', message, [
+      {
+        text: 'OK',
+        onPress: () => {
+          void markNudgeSeen(nextNudge.id).catch((error) => {
+            console.error('markNudgeSeen error:', error);
+          });
+
+          showingNudgeRef.current = false;
+          showNextNudge();
+        },
+      },
+    ]);
+  }, []);
+
+  const enqueueNudges = useCallback(
+    async (incomingNudges: NudgeRow[]) => {
+      if (incomingNudges.length === 0) return;
+
+      const fresh = incomingNudges.filter((nudge) => !processedNudgeIdsRef.current.has(nudge.id));
+      if (fresh.length === 0) return;
+
+      for (const nudge of fresh) {
+        processedNudgeIdsRef.current.add(nudge.id);
+      }
+
+      nudgeQueueRef.current.push(...fresh);
+
+      try {
+        await markNudgesDelivered(fresh.map((nudge) => nudge.id));
+      } catch (error) {
+        console.error('markNudgesDelivered error:', error);
+      }
+
+      showNextNudge();
+    },
+    [showNextNudge],
+  );
+
   const loadTasks = useCallback(async () => {
     try {
       const data = await getTasks();
@@ -125,17 +204,94 @@ export default function App() {
     }
   }, []);
 
+  const awardPenaltyTrophy = useCallback((title: PenaltyTrophyTitle) => {
+    setTrophies((prevTrophies) => unlockTrophyByTitle(prevTrophies, title));
+    unlockPenaltyTrophy(title).catch((err) => console.error('unlockPenaltyTrophy error:', err));
+  }, []);
+
   useEffect(() => {
-    if (session) {
-      loadTasks();
-      loadTrophies()
-        .then(setTrophies)
-        .catch((err) => console.error('Failed to load trophies:', err));
-    } else {
+    if (!session) {
       setTasks([]);
-      setTrophies(INITIAL_TROPHIES.map((t) => ({ ...t, earned: false, earnedDate: undefined, earnedAt: undefined })));
+      setTrophies(
+        INITIAL_TROPHIES.map((t) => ({
+          ...t,
+          earned: false,
+          earnedDate: undefined,
+          earnedAt: undefined,
+        })),
+      );
+      return;
     }
-  }, [session, loadTasks]);
+
+    let active = true;
+
+    const bootstrap = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const resetKey = `${PENALTY_RESET_STORAGE_KEY}:${session.user.id}`;
+        const lastReset = await AsyncStorage.getItem(resetKey);
+
+        if (lastReset !== today) {
+          await resetPenaltyStateForCurrentUser();
+          await AsyncStorage.setItem(resetKey, today);
+        }
+
+        const [taskData, trophyData] = await Promise.all([getTasks(), loadTrophies()]);
+        if (!active) return;
+
+        setTasks(taskData);
+        setTrophies(trophyData);
+      } catch (err) {
+        console.error('Failed to bootstrap session data:', err);
+      }
+    };
+
+    void bootstrap();
+
+    return () => {
+      active = false;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) {
+      processedNudgeIdsRef.current.clear();
+      nudgeQueueRef.current = [];
+      showingNudgeRef.current = false;
+      return;
+    }
+
+    let active = true;
+
+    const fetchPending = async () => {
+      try {
+        const pending = await listPendingNudges();
+        if (!active) return;
+        await enqueueNudges(pending);
+      } catch (error) {
+        console.error('listPendingNudges error:', error);
+      }
+    };
+
+    void fetchPending();
+
+    const unsubscribeRealtime = subscribeToIncomingNudges(session.user.id, (nudge) => {
+      if (!active) return;
+      void enqueueNudges([nudge]);
+    });
+
+    const appStateSubscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void fetchPending();
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribeRealtime();
+      appStateSubscription.remove();
+    };
+  }, [enqueueNudges, session]);
 
   if (loading) {
     return (
@@ -208,21 +364,71 @@ export default function App() {
 
   // Toggle skip status of a habit, ensuring it cannot be marked as both completed and skipped
   const toggleTaskSkip = (id: string) => {
+    let becameSkipped = false;
+    let brokeLongStreak = false;
+    let nextTasksSnapshot: Task[] = [];
+
     updateTasks((currentTasks) => {
       const task = currentTasks.find((t) => t.id === id);
       if (!task) return currentTasks;
 
       const nextSkipped = !task.skippedToday;
       const nextCompleted = nextSkipped ? false : task.completedToday;
+      const nextStreak = nextSkipped ? 0 : task.streakCount;
+
+      becameSkipped = !task.skippedToday && nextSkipped;
+      brokeLongStreak = becameSkipped && task.streakCount >= 7;
 
       upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
         console.error('upsertCompletion error:', err),
       );
 
-      return currentTasks.map((t) =>
-        t.id === id ? { ...t, skippedToday: nextSkipped, completedToday: nextCompleted } : t,
+      if (nextStreak !== task.streakCount) {
+        updateStreakCount(id, nextStreak).catch((err) =>
+          console.error('updateStreakCount error:', err),
+        );
+      }
+
+      if (becameSkipped) {
+        incrementTaskSkippedCount(id).catch((err) =>
+          console.error('incrementTaskSkippedCount error:', err),
+        );
+      }
+
+      nextTasksSnapshot = currentTasks.map((t) =>
+        t.id === id
+          ? { ...t, skippedToday: nextSkipped, completedToday: nextCompleted, streakCount: nextStreak }
+          : t,
       );
+
+      return nextTasksSnapshot;
     });
+
+    if (!becameSkipped) {
+      return;
+    }
+
+    if (brokeLongStreak) {
+      awardPenaltyTrophy('Streak Breaker');
+    }
+
+    const todayTasks = nextTasksSnapshot.filter((task) => task.active && task.days[todayIdx]);
+    const skippedAllToday =
+      todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
+
+    if (!skippedAllToday) {
+      return;
+    }
+
+    awardPenaltyTrophy('Slacker');
+
+    getConsecutiveAllSkippedDays(7)
+      .then((consecutiveDays) => {
+        if (consecutiveDays >= 7) {
+          awardPenaltyTrophy('Gone Missing');
+        }
+      })
+      .catch((err) => console.error('getConsecutiveAllSkippedDays error:', err));
   };
 
   // Render the active tab and bottom navigation bar

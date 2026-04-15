@@ -1,7 +1,10 @@
 import { supabase } from './supabase';
 
-import { INITIAL_TROPHIES } from '../src/types';
 import type { Trophy } from '../src/types';
+import { INITIAL_TROPHIES } from '../src/types';
+
+export const PENALTY_TROPHY_TITLES = ['Slacker', 'Gone Missing', 'Streak Breaker'] as const;
+export type PenaltyTrophyTitle = (typeof PENALTY_TROPHY_TITLES)[number];
 
 // Raw DB row shape
 type DbTrophy = {
@@ -74,6 +77,41 @@ export async function unlockTrophy(
     unlocked_at: new Date().toISOString(),
   });
   if (error) throw error;
+}
+
+export async function setNeedsNudgeForCurrentUser(needsNudge: boolean): Promise<void> {
+  const userId = await getUserId();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ needs_nudge: needsNudge })
+    .eq('id', userId);
+
+  if (error) throw error;
+}
+
+/**
+ * Daily fallback reset for the logged-in user.
+ * Global reset should be handled by a server-side scheduled SQL job.
+ */
+export async function resetPenaltyStateForCurrentUser(): Promise<void> {
+  const userId = await getUserId();
+
+  const { error: deleteError } = await supabase
+    .from('trophies')
+    .delete()
+    .eq('user_id', userId)
+    .in('title', [...PENALTY_TROPHY_TITLES]);
+
+  if (deleteError) throw deleteError;
+
+  await setNeedsNudgeForCurrentUser(false);
+}
+
+export async function unlockPenaltyTrophy(title: PenaltyTrophyTitle): Promise<void> {
+  const catalog = INITIAL_TROPHIES.find((t) => t.title === title);
+  await unlockTrophy(title, catalog?.description, catalog?.icon);
+  await setNeedsNudgeForCurrentUser(true);
 }
 
 // Check if the current user has already earned a trophy by title

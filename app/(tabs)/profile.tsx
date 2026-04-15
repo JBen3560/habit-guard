@@ -15,6 +15,7 @@ import { ScrollView, Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
+import { getNudgeErrorMessage, sendNudge } from '@/lib/nudges';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
@@ -135,19 +136,20 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 function FriendModal({
   visible,
   friend,
+  onSendNudge,
   onClose,
 }: Readonly<{
   visible: boolean;
   friend: Friend | null;
+  onSendNudge: (friend: Friend) => void | Promise<void>;
   onClose: () => void;
 }>) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   if (!friend) return null;
-  const needsNudge = friend.missedDays >= 2;
+  const needsNudge = friend.needsNudge;
   const firstName = friend.name.split(' ')[0];
 
-  // Alert to simulate sending a nudge
   return (
     <Modal
       visible={visible}
@@ -185,8 +187,10 @@ function FriendModal({
               </View>
               <View style={[s.statDivider, { backgroundColor: C.border }]} />
               <View style={s.friendStat}>
-                <Text style={[s.friendStatNum, { color: C.red }]}>{friend.missedDays}</Text>
-                <Text style={[s.friendStatLabel, { color: C.sub }]}>Missed Days</Text>
+                <Text style={[s.friendStatNum, { color: needsNudge ? C.red : C.sub }]}>
+                  {needsNudge ? 'Yes' : 'No'}
+                </Text>
+                <Text style={[s.friendStatLabel, { color: C.sub }]}>Needs Nudge</Text>
               </View>
               <View style={[s.statDivider, { backgroundColor: C.border }]} />
               <View style={s.friendStat}>
@@ -201,13 +205,15 @@ function FriendModal({
               <View style={s.nudgeBoxTitle}>
                 <MaterialIcons name="warning" size={18} color="#9A3412" />
                 <Text style={s.nudgeTitle}>
-                  {firstName} has missed {friend.missedDays} days!
+                  {firstName} needs a check-in today!
                 </Text>
               </View>
               <Text style={[s.nudgeSubtitle, { color: C.sub }]}>Send some encouragement</Text>
               <TouchableOpacity
                 style={[s.nudgeBtn, { backgroundColor: C.yellow }]}
-                onPress={() => Alert.alert('Nudge sent!', `${firstName} has been nudged!`)}
+                onPress={() => {
+                  void onSendNudge(friend);
+                }}
               >
                 <MaterialIcons name="notifications-active" size={18} color="#fff" />
                 <Text style={s.nudgeBtnText}>Check In</Text>
@@ -449,6 +455,22 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const MY_STREAK = 13;
   const MY_TASKS = tasks.filter((t) => t.active).length;
 
+  const sendFriendNudge = async (friend: Friend) => {
+    const recipientUserId = friend.profileId;
+    if (!recipientUserId) {
+      Alert.alert('Could not send nudge', 'Friend account information is missing.');
+      return;
+    }
+
+    try {
+      await sendNudge(recipientUserId, `${MY_NAME} nudged you to check in today.`);
+      Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`);
+    } catch (error) {
+      console.error('sendNudge error:', error);
+      Alert.alert('Could not send nudge', getNudgeErrorMessage(error));
+    }
+  };
+
   const openFriend = (f: Friend) => {
     setSelectedFriend(f);
     setFriendModalVisible(true);
@@ -539,7 +561,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
         </View>
 
         {friends.map((friend) => {
-          const needsNudge = friend.missedDays >= 2;
+          const needsNudge = friend.needsNudge;
 
           const renderRightActions = () => (
             <TouchableOpacity
@@ -609,9 +631,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                     {needsNudge && (
                       <View style={s.missedBadge}>
                         <MaterialIcons name="warning" size={11} color={C.red} />
-                        <Text style={[s.missedText, { color: C.red }]}>
-                          {friend.missedDays} missed
-                        </Text>
+                        <Text style={[s.missedText, { color: C.red }]}>Needs nudge</Text>
                       </View>
                     )}
                   </View>
@@ -619,9 +639,9 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                 {needsNudge && (
                   <TouchableOpacity
                     style={s.nudgeSmallBtn}
-                    onPress={() =>
-                      Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`)
-                    }
+                    onPress={() => {
+                      void sendFriendNudge(friend);
+                    }}
                   >
                     <MaterialIcons name="notifications" size={18} color="#92400E" />
                   </TouchableOpacity>
@@ -663,6 +683,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       <FriendModal
         visible={friendModalVisible}
         friend={selectedFriend}
+        onSendNudge={sendFriendNudge}
         onClose={() => setFriendModalVisible(false)}
       />
       <AddFriendModal

@@ -13,6 +13,7 @@ type DbTask = {
   days: boolean[];
   active: boolean;
   streak_count: number;
+  skipped_count?: number;
   created_at: string;
 };
 
@@ -33,6 +34,12 @@ async function getUserId(): Promise<string> {
 
 function dateStr(d = new Date()): string {
   return d.toISOString().split('T')[0];
+}
+
+function shiftDate(base: Date, days: number): Date {
+  const next = new Date(base);
+  next.setDate(base.getDate() + days);
+  return next;
 }
 
 function toTask(row: DbTask, comp?: DbCompletion): Task {
@@ -122,6 +129,85 @@ export async function updateStreakCount(id: string, streakCount: number): Promis
     .update({ streak_count: streakCount })
     .eq('id', id);
   if (error) throw error;
+}
+
+/** Increment skipped_count whenever a task is newly marked skipped. */
+export async function incrementTaskSkippedCount(id: string): Promise<void> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('skipped_count')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+
+  const current = (data as { skipped_count: number | null }).skipped_count ?? 0;
+  const { error: updateError } = await supabase
+    .from('tasks')
+    .update({ skipped_count: current + 1 })
+    .eq('id', id);
+
+  if (updateError) throw updateError;
+}
+
+/**
+ * Count consecutive days (including today) where every scheduled active task was skipped.
+ * A day with no scheduled active tasks breaks the streak.
+ */
+export async function getConsecutiveAllSkippedDays(maxDays = 7): Promise<number> {
+  const userId = await getUserId();
+  const today = new Date();
+  const start = dateStr(shiftDate(today, -(maxDays - 1)));
+  const end = dateStr(today);
+
+  const [{ data: taskRows, error: taskError }, { data: completionRows, error: completionError }] =
+    await Promise.all([
+      supabase
+        .from('tasks')
+        .select('id, days, active')
+        .eq('user_id', userId)
+        .eq('active', true),
+      supabase
+        .from('task_completions')
+        .select('task_id, date, skipped, completed')
+        .eq('user_id', userId)
+        .gte('date', start)
+        .lte('date', end),
+    ]);
+
+  if (taskError) throw taskError;
+  if (completionError) throw completionError;
+
+  const activeTasks = (taskRows ?? []) as Pick<DbTask, 'id' | 'days' | 'active'>[];
+  if (activeTasks.length === 0) return 0;
+
+  const completionMap = new Map<string, DbCompletion>();
+  for (const row of (completionRows ?? []) as DbCompletion[]) {
+    completionMap.set(`${row.date}|${row.task_id}`, row);
+  }
+
+  let streak = 0;
+  for (let offset = 0; offset < maxDays; offset += 1) {
+    const day = shiftDate(today, -offset);
+    const date = dateStr(day);
+    const weekday = day.getDay();
+
+    const scheduledTaskIds = activeTasks
+      .filter((task) => Boolean(task.days?.[weekday]))
+      .map((task) => task.id);
+
+    if (scheduledTaskIds.length === 0) break;
+
+    const allSkipped = scheduledTaskIds.every((taskId) => {
+      const completion = completionMap.get(`${date}|${taskId}`);
+      return Boolean(completion?.skipped) && !Boolean(completion?.completed);
+    });
+
+    if (!allSkipped) break;
+    streak += 1;
+  }
+
+  return streak;
 }
 
 // ──────────────────────────────────────────────

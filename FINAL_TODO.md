@@ -10,3 +10,5 @@
   - [] "We’ll just make a database table for it that is checked when you open the app or log in or change screens or something idk and displays pop ups if it finds stuff...That should work. Call it like nudge_reminders or something that actually makes sense"
 - [] Adding back mock data on og load (MAYBE?????????? Depends. Discuss this)
 - [] Test existing logic hookups for achievements/penalties to ensure it's working
+- [] poll friends database when navigate to profile tab
+- [] penalty trophies that are triggered during the day reset each day

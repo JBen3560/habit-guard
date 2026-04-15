@@ -40,7 +40,7 @@ export type Friend = {
     name: string;
     tag: string;
     streakDays: number;
-    missedDays: number;
+    needsNudge: boolean;
     photo?: ImageSourcePropType;
     tasks: number;
     bio?: string;
@@ -89,8 +89,8 @@ export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't5', title: 'Early Bird',       description: 'Complete a habit before 7am',      icon: '🌅',   type: 'silver', earned: false                                                                    },
     { id: 't6', title: 'Slacker',          description: 'Skipped all tasks in a day',       icon: '😴',   type: 'bad',    earned: false                                                                    },
     { id: 't7', title: 'Iron Will',        description: '100-day streak',                   icon: '💪',   type: 'gold',   earned: false                                                                    },
-    { id: 't8', title: 'Streak Breaker',   description: 'Ended streak of at least 7 days',  icon: '⛓️‍💥', type: 'bad',    earned: true,  earnedDate: 'Mar 22', earnedAt: new Date('2026-03-22').getTime() },
-    { id: 't9', title: 'Gone Missing',     description: 'Skipped all tasks in a week',   icon: '🫥', type: 'bad',    earned: false,                      },
+    { id: 't8', title: 'Streak Breaker',   description: 'Ended streak of at least 7 days',  icon: '⛓️‍💥', type: 'bad',    earned: false                                                                    },
+    { id: 't9', title: 'Gone Missing',     description: 'Skipped all tasks in a week',   icon: '🫥', type: 'bad',    earned: false                                                                    },
     { id: 't10', title: 'Social Butterfly', description: 'Add 3 friends',                 icon: '🦋', type: 'silver', earned: false                       },
 ];
 
