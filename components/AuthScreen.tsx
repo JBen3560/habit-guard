@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { signIn, signUp } from '@/lib/auth';
+import { signInWithUsername, signUp } from '@/lib/auth';
 import { useTheme } from '@/src/context/ThemeContext';
 import { getColors } from '@/src/types';
 
@@ -22,6 +22,7 @@ export default function AuthScreen() {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [mode, setMode] = useState<Mode>('sign-in');
+  const [loginUsername, setLoginUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -37,12 +38,18 @@ export default function AuthScreen() {
   };
 
   const handleSubmit = async () => {
+    const trimmedLoginUsername = loginUsername.trim();
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedDisplayName = displayName.trim();
     const trimmedUsername = username.trim();
     const trimmedDescription = description.trim();
 
-    if (!trimmedEmail || !password.trim()) {
+    if (mode === 'sign-in') {
+      if (!trimmedLoginUsername || !password.trim()) {
+        showMessage('Enter your username and password to continue.', 'error');
+        return;
+      }
+    } else if (!trimmedEmail || !password.trim()) {
       showMessage('Enter an email and password to continue.', 'error');
       return;
     }
@@ -57,7 +64,7 @@ export default function AuthScreen() {
 
     try {
       if (mode === 'sign-in') {
-        const { error } = await signIn(trimmedEmail, password);
+        const { error } = await signInWithUsername(trimmedLoginUsername, password);
         if (error) {
           showMessage(error.message, 'error');
           return;
@@ -91,7 +98,7 @@ export default function AuthScreen() {
   const title = mode === 'sign-in' ? 'Sign in to Habit-Guard' : 'Create your account';
   const subtitle =
     mode === 'sign-in'
-      ? 'Pick up your habits on any device with a real Supabase account.'
+      ? 'Pick up your habits on any device.'
       : 'Create your account once and keep your habit history tied to you.';
 
   return (
@@ -112,23 +119,45 @@ export default function AuthScreen() {
           <View style={[s.card, { backgroundColor: C.card, borderColor: C.border }]}>
             <Text style={[s.title, { color: C.text }]}>{title}</Text>
             <Text style={[s.caption, { color: C.sub }]}>
-              Use the same email and password every time.
+              {mode === 'sign-in'
+                ? 'Enter your username and password.'
+                : 'Your email is only needed once to create your account.'}
             </Text>
 
-            <Text style={[s.fieldLabel, { color: C.sub }]}>EMAIL</Text>
-            <TextInput
-              style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              placeholderTextColor={C.sub}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              autoComplete="email"
-              returnKeyType="next"
-            />
+            {mode === 'sign-in' ? (
+              <>
+                <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
+                <TextInput
+                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+                  value={loginUsername}
+                  onChangeText={setLoginUsername}
+                  placeholder="your_username"
+                  placeholderTextColor={C.sub}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="username"
+                  autoComplete="username"
+                  returnKeyType="next"
+                />
+              </>
+            ) : (
+              <>
+                <Text style={[s.fieldLabel, { color: C.sub }]}>EMAIL</Text>
+                <TextInput
+                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="you@example.com"
+                  placeholderTextColor={C.sub}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  autoComplete="email"
+                  returnKeyType="next"
+                />
+              </>
+            )}
 
             {mode === 'sign-up' ? (
               <>
@@ -241,6 +270,9 @@ export default function AuthScreen() {
                   setDisplayName('');
                   setUsername('');
                   setDescription('');
+                  setEmail('');
+                } else {
+                  setLoginUsername('');
                 }
               }}
             >
