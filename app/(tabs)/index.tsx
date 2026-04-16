@@ -2,48 +2,49 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    AppState,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  AppState,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AuthScreen from '@/components/AuthScreen';
 import {
-    type NudgeRow,
-    listPendingNudges,
-    markNudgeSeen,
-    markNudgesDelivered,
-    subscribeToIncomingNudges,
+  type NudgeRow,
+  listPendingNudges,
+  markNudgeSeen,
+  markNudgesDelivered,
+  subscribeToIncomingNudges,
 } from '@/lib/nudges';
 import {
-    getConsecutiveAllSkippedDays,
-    getTasks,
-    incrementTaskSkippedCount,
-    updateStreakCount,
-    upsertCompletion,
+  getConsecutiveAllSkippedDays,
+  getTasks,
+  incrementTaskSkippedCount,
+  resetTaskSkippedCount,
+  updateStreakCount,
+  upsertCompletion,
 } from '@/lib/tasks';
 import {
-    type PenaltyTrophyTitle,
-    loadTrophies,
-    resetPenaltyStateForCurrentUser,
-    unlockPenaltyTrophy,
-    unlockTrophy,
+  type PenaltyTrophyTitle,
+  loadTrophies,
+  resetPenaltyStateForCurrentUser,
+  unlockPenaltyTrophy,
+  unlockTrophy,
 } from '@/lib/trophies';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import {
-    type Friend,
-    INITIAL_FRIENDS,
-    INITIAL_TROPHIES,
-    type Task,
-    type Trophy,
-    getColors,
-    todayIdx,
+  type Friend,
+  INITIAL_FRIENDS,
+  INITIAL_TROPHIES,
+  type Task,
+  type Trophy,
+  getColors,
+  todayIdx,
 } from '@/src/types';
 
 import AchievementsTab from './achievements';
@@ -343,20 +344,44 @@ export default function App() {
 
       const nextCompleted = !task.completedToday;
       const nextSkipped = nextCompleted ? false : task.skippedToday;
-      const nextStreak = nextCompleted
-        ? task.streakCount + 1
-        : Math.max(0, task.streakCount - 1);
+      const nextCompletedOnceToday = task.completedOnceToday || nextCompleted;
+      const nextSkippedOnceToday = task.skippedOnceToday || nextSkipped;
+
+      const gainedCompletionToday = nextCompleted && !task.completedOnceToday;
+
+      let nextStreak = task.streakCount;
+      if (task.skippedOnceToday) {
+        nextStreak = 0;
+      } else if (gainedCompletionToday) {
+        nextStreak = task.streakCount + 1;
+      }
 
       upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
         console.error('upsertCompletion error:', err),
       );
-      updateStreakCount(id, nextStreak).catch((err) =>
-        console.error('updateStreakCount error:', err),
-      );
+
+      if (nextStreak !== task.streakCount) {
+        updateStreakCount(id, nextStreak).catch((err) =>
+          console.error('updateStreakCount error:', err),
+        );
+      }
+
+      if (gainedCompletionToday) {
+        resetTaskSkippedCount(id).catch((err) =>
+          console.error('resetTaskSkippedCount error:', err),
+        );
+      }
 
       return currentTasks.map((t) =>
         t.id === id
-          ? { ...t, completedToday: nextCompleted, skippedToday: nextSkipped, streakCount: nextStreak }
+          ? {
+              ...t,
+              completedToday: nextCompleted,
+              skippedToday: nextSkipped,
+              completedOnceToday: nextCompletedOnceToday,
+              skippedOnceToday: nextSkippedOnceToday,
+              streakCount: nextStreak,
+            }
           : t,
       );
     });
@@ -374,10 +399,14 @@ export default function App() {
 
       const nextSkipped = !task.skippedToday;
       const nextCompleted = nextSkipped ? false : task.completedToday;
-      const nextStreak = nextSkipped ? 0 : task.streakCount;
+      const nextCompletedOnceToday = task.completedOnceToday || nextCompleted;
+      const nextSkippedOnceToday = task.skippedOnceToday || nextSkipped;
 
-      becameSkipped = !task.skippedToday && nextSkipped;
-      brokeLongStreak = becameSkipped && task.streakCount >= 7;
+      const firstSkipToday = nextSkipped && !task.skippedOnceToday;
+      const nextStreak = firstSkipToday ? 0 : task.streakCount;
+
+      becameSkipped = firstSkipToday;
+      brokeLongStreak = firstSkipToday && task.streakCount >= 7;
 
       upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
         console.error('upsertCompletion error:', err),
@@ -389,7 +418,7 @@ export default function App() {
         );
       }
 
-      if (becameSkipped) {
+      if (firstSkipToday && !task.completedOnceToday) {
         incrementTaskSkippedCount(id).catch((err) =>
           console.error('incrementTaskSkippedCount error:', err),
         );
@@ -397,7 +426,14 @@ export default function App() {
 
       nextTasksSnapshot = currentTasks.map((t) =>
         t.id === id
-          ? { ...t, skippedToday: nextSkipped, completedToday: nextCompleted, streakCount: nextStreak }
+          ? {
+              ...t,
+              skippedToday: nextSkipped,
+              completedToday: nextCompleted,
+              completedOnceToday: nextCompletedOnceToday,
+              skippedOnceToday: nextSkippedOnceToday,
+              streakCount: nextStreak,
+            }
           : t,
       );
 
@@ -414,7 +450,8 @@ export default function App() {
 
     const todayTasks = nextTasksSnapshot.filter((task) => task.active && task.days[todayIdx]);
     const skippedAllToday =
-      todayTasks.length > 0 && todayTasks.every((task) => task.skippedToday);
+      todayTasks.length > 0 &&
+      todayTasks.every((task) => task.skippedOnceToday && !task.completedOnceToday);
 
     if (!skippedAllToday) {
       return;

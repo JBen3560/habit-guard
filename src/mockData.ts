@@ -18,6 +18,8 @@ function makeTask(
     streakCount: 0,
     completedToday: false,
     skippedToday: false,
+    completedOnceToday: false,
+    skippedOnceToday: false,
     ...overrides,
   };
 }

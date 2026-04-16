@@ -25,6 +25,8 @@ type DbCompletion = {
   date: string;
   completed: boolean;
   skipped: boolean;
+  completed_once?: boolean;
+  skipped_once?: boolean;
 };
 
 async function getUserId(): Promise<string> {
@@ -54,6 +56,8 @@ function toTask(row: DbTask, comp?: DbCompletion): Task {
     streakCount: row.streak_count,
     completedToday: comp?.completed ?? false,
     skippedToday: comp?.skipped ?? false,
+    completedOnceToday: comp?.completed_once ?? false,
+    skippedOnceToday: comp?.skipped_once ?? false,
   };
 }
 
@@ -190,6 +194,16 @@ export async function incrementTaskSkippedCount(id: string): Promise<void> {
   if (updateError) throw updateError;
 }
 
+/** Reset skipped_count to zero when a task is completed. */
+export async function resetTaskSkippedCount(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('tasks')
+    .update({ skipped_count: 0 })
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
 /**
  * Count consecutive days (including today) where every scheduled active task was skipped.
  * A day with no scheduled active tasks breaks the streak.
@@ -209,7 +223,7 @@ export async function getConsecutiveAllSkippedDays(maxDays = 7): Promise<number>
         .eq('active', true),
       supabase
         .from('task_completions')
-        .select('task_id, date, skipped, completed')
+        .select('task_id, date, skipped_once, completed_once')
         .eq('user_id', userId)
         .gte('date', start)
         .lte('date', end),
@@ -240,7 +254,7 @@ export async function getConsecutiveAllSkippedDays(maxDays = 7): Promise<number>
 
     const allSkipped = scheduledTaskIds.every((taskId) => {
       const completion = completionMap.get(`${date}|${taskId}`);
-      return Boolean(completion?.skipped) && !Boolean(completion?.completed);
+      return Boolean(completion?.skipped_once) && !Boolean(completion?.completed_once);
     });
 
     if (!allSkipped) break;
@@ -262,17 +276,36 @@ export async function upsertCompletion(
   taskId: string,
   completed: boolean,
   skipped: boolean,
-): Promise<void> {
+): Promise<{ completedOnce: boolean; skippedOnce: boolean }> {
   const userId = await getUserId();
+  const today = dateStr();
+
+  const { data: existing, error: existingError } = await supabase
+    .from('task_completions')
+    .select('completed_once, skipped_once')
+    .eq('task_id', taskId)
+    .eq('user_id', userId)
+    .eq('date', today)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+
+  const completedOnce = Boolean((existing as DbCompletion | null)?.completed_once) || completed;
+  const skippedOnce = Boolean((existing as DbCompletion | null)?.skipped_once) || skipped;
+
   const { error } = await supabase.from('task_completions').upsert(
     {
       task_id: taskId,
       user_id: userId,
-      date: dateStr(),
+      date: today,
       completed,
       skipped,
+      completed_once: completedOnce,
+      skipped_once: skippedOnce,
     },
     { onConflict: 'task_id,date' },
   );
   if (error) throw error;
+
+  return { completedOnce, skippedOnce };
 }

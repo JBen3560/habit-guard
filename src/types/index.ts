@@ -22,6 +22,8 @@ export type Task = {
     streakCount: number;
     completedToday: boolean;
     skippedToday: boolean;
+    completedOnceToday: boolean;
+    skippedOnceToday: boolean;
 };
 
 export type Trophy = {

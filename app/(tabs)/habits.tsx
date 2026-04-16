@@ -28,7 +28,10 @@ import { type Task, CATEGORIES, CATEGORY_COLORS, getColors, today, todayIdx } fr
 // Habits tab: create/edit habits, track daily progress, and toggle completion state
 
 //  HabitModal component: form for creating/editing habits
-type HabitFormData = Omit<Task, 'id' | 'streakCount' | 'completedToday' | 'skippedToday'>;
+type HabitFormData = Omit<
+  Task,
+  'id' | 'streakCount' | 'completedToday' | 'skippedToday' | 'completedOnceToday' | 'skippedOnceToday'
+>;
 
 // Default form values for new habit creation
 const EMPTY_FORM: HabitFormData = {
