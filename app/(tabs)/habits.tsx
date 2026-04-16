@@ -1,17 +1,17 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useRef, useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -349,6 +349,10 @@ export default function HabitsTab({ tasks, refreshTasks, onToggleComplete, onTog
   const swipeOpenId = useRef<string | null>(null);
 
   const todayTasks = tasks.filter((t) => t.active && t.days[todayIdx]);
+  const inactiveTasks = tasks
+    .filter((t) => !t.active || !t.days[todayIdx])
+    .slice()
+    .sort((a, b) => a.title.localeCompare(b.title));
   const pending = todayTasks.filter((t) => !t.completedToday && !t.skippedToday);
   const skipped = todayTasks.filter((t) => t.skippedToday);
   const done = todayTasks.filter((t) => t.completedToday);
@@ -634,6 +638,54 @@ export default function HabitsTab({ tasks, refreshTasks, onToggleComplete, onTog
             </Swipeable>
           );
         })}
+
+        {inactiveTasks.length > 0 && (
+          <View style={s.inactiveSection}>
+            <Text style={[s.inactiveTitle, { color: C.text }]}>Inactive Habits</Text>
+            <Text style={[s.inactiveHint, { color: C.sub }]}>
+              Includes turned-off habits and habits not scheduled for today. Tap to edit.
+            </Text>
+
+            {inactiveTasks.map((task) => {
+              const catColor = CATEGORY_COLORS[task.category];
+              const catIcon = CATEGORY_META[task.category].icon as React.ComponentProps<
+                typeof MaterialIcons
+              >['name'];
+              const statusLabel = task.active ? 'Not Today' : 'Inactive';
+
+              return (
+                <TouchableOpacity
+                  key={`inactive-${task.id}`}
+                  style={[s.taskCard, s.inactiveCard, { backgroundColor: C.card }]}
+                  onPress={() => openEdit(task)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[s.taskAccent, { backgroundColor: C.sub }]} />
+
+                  <View style={[s.taskIconWrap, { backgroundColor: `${catColor}18` }]}>
+                    <MaterialIcons name={catIcon} size={18} color={catColor} />
+                  </View>
+
+                  <View style={s.taskInfo}>
+                    <Text style={[s.taskTitle, { color: C.sub }]}>{task.title}</Text>
+                    <View style={s.taskMeta}>
+                      <MaterialIcons name="schedule" size={11} color={C.sub} />
+                      <Text style={[s.taskTime, { color: C.sub }]}>{formatTime(task.time)}</Text>
+                    </View>
+                    <CategoryPill cat={task.category} />
+                  </View>
+
+                  <View style={s.taskActions}>
+                    <View style={[s.inactiveBadge, { borderColor: C.border }]}>
+                      <Text style={[s.inactiveBadgeText, { color: C.sub }]}>{statusLabel}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
         <View style={{ height: 20 }} />
       </ScrollView>
 
@@ -780,6 +832,17 @@ const s = StyleSheet.create({
   completedText: { fontSize: 12, color: '#166534', fontWeight: '700' },
   skippedText: { color: '#A16207' },
   undoHint: { fontSize: 9 },
+  inactiveSection: { marginTop: 8, marginBottom: 4 },
+  inactiveTitle: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  inactiveHint: { fontSize: 12, marginBottom: 10 },
+  inactiveCard: { opacity: 0.92 },
+  inactiveBadge: {
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  inactiveBadgeText: { fontSize: 12, fontWeight: '700' },
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: 48, gap: 8 },
   emptyTitle: { fontSize: 17, fontWeight: '700' },
