@@ -526,7 +526,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
 
   const MY_NAME = displayName ?? username ?? 'You';
   const MY_TAG = username ? `@${username}` : '@your_habit';
-  const MY_STREAK = 13;
+  const MY_STREAK = tasks.reduce((longest, task) => Math.max(longest, task.streakCount), 0);
   const MY_TASKS = tasks.filter((t) => t.active).length;
 
   const sendFriendNudge = async (friend: Friend) => {
@@ -613,7 +613,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           <View style={[s.profileStats, { borderTopColor: C.border }]}>
             <View style={s.profileStat}>
               <Text style={[s.profileStatNum, { color: C.text }]}>{MY_STREAK}</Text>
-              <Text style={[s.profileStatLabel, { color: C.sub }]}>Day Streak</Text>
+              <Text style={[s.profileStatLabel, { color: C.sub }]}>Top Streak</Text>
             </View>
             <View style={[s.statDivider, { backgroundColor: C.border }]} />
             <View style={s.profileStat}>
