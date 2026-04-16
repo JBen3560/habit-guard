@@ -195,9 +195,7 @@ function FriendModal({
             </View>
             <Text style={[s.friendProfileName, { color: C.text }]}>{friend.name}</Text>
             <Text style={[s.friendProfileTag, { color: C.blue }]}>{friend.tag}</Text>
-            {friend.bio ? (
-              <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text>
-            ) : null}
+            {friend.bio ? <Text style={[s.friendBio, { color: C.sub }]}>{friend.bio}</Text> : null}
             <View style={s.friendStats}>
               <View style={s.friendStat}>
                 <Text style={[s.friendStatNum, { color: C.text }]}>{friend.streakDays}</Text>
@@ -222,9 +220,7 @@ function FriendModal({
             <View style={s.nudgeBox}>
               <View style={s.nudgeBoxTitle}>
                 <MaterialIcons name="warning" size={18} color="#9A3412" />
-                <Text style={s.nudgeTitle}>
-                  {firstName} needs a check-in today!
-                </Text>
+                <Text style={s.nudgeTitle}>{firstName} needs a check-in today!</Text>
               </View>
               <Text style={[s.nudgeSubtitle, { color: C.sub }]}>Send some encouragement</Text>
               <TouchableOpacity
@@ -372,7 +368,10 @@ function EditProfileModal({
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={[s.modalBody, { backgroundColor: C.bg }]} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={[s.modalBody, { backgroundColor: C.bg }]}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={[s.fieldLabel, { color: C.sub }]}>DISPLAY NAME</Text>
           <TextInput
             style={[s.textInput, { backgroundColor: C.card, borderColor: C.border, color: C.text }]}
@@ -429,6 +428,9 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
 
+  const isLoggedOutError = (error: unknown) =>
+    error instanceof Error && error.message === 'User not logged in';
+
   useEffect(() => {
     if (!user) return;
     supabase
@@ -460,6 +462,10 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
         }
       })
       .catch((error) => {
+        if (!active || isLoggedOutError(error)) {
+          return;
+        }
+
         console.error('Failed to load friends', error);
       });
 
@@ -495,8 +501,22 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   };
 
   const refreshFriends = async () => {
-    const nextFriends = await getFriends();
-    setFriends(nextFriends);
+    if (!user) {
+      setFriends([]);
+      return;
+    }
+
+    try {
+      const nextFriends = await getFriends();
+      setFriends(nextFriends);
+    } catch (error) {
+      if (isLoggedOutError(error)) {
+        setFriends([]);
+        return;
+      }
+
+      throw error;
+    }
   };
 
   const saveProfile = async (newDisplayName: string, newDescription: string) => {
@@ -527,10 +547,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── My Profile card ── */}
         <View style={[s.profileCard, { backgroundColor: C.card }]}>
-          <TouchableOpacity
-            style={s.editProfileBtn}
-            onPress={() => setEditProfileVisible(true)}
-          >
+          <TouchableOpacity style={s.editProfileBtn} onPress={() => setEditProfileVisible(true)}>
             <MaterialIcons name="edit" size={18} color={C.sub} />
           </TouchableOpacity>
           <View style={s.profileAvatarWrap}>
