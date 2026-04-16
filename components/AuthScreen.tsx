@@ -31,6 +31,7 @@ export default function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [messageTone, setMessageTone] = useState<'neutral' | 'error' | 'success'>('neutral');
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
 
   const showMessage = (nextMessage: string, tone: 'neutral' | 'error' | 'success') => {
     setMessage(nextMessage);
@@ -70,6 +71,7 @@ export default function AuthScreen() {
           return;
         }
 
+        setVerificationEmail(null);
         showMessage('Signed in. Loading your account...', 'success');
         return;
       }
@@ -87,8 +89,9 @@ export default function AuthScreen() {
       if (data.session) {
         showMessage('Account created. Loading your account...', 'success');
       } else {
-        showMessage('Account created. Check your email to confirm before signing in.', 'success');
+        setVerificationEmail(trimmedEmail);
         setMode('sign-in');
+        setMessage(null);
       }
     } finally {
       setBusy(false);
@@ -115,6 +118,25 @@ export default function AuthScreen() {
             <Text style={[s.brand, { color: C.text }]}>Habit-Guard</Text>
             <Text style={[s.heroText, { color: C.sub }]}>{subtitle}</Text>
           </View>
+
+          {verificationEmail ? (
+            <View style={s.verifyBanner}>
+              <View style={s.verifyIconWrap}>
+                <MaterialIcons name="mark-email-unread" size={26} color="#166534" />
+              </View>
+              <View style={s.verifyBody}>
+                <Text style={s.verifyTitle}>Check your inbox!</Text>
+                <Text style={s.verifyText}>
+                  We sent a confirmation link to{' '}
+                  <Text style={s.verifyEmail}>{verificationEmail}</Text>
+                  {'. Click the link to verify your account, then sign in below.'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setVerificationEmail(null)} style={s.verifyDismiss}>
+                <MaterialIcons name="close" size={18} color="#166534" />
+              </TouchableOpacity>
+            </View>
+          ) : null}
 
           <View style={[s.card, { backgroundColor: C.card, borderColor: C.border }]}>
             <Text style={[s.title, { color: C.text }]}>{title}</Text>
@@ -393,4 +415,30 @@ const s = StyleSheet.create({
   },
   switchText: { fontSize: 14, fontWeight: '600' },
   footer: { marginTop: 18, textAlign: 'center', fontSize: 12, lineHeight: 18 },
+
+  verifyBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 14,
+    gap: 12,
+  },
+  verifyIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#BBF7D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  verifyBody: { flex: 1 },
+  verifyTitle: { fontSize: 15, fontWeight: '800', color: '#166534', marginBottom: 4 },
+  verifyText: { fontSize: 13, color: '#166534', lineHeight: 18 },
+  verifyEmail: { fontWeight: '700' },
+  verifyDismiss: { padding: 4, flexShrink: 0 },
 });
