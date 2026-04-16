@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { seedStarterTasks } from './tasks';
 
 type SignUpOptions = {
   displayName?: string;
@@ -23,7 +24,15 @@ export async function signUp(email: string, password: string, options: SignUpOpt
     })
     .eq('id', data.user.id);
 
-  return { data, error: profileError ?? null };
+  if (profileError) return { data, error: profileError };
+
+  try {
+    await seedStarterTasks(data.user.id);
+  } catch (error) {
+    return { data, error };
+  }
+
+  return { data, error: null };
 }
 
 // Sign in by looking up the email via a SECURITY DEFINER RPC (bypasses RLS so

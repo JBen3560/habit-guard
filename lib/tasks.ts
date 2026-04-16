@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 
+import { INITIAL_TASKS } from '../src/mockData';
 import type { Category, Task } from '../src/types';
 
 // Raw DB row shapes
@@ -86,6 +87,45 @@ export async function getTasks(): Promise<Task[]> {
 }
 
 export type TaskFormData = Pick<Task, 'title' | 'category' | 'time' | 'days' | 'active'>;
+
+const STARTER_TASK_TITLES = [
+  'Morning Medication',
+  'Morning Water',
+  'Touch Grass',
+  'Brush Teeth (AM)',
+  'Deep Breathing',
+] as const;
+
+/**
+ * Seed five starter tasks for a new user.
+ * The tasks are pulled from INITIAL_TASKS so the seeded data stays aligned
+ * with the app's built-in catalog.
+ */
+export async function seedStarterTasks(userId: string): Promise<void> {
+  const starterTasks = STARTER_TASK_TITLES.map((title) => {
+    const task = INITIAL_TASKS.find((item) => item.title === title);
+    if (!task) {
+      throw new Error(`Starter task not found: ${title}`);
+    }
+
+    return {
+      user_id: userId,
+      title: task.title,
+      category: task.category,
+      time: task.time,
+      days: task.days,
+      active: task.active,
+      streak_count: 0,
+      skipped_count: 0,
+    };
+  });
+
+  const { error } = await supabase.rpc('seed_starter_tasks', {
+    p_user_id: userId,
+    p_tasks: starterTasks,
+  });
+  if (error) throw error;
+}
 
 /** Create a new task. */
 export async function createTask(form: TaskFormData): Promise<void> {
