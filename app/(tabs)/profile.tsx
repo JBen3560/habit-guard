@@ -17,10 +17,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
 import { getNudgeErrorMessage, sendNudge } from '@/lib/nudges';
 import { supabase } from '@/lib/supabase';
+import { getProgressData, type ProgressCategoryStat, type ProgressDay } from '@/lib/tasks';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import { buildHistory, getCategoryStats, getWeeklyData } from '@/src/mockData';
-import { type Friend, type Task, getColors } from '@/src/types/index';
+import { getColors, type Friend, type Task } from '@/src/types/index';
 
 // Personal summary, social graph, and progress visualizations.
 
@@ -37,10 +37,28 @@ function heatColor(rate: number, isDark: boolean): string {
 function ProgressSection({ tasks }: { tasks: Task[] }) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
+  const [history, setHistory] = useState<ProgressDay[]>([]);
+  const [categoryStats, setCategoryStats] = useState<ProgressCategoryStat[]>([]);
 
-  const history = useMemo(() => buildHistory(tasks), [tasks]);
-  const weeklyData = useMemo(() => getWeeklyData(history), [history]);
-  const categoryStats = useMemo(() => getCategoryStats(tasks, history), [tasks, history]);
+  useEffect(() => {
+    let active = true;
+
+    void getProgressData(28)
+      .then((data) => {
+        if (!active) return;
+        setHistory(data.history);
+        setCategoryStats(data.categoryStats);
+      })
+      .catch((error) => {
+        console.error('Failed to load progress data', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [tasks]);
+
+  const weeklyData = useMemo(() => history.slice(-7), [history]);
 
   const maxBarRate = Math.max(...weeklyData.map((d) => d.rate), 0.01);
 

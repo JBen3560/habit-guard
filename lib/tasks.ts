@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
 
-import { INITIAL_TASKS } from '../src/mockData';
-import type { Category, Task } from '../src/types';
+import { CATEGORY_META, INITIAL_TASKS } from '../src/mockData';
+import type { Task } from '../src/types';
+import { CATEGORY_COLORS, type Category } from '../src/types';
 
 // Raw DB row shapes
 
@@ -29,6 +30,25 @@ type DbCompletion = {
   skipped_once?: boolean;
 };
 
+export type ProgressDay = {
+  date: string;
+  label: string;
+  dayNum: number;
+  completed: number;
+  total: number;
+  rate: number;
+};
+
+export type ProgressCategoryStat = {
+  category: Category;
+  label: string;
+  icon: string;
+  color: string;
+  rate: number;
+  completed: number;
+  total: number;
+};
+
 async function getUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error('User not logged in');
@@ -44,6 +64,8 @@ function shiftDate(base: Date, days: number): Date {
   next.setDate(base.getDate() + days);
   return next;
 }
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function toTask(row: DbTask, comp?: DbCompletion): Task {
   return {
@@ -262,6 +284,112 @@ export async function getConsecutiveAllSkippedDays(maxDays = 7): Promise<number>
   }
 
   return streak;
+}
+
+/**
+ * Build real progress metrics from persisted completion history.
+ * Returns day-level completion rates and category-level completion rates.
+ */
+export async function getProgressData(days = 28): Promise<{
+  history: ProgressDay[];
+  categoryStats: ProgressCategoryStat[];
+}> {
+  const userId = await getUserId();
+  const today = new Date();
+  const startDate = shiftDate(today, -(days - 1));
+  const start = dateStr(startDate);
+  const end = dateStr(today);
+
+  const [{ data: taskRows, error: taskError }, { data: completionRows, error: completionError }] =
+    await Promise.all([
+      supabase
+        .from('tasks')
+        .select('id, category, days, active')
+        .eq('user_id', userId)
+        .eq('active', true),
+      supabase
+        .from('task_completions')
+        .select('task_id, date, completed')
+        .eq('user_id', userId)
+        .gte('date', start)
+        .lte('date', end),
+    ]);
+
+  if (taskError) throw taskError;
+  if (completionError) throw completionError;
+
+  const activeTasks = (taskRows ?? []) as Array<{
+    id: string;
+    category: Category;
+    days: boolean[];
+    active: boolean;
+  }>;
+
+  const completionMap = new Map<string, boolean>();
+  for (const row of (completionRows ?? []) as Array<{ task_id: string; date: string; completed: boolean }>) {
+    completionMap.set(`${row.date}|${row.task_id}`, Boolean(row.completed));
+  }
+
+  const history: ProgressDay[] = [];
+  for (let i = days - 1; i >= 0; i -= 1) {
+    const d = shiftDate(today, -i);
+    const ds = dateStr(d);
+    const dayIdx = d.getDay();
+
+    const scheduledIds = activeTasks
+      .filter((t) => Boolean(t.days?.[dayIdx]))
+      .map((t) => t.id);
+
+    const total = scheduledIds.length;
+    const completed = scheduledIds.filter((taskId) => completionMap.get(`${ds}|${taskId}`)).length;
+
+    history.push({
+      date: ds,
+      label: DAY_NAMES[dayIdx],
+      dayNum: d.getDate(),
+      completed,
+      total,
+      rate: total > 0 ? completed / total : 0,
+    });
+  }
+
+  const categoryStats: ProgressCategoryStat[] = [];
+
+  for (const category of Object.keys(CATEGORY_COLORS) as Category[]) {
+    const categoryTaskIds = activeTasks
+      .filter((t) => t.category === category)
+      .map((t) => t.id);
+
+    if (categoryTaskIds.length === 0) continue;
+
+    let completed = 0;
+    let total = 0;
+
+    for (const day of history) {
+      const dayIdx = new Date(`${day.date}T12:00:00`).getDay();
+      const scheduledInCategory = activeTasks
+        .filter((t) => t.category === category && Boolean(t.days?.[dayIdx]))
+        .map((t) => t.id);
+
+      total += scheduledInCategory.length;
+      completed += scheduledInCategory.filter((taskId) => completionMap.get(`${day.date}|${taskId}`)).length;
+    }
+
+    const meta = CATEGORY_META[category];
+    categoryStats.push({
+      category,
+      label: category,
+      icon: meta.icon,
+      color: meta.color,
+      rate: total > 0 ? Math.round((completed / total) * 100) : 0,
+      completed,
+      total,
+    });
+  }
+
+  categoryStats.sort((a, b) => b.rate - a.rate);
+
+  return { history, categoryStats };
 }
 
 // ──────────────────────────────────────────────
