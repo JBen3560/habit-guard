@@ -90,6 +90,7 @@ export default function AuthScreen() {
         showMessage('Account created. Loading your account...', 'success');
       } else {
         setVerificationEmail(trimmedEmail);
+        setLoginUsername(trimmedUsername);
         setMode('sign-in');
         setMessage(null);
       }
@@ -209,7 +210,10 @@ export default function AuthScreen() {
 
                 <Text style={[s.fieldLabel, { color: C.sub }]}>DESCRIPTION</Text>
                 <TextInput
-                  style={[s.textArea, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+                  style={[
+                    s.textArea,
+                    { backgroundColor: C.bg, borderColor: C.border, color: C.text },
+                  ]}
                   value={description}
                   onChangeText={setDescription}
                   placeholder="A short bio for your profile"
@@ -220,7 +224,6 @@ export default function AuthScreen() {
                   numberOfLines={3}
                   textAlignVertical="top"
                 />
-
               </>
             ) : null}
 
@@ -289,6 +292,7 @@ export default function AuthScreen() {
                 setMode(nextMode);
                 setMessage(null);
                 if (nextMode === 'sign-in') {
+                  setLoginUsername(username.trim());
                   setDisplayName('');
                   setUsername('');
                   setDescription('');
