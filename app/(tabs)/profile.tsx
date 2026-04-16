@@ -100,8 +100,6 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
     return stats;
   }, [tasks]);
 
-  const maxBarRate = Math.max(...weeklyData.map((d) => d.rate), 0.01);
-
   return (
     <>
       {/* ── Last 7 Days bar chart ── */}
@@ -112,7 +110,6 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       <View style={[s.chartCard, { backgroundColor: C.card }]}>
         <View style={s.chartBars}>
           {weeklyData.map((d, i) => {
-            const pct = d.rate / maxBarRate;
             const color = d.rate >= 0.8 ? C.green : d.rate >= 0.5 ? C.blue : C.yellow;
             return (
               <View key={i} style={s.barCol}>
@@ -123,7 +120,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
                   <View
                     style={[
                       s.barFill,
-                      { height: `${Math.max(pct * 100, 4)}%`, backgroundColor: color },
+                      { height: `${Math.max(d.rate * 100, 4)}%`, backgroundColor: color },
                     ]}
                   />
                 </View>
