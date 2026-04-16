@@ -27,7 +27,7 @@ import { getColors, todayIdx, type Friend, type Task } from '@/src/types/index';
 
 //  Heatmap color based on completion rate
 function heatColor(rate: number, isDark: boolean): string {
-  if (rate === 0) return isDark ? '#1F2937' : '#E5E7EB';
+  if (rate === 0) return isDark ? '#374151' : '#E5E7EB';
   if (rate < 0.4) return '#BFDBFE';
   if (rate < 0.7) return '#60A5FA';
   if (rate < 0.9) return '#3B82F6';
@@ -67,7 +67,25 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
     };
   }, [tasks]);
 
-  const weeklyData = useMemo(() => history.slice(-7), [history]);
+  // Patch today's entry with live in-memory data so the bar always matches
+  // the habits tab progress wheel, regardless of DB write timing.
+  const liveHistory = useMemo(() => {
+    if (history.length === 0) return history;
+    const todayScheduled = tasks.filter((t) => t.active && t.days[todayIdx]);
+    const total = todayScheduled.length;
+    const completed = todayScheduled.filter((t) => t.completedToday).length;
+    const patched = [...history];
+    const last = patched[patched.length - 1];
+    patched[patched.length - 1] = {
+      ...last,
+      completed,
+      total,
+      rate: total > 0 ? completed / total : 0,
+    };
+    return patched;
+  }, [history, tasks]);
+
+  const weeklyData = useMemo(() => liveHistory.slice(-7), [liveHistory]);
   const todayCategoryStats = useMemo(() => {
     const stats = tasks
       .reduce<TodayCategoryStat[]>((acc, task) => {
@@ -138,7 +156,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       <View style={[s.heatmapCard, { backgroundColor: C.card }]}>
         <View style={s.heatmapGrid}>
-          {history.map((day, i) => (
+          {liveHistory.map((day, i) => (
             <View key={i} style={s.heatCell}>
               <View style={[s.heatSquare, { backgroundColor: heatColor(day.rate, isDark) }]} />
               <Text style={[s.heatNum, { color: C.sub }]}>{day.dayNum}</Text>
