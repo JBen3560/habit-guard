@@ -17,10 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
 import { getNudgeErrorMessage, sendNudge } from '@/lib/nudges';
 import { supabase } from '@/lib/supabase';
-import { getProgressData, type ProgressCategoryStat, type ProgressDay } from '@/lib/tasks';
+import { getProgressData, type ProgressDay } from '@/lib/tasks';
 import { useAuth } from '@/src/context/AuthContext';
 import { useTheme } from '@/src/context/ThemeContext';
-import { getColors, type Friend, type Task } from '@/src/types/index';
+import { CATEGORY_META } from '@/src/mockData';
+import { getColors, todayIdx, type Friend, type Task } from '@/src/types/index';
 
 // Personal summary, social graph, and progress visualizations.
 
@@ -33,12 +34,21 @@ function heatColor(rate: number, isDark: boolean): string {
   return '#1D4ED8';
 }
 
+type TodayCategoryStat = {
+  category: Task['category'];
+  label: string;
+  icon: string;
+  color: string;
+  rate: number;
+  completed: number;
+  total: number;
+};
+
 //  Progress section with a 7-day bar chart, 28-day heatmap, and category breakdowns with progress bars
 function ProgressSection({ tasks }: { tasks: Task[] }) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [history, setHistory] = useState<ProgressDay[]>([]);
-  const [categoryStats, setCategoryStats] = useState<ProgressCategoryStat[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -47,7 +57,6 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       .then((data) => {
         if (!active) return;
         setHistory(data.history);
-        setCategoryStats(data.categoryStats);
       })
       .catch((error) => {
         console.error('Failed to load progress data', error);
@@ -59,6 +68,37 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
   }, [tasks]);
 
   const weeklyData = useMemo(() => history.slice(-7), [history]);
+  const todayCategoryStats = useMemo(() => {
+    const stats = tasks
+      .reduce<TodayCategoryStat[]>((acc, task) => {
+        if (!task.active || !task.days[todayIdx]) return acc;
+
+        const existing = acc.find((item) => item.category === task.category);
+        const completed = task.completedToday ? 1 : 0;
+
+        if (existing) {
+          existing.completed += completed;
+          existing.total += 1;
+          existing.rate = Math.round((existing.completed / existing.total) * 100);
+          return acc;
+        }
+
+        const meta = CATEGORY_META[task.category];
+        acc.push({
+          category: task.category,
+          label: task.category,
+          icon: meta.icon,
+          color: meta.color,
+          rate: completed ? 100 : 0,
+          completed,
+          total: 1,
+        });
+        return acc;
+      }, [])
+      .sort((a, b) => b.rate - a.rate);
+
+    return stats;
+  }, [tasks]);
 
   const maxBarRate = Math.max(...weeklyData.map((d) => d.rate), 0.01);
 
@@ -120,32 +160,42 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       {/* ── By Category ── */}
       <View style={s.sectionHeader}>
-        <Text style={[s.sectionTitle, { color: C.text }]}>By Category</Text>
+        <Text style={[s.sectionTitle, { color: C.text }]}>Today by Category</Text>
       </View>
 
-      {categoryStats.map((cat) => (
-        <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
-          <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
-            <MaterialIcons
-              name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']}
-              size={20}
-              color={cat.color}
-            />
-          </View>
-          <View style={s.catInfo}>
-            <View style={s.catRowTop}>
-              <Text style={[s.catName, { color: C.text }]}>{cat.label}</Text>
-              <Text style={[s.catRate, { color: cat.color }]}>{cat.rate}%</Text>
-            </View>
-            <View style={[s.catBarTrack, { backgroundColor: C.border }]}>
-              <View style={[s.catBarFill, { width: `${cat.rate}%`, backgroundColor: cat.color }]} />
-            </View>
-            <Text style={[s.catMeta, { color: C.sub }]}>
-              {cat.completed} of {cat.total} check-ins completed
-            </Text>
-          </View>
+      {todayCategoryStats.length === 0 ? (
+        <View style={[s.catEmptyCard, { backgroundColor: C.card, borderColor: C.border }]}>
+          <Text style={[s.catEmptyText, { color: C.sub }]}>
+            No active habits are scheduled today.
+          </Text>
         </View>
-      ))}
+      ) : (
+        todayCategoryStats.map((cat) => (
+          <View key={cat.category} style={[s.catRow, { backgroundColor: C.card }]}>
+            <View style={[s.catIconWrap, { backgroundColor: `${cat.color}18` }]}>
+              <MaterialIcons
+                name={cat.icon as React.ComponentProps<typeof MaterialIcons>['name']}
+                size={20}
+                color={cat.color}
+              />
+            </View>
+            <View style={s.catInfo}>
+              <View style={s.catRowTop}>
+                <Text style={[s.catName, { color: C.text }]}>{cat.label}</Text>
+                <Text style={[s.catRate, { color: cat.color }]}>{cat.rate}%</Text>
+              </View>
+              <View style={[s.catBarTrack, { backgroundColor: C.border }]}>
+                <View
+                  style={[s.catBarFill, { width: `${cat.rate}%`, backgroundColor: cat.color }]}
+                />
+              </View>
+              <Text style={[s.catMeta, { color: C.sub }]}>
+                {cat.completed} of {cat.total} scheduled today completed
+              </Text>
+            </View>
+          </View>
+        ))
+      )}
     </>
   );
 }
@@ -907,6 +957,14 @@ const s = StyleSheet.create({
   catBarTrack: { height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 3 },
   catBarFill: { height: '100%', borderRadius: 3 },
   catMeta: { fontSize: 10 },
+  catEmptyCard: {
+    marginHorizontal: 20,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  catEmptyText: { fontSize: 11, lineHeight: 15 },
 
   // Friend cards
   addBtn: {
