@@ -309,10 +309,6 @@ export default function AuthScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={[s.footer, { color: C.sub }]}>
-            Your habits stay attached to your account instead of a shared demo state.
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
