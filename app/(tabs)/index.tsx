@@ -390,6 +390,7 @@ export default function App() {
   // Toggle skip status of a habit, ensuring it cannot be marked as both completed and skipped
   const toggleTaskSkip = (id: string) => {
     let becameSkipped = false;
+    let turnedSkippedOn = false;
     let brokeLongStreak = false;
     let nextTasksSnapshot: Task[] = [];
 
@@ -406,6 +407,7 @@ export default function App() {
       const nextStreak = firstSkipToday ? 0 : task.streakCount;
 
       becameSkipped = firstSkipToday;
+      turnedSkippedOn = !task.skippedToday && nextSkipped;
       brokeLongStreak = firstSkipToday && task.streakCount >= 7;
 
       upsertCompletion(id, nextCompleted, nextSkipped).catch((err) =>
@@ -440,7 +442,7 @@ export default function App() {
       return nextTasksSnapshot;
     });
 
-    if (!becameSkipped) {
+    if (!turnedSkippedOn) {
       return;
     }
 
@@ -451,7 +453,7 @@ export default function App() {
     const todayTasks = nextTasksSnapshot.filter((task) => task.active && task.days[todayIdx]);
     const skippedAllToday =
       todayTasks.length > 0 &&
-      todayTasks.every((task) => task.skippedOnceToday && !task.completedOnceToday);
+      todayTasks.every((task) => task.skippedToday && !task.completedToday);
 
     if (!skippedAllToday) {
       return;
