@@ -555,7 +555,6 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
       await sendNudge(recipientUserId, `${MY_NAME} nudged you to check in today.`);
       Alert.alert('Nudge sent!', `${friend.name.split(' ')[0]} has been nudged!`);
     } catch (error) {
-      console.error('sendNudge error:', error);
       Alert.alert('Could not send nudge', getNudgeErrorMessage(error));
     }
   };
