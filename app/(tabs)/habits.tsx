@@ -43,6 +43,14 @@ const EMPTY_FORM: HabitFormData = {
   active: true,
 };
 
+const REMINDER_TIMES = [
+  { value: '06:00', sub: 'Early' },
+  { value: '08:00', sub: 'Morning' },
+  { value: '12:00', sub: 'Midday' },
+  { value: '18:00', sub: 'Evening' },
+  { value: '21:00', sub: 'Night' },
+];
+
 function timeStringToDate(hhmm: string): Date {
   const [h, m] = hhmm.split(':').map(Number);
   const d = new Date();
@@ -191,7 +199,32 @@ function HabitModal({
 
             {/* Reminder Time */}
             <Text style={[s.fieldLabel, { color: C.sub }]}>REMINDER TIME</Text>
-            <Text style={[s.fieldSub, { color: C.sub }]}>{formatTime(form.time)}</Text>
+            <View style={s.timeGrid}>
+              {REMINDER_TIMES.map(({ value, sub }) => {
+                const isSelected = form.time === value;
+                return (
+                  <TouchableOpacity
+                    key={value}
+                    onPress={() => setForm({ ...form, time: value })}
+                    style={[
+                      s.timeCard,
+                      { backgroundColor: C.card, borderColor: C.border },
+                      isSelected && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={isSelected ? 'alarm-on' : 'alarm'}
+                      size={18}
+                      color={isSelected ? C.blue : C.sub}
+                    />
+                    <Text style={[s.timeCardLabel, { color: isSelected ? C.blue : C.sub }, isSelected && { fontWeight: '700' }]}>
+                      {formatTime(value)}
+                    </Text>
+                    <Text style={[s.timeCardSub, { color: isSelected ? C.blue : C.sub }]}>{sub}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
             {Platform.OS === 'web' ? (
               <View style={s.webTimeRow}>
                 <MaterialIcons name="schedule" size={18} color={C.sub} />
@@ -836,6 +869,18 @@ const s = StyleSheet.create({
   catCardText: { fontSize: 13 },
 
   fieldSub: { fontSize: 12, marginTop: -4, marginBottom: 4 },
+  timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
+  timeCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    gap: 3,
+    minWidth: 56,
+  },
+  timeCardLabel: { fontSize: 12, fontWeight: '600' },
+  timeCardSub: { fontSize: 10 },
   webTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
