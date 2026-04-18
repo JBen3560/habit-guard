@@ -1,4 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import React, { useRef, useState } from 'react';
 import {
     Alert,
@@ -42,14 +43,18 @@ const EMPTY_FORM: HabitFormData = {
   active: true,
 };
 
-// Predefined reminder time options for habit notifications
-const REMINDER_TIMES = [
-  { value: '06:00', label: '06:00', sub: 'Early' },
-  { value: '08:00', label: '08:00', sub: 'Morning' },
-  { value: '12:00', label: '12:00', sub: 'Midday' },
-  { value: '18:00', label: '18:00', sub: 'Evening' },
-  { value: '21:00', label: '21:00', sub: 'Night' },
-];
+function timeStringToDate(hhmm: string): Date {
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h ?? 8, m ?? 0, 0, 0);
+  return d;
+}
+
+function dateToTimeString(date: Date): string {
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
 
 // Modal component for creating or editing a habit
 function HabitModal({
@@ -66,19 +71,14 @@ function HabitModal({
   onClose: () => void;
 }>) {
   const { isDark } = useTheme();
-  const { formatTime } = useTimeFormat();
+  const { formatTime, is24Hour } = useTimeFormat();
   const C = getColors(isDark);
   const [form, setForm] = useState<HabitFormData>(EMPTY_FORM);
-  const [customMode, setCustomMode] = useState(false);
-  const [customText, setCustomText] = useState('');
-
-  const isPresetTime = (t: string) => REMINDER_TIMES.some((r) => r.value === t);
-  const validTimeFormat = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  const [webTimeText, setWebTimeText] = useState('');
+  const webTimeValid = /^([01]\d|2[0-3]):([0-5]\d)$/.test(webTimeText);
 
   React.useEffect(() => {
     if (visible) {
-      const t = initial?.time ?? EMPTY_FORM.time;
-      const isCustom = !isPresetTime(t);
       setForm(
         initial
           ? {
@@ -90,8 +90,7 @@ function HabitModal({
             }
           : { ...EMPTY_FORM, days: [true, true, true, true, true, true, true] },
       );
-      setCustomMode(isCustom);
-      setCustomText(isCustom ? t : '');
+      setWebTimeText(initial?.time ?? EMPTY_FORM.time);
     }
   }, [visible, initial]);
 
@@ -101,14 +100,17 @@ function HabitModal({
     setForm({ ...form, days: d });
   };
 
-  const handleCustomTimeChange = (text: string) => {
-    setCustomText(text);
-    if (validTimeFormat.test(text)) {
-      setForm({ ...form, time: text });
-    }
+  const handlePickerChange = (_event: DateTimePickerEvent, date?: Date) => {
+    if (date) setForm({ ...form, time: dateToTimeString(date) });
   };
 
-  const canSave = form.title.trim().length > 0 && (!customMode || validTimeFormat.test(customText));
+  const handleWebTimeChange = (text: string) => {
+    setWebTimeText(text);
+    if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(text)) setForm({ ...form, time: text });
+  };
+
+  const canSave =
+    form.title.trim().length > 0 && (Platform.OS !== 'web' || webTimeValid);
 
   // Render modal with form fields for habit name, category, reminder time, active days, and active toggle
   return (
@@ -189,94 +191,36 @@ function HabitModal({
 
             {/* Reminder Time */}
             <Text style={[s.fieldLabel, { color: C.sub }]}>REMINDER TIME</Text>
-            <Text style={[s.fieldHint, { color: C.sub }]}>
-              Select a preset or enter a custom time
-            </Text>
-            <View style={s.timeGrid}>
-              {REMINDER_TIMES.map(({ value, sub }) => {
-                const isSelected = !customMode && form.time === value;
-                return (
-                  <TouchableOpacity
-                    key={value}
-                    onPress={() => {
-                      setCustomMode(false);
-                      setCustomText('');
-                      setForm({ ...form, time: value });
-                    }}
-                    style={[
-                      s.timeCard,
-                      { backgroundColor: C.card, borderColor: C.border },
-                      isSelected && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name={isSelected ? 'alarm-on' : 'alarm'}
-                      size={18}
-                      color={isSelected ? C.blue : C.sub}
-                    />
-                    <Text
-                      style={[
-                        s.timeCardLabel,
-                        { color: C.sub },
-                        isSelected && { color: C.blue, fontWeight: '700' },
-                      ]}
-                    >
-                      {formatTime(value)}
-                    </Text>
-                    <Text
-                      style={[s.timeCardSub, { color: C.sub }, isSelected && { color: C.blue }]}
-                    >
-                      {sub}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-              <TouchableOpacity
-                onPress={() => {
-                  setCustomMode(true);
-                  setCustomText('');
-                  setForm({ ...form, time: '' });
-                }}
-                style={[
-                  s.timeCard,
-                  { backgroundColor: C.card, borderColor: C.border },
-                  customMode && { borderColor: C.blue, backgroundColor: `${C.blue}12` },
-                ]}
-              >
-                <MaterialIcons name="edit" size={18} color={customMode ? C.blue : C.sub} />
-                <Text
-                  style={[
-                    s.timeCardLabel,
-                    { color: C.sub },
-                    customMode && { color: C.blue, fontWeight: '700' },
-                  ]}
-                >
-                  Custom
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {customMode && (
-              <View style={s.customTimeRow}>
+            <Text style={[s.fieldSub, { color: C.sub }]}>{formatTime(form.time)}</Text>
+            {Platform.OS === 'web' ? (
+              <View style={s.webTimeRow}>
                 <MaterialIcons name="schedule" size={18} color={C.sub} />
                 <TextInput
                   style={[
-                    s.customTimeInput,
+                    s.webTimeInput,
                     { backgroundColor: C.card, borderColor: C.border, color: C.text },
-                    validTimeFormat.test(customText) && { borderColor: C.green },
-                    customText.length > 0 &&
-                      !validTimeFormat.test(customText) && { borderColor: '#DC2626' },
+                    webTimeValid && { borderColor: C.green },
+                    webTimeText.length > 0 && !webTimeValid && { borderColor: '#DC2626' },
                   ]}
-                  value={customText}
-                  onChangeText={handleCustomTimeChange}
+                  value={webTimeText}
+                  onChangeText={handleWebTimeChange}
                   placeholder="HH:MM"
                   placeholderTextColor={C.sub}
                   keyboardType="numbers-and-punctuation"
                   maxLength={5}
                 />
-                {customText.length > 0 && !validTimeFormat.test(customText) && (
-                  <Text style={s.customTimeError}>Use HH:MM (e.g. 14:30)</Text>
+                {webTimeText.length > 0 && !webTimeValid && (
+                  <Text style={s.webTimeError}>Use HH:MM (e.g. 14:30)</Text>
                 )}
               </View>
+            ) : (
+              <DateTimePicker
+                value={timeStringToDate(form.time)}
+                mode="time"
+                display="spinner"
+                is24Hour={is24Hour}
+                onChange={handlePickerChange}
+              />
             )}
 
             {/* Active Days */}
@@ -891,26 +835,15 @@ const s = StyleSheet.create({
   },
   catCardText: { fontSize: 13 },
 
-  timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  timeCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    gap: 3,
-    minWidth: 56,
-  },
-  timeCardLabel: { fontSize: 12, fontWeight: '600' },
-  timeCardSub: { fontSize: 10 },
-  customTimeRow: {
+  fieldSub: { fontSize: 12, marginTop: -4, marginBottom: 4 },
+  webTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginTop: 10,
+    marginTop: 8,
     flexWrap: 'wrap',
   },
-  customTimeInput: {
+  webTimeInput: {
     borderRadius: 10,
     borderWidth: 1.5,
     paddingHorizontal: 14,
@@ -921,7 +854,7 @@ const s = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 2,
   },
-  customTimeError: { fontSize: 12, color: '#DC2626', flex: 1 },
+  webTimeError: { fontSize: 12, color: '#DC2626', flex: 1 },
 
   switchRow: {
     flexDirection: 'row',
