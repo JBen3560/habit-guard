@@ -253,6 +253,7 @@ function HabitModal({
                 display="spinner"
                 is24Hour={is24Hour}
                 onChange={handlePickerChange}
+                textColor={isDark ? '#ffffff' : '#000000'}
               />
             )}
 
