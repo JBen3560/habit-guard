@@ -99,7 +99,7 @@ export default function AuthScreen() {
     }
   };
 
-  const title = mode === 'sign-in' ? 'Sign in to Habit-Guard' : 'Create your account';
+  const title = mode === 'sign-in' ? 'Sign in to Habit Guard' : 'Create your account';
   const subtitle =
     mode === 'sign-in'
       ? 'Pick up your habits on any device.'
@@ -116,7 +116,7 @@ export default function AuthScreen() {
             <View style={[s.logoMark, { backgroundColor: C.card, borderColor: C.border }]}>
               <MaterialIcons name="shield" size={28} color={C.blue} />
             </View>
-            <Text style={[s.brand, { color: C.text }]}>Habit-Guard</Text>
+            <Text style={[s.brand, { color: C.text }]}>Habit Guard</Text>
             <Text style={[s.heroText, { color: C.sub }]}>{subtitle}</Text>
           </View>
 
