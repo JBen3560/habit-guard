@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About — Habit Guard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --blue: #3b82f6;
+        --green: #10b981;
+        --bg: #f9fafb;
+        --card: #ffffff;
+        --text: #111827;
+        --sub: #6b7280;
+        --border: #e5e7eb;
+        --logo-bg: #eff6ff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111827;
+          --card: #1f2937;
+          --text: #f9fafb;
+          --sub: #9ca3af;
+          --border: #374151;
+          --logo-bg: #1e3a5f;
+        }
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.07);
+        padding: 48px 40px;
+        text-align: center;
+        max-width: 480px;
+        width: 100%;
+      }
+      .logo-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        background: var(--logo-bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1);
+      }
+      .logo-mark .material-icons-round {
+        font-size: 32px;
+        color: var(--blue);
+      }
+      .brand-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sub);
+        margin-bottom: 24px;
+        letter-spacing: 0.2px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text);
+        margin-bottom: 12px;
+      }
+      .tagline {
+        color: var(--sub);
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 32px;
+      }
+      .features {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 32px;
+        text-align: left;
+      }
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .feature .material-icons-round {
+        font-size: 22px;
+        color: var(--blue);
+        flex-shrink: 0;
+      }
+      .feature-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .feature-sub {
+        font-size: 12px;
+        color: var(--sub);
+        margin-top: 2px;
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 28px 0;
+      }
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        color: var(--sub);
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .team {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .member {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+      }
+      .member-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        text-align: left;
+      }
+      .member-role {
+        font-size: 12px;
+        color: var(--sub);
+        text-align: left;
+        margin-top: 2px;
+      }
+      .member-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--blue);
+        text-decoration: none;
+      }
+      .member-link .material-icons-round {
+        font-size: 16px;
+      }
+      .repo-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--text);
+        color: var(--card);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 12px 24px;
+        border-radius: 12px;
+        transition: opacity 0.15s;
+      }
+      .repo-btn:hover {
+        opacity: 0.85;
+      }
+      .repo-btn .material-icons-round {
+        font-size: 18px;
+      }
+      .footer {
+        font-size: 13px;
+        color: var(--sub);
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .footer .material-icons-round {
+        font-size: 15px;
+        color: var(--blue);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <!-- Logo -->
+      <div class="logo-mark">
+        <span class="material-icons-round">shield</span>
+      </div>
+      <div class="brand-name">Habit Guard</div>
+
+      <!-- Heading -->
+      <h1>Build habits that stick.</h1>
+      <p class="tagline">
+        Habit Guard is a mobile app that helps you track daily habits, stay consistent, and earn
+        trophies as you hit your goals.
+        <!-- EDIT: replace with your real description -->
+      </p>
+
+      <!-- Features -->
+      <div class="features">
+        <div class="feature">
+          <span class="material-icons-round">check_circle</span>
+          <div>
+            <div class="feature-text">Daily habit tracking</div>
+            <div class="feature-sub">Mark habits complete or skipped each day</div>
+            <!-- EDIT -->
+          </div>
+        </div>
+        <div class="feature">
+          <span class="material-icons-round">emoji_events</span>
+          <div>
+            <div class="feature-text">Trophies &amp; achievements</div>
+            <div class="feature-sub">Unlock rewards as you build streaks</div>
+            <!-- EDIT -->
+          </div>
+        </div>
+        <div class="feature">
+          <span class="material-icons-round">group</span>
+          <div>
+            <div class="feature-text">Friends &amp; accountability</div>
+            <div class="feature-sub">See how your friends are tracking their habits</div>
+            <!-- EDIT -->
+          </div>
+        </div>
+        <div class="feature">
+          <span class="material-icons-round">insights</span>
+          <div>
+            <div class="feature-text">Progress overview</div>
+            <div class="feature-sub">Visualize your consistency over time</div>
+            <!-- EDIT -->
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Team -->
+      <div class="section-label">The Team — Runtime Terrors</div>
+      <div class="team">
+        <div class="member">
+          <div>
+            <div class="member-name">Miles</div>
+            <!-- EDIT: last name? -->
+            <div class="member-role"><!-- EDIT: role --></div>
+          </div>
+          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+        <div class="member">
+          <div>
+            <div class="member-name">Joey</div>
+            <div class="member-role"><!-- EDIT: role --></div>
+          </div>
+          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+        <div class="member">
+          <div>
+            <div class="member-name">Stephanie</div>
+            <div class="member-role"><!-- EDIT: role --></div>
+          </div>
+          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+        <div class="member">
+          <div>
+            <div class="member-name">Kylie</div>
+            <div class="member-role"><!-- EDIT: role --></div>
+          </div>
+          <a href="https://github.com/KylieKat17" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- Repo link -->
+      <a href="https://github.com/PLACEHOLDER/habit-guard" class="repo-btn" target="_blank">
+        <!-- EDIT: real repo URL -->
+        <span class="material-icons-round">code</span>
+        View Repository
+      </a>
+
+      <!-- Footer -->
+      <div class="footer">
+        <span class="material-icons-round">shield</span>
+        Habit Guard
+      </div>
+    </div>
+  </body>
+</html>
