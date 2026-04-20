@@ -29,6 +29,19 @@ See [LICENSE](./LICENSE) and [NOTICE.md](./NOTICE.md) for details.
 
 ---
 
+## Environment Setup
+
+This app requires a `.env` file in the project root to connect to the Supabase backend. **This file is not included in the repository.** Contact a team member to obtain the required values, then create the file as follows:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+The app will not function without these values.
+
+---
+
 ## Getting Started
 
 The Makefile provides a workaround for the lack of `npx` on the School of Computing machines (as discussed with Anna during standup). It installs `nvm` and Node locally without requiring `sudo`.
@@ -39,7 +52,7 @@ make run       # Start the app (runs install automatically if needed)
 make clean     # Remove node_modules
 ```
 
-> **Note:** `make install` uses `npm ci` to install dependencies exactly as specified in `package-lock.json`. All dependencies including Supabase, async storage, and gesture handling are handled automatically.
+> **Note:** `make install` uses `npm ci` to install dependencies exactly as specified in `package-lock.json`. All dependencies including Supabase, async storage, and gesture handling are handled automatically. You must still create the `.env` file manually as described above before running.
 
 To run without the Makefile (will not work on School of Computing machines):
 
