@@ -39,7 +39,7 @@ const EMPTY_FORM: HabitFormData = {
   title: '',
   category: 'Other',
   time: '08:00',
-  days: [true, true, true, true, true, true, true],
+  days: [false, false, false, false, false, false, false],
   active: true,
 };
 
@@ -96,7 +96,7 @@ function HabitModal({
               days: [...initial.days],
               active: initial.active,
             }
-          : { ...EMPTY_FORM, days: [true, true, true, true, true, true, true] },
+          : { ...EMPTY_FORM },
       );
       setWebTimeText(initial?.time ?? EMPTY_FORM.time);
     }
@@ -253,6 +253,7 @@ function HabitModal({
                 display="spinner"
                 is24Hour={is24Hour}
                 onChange={handlePickerChange}
+                textColor={isDark ? '#ffffff' : '#000000'}
               />
             )}
 
