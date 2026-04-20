@@ -17,3 +17,4 @@
 
 - [] remove active slider in the add habits page and the active column in the tasks page
 - [] add skipped_count which is the opposite of streak_count. only checked for trophy earning logic
+- [] update github about to: "A cross-platform mobile and web app for building sustainable habits — track daily progress, earn achievements, and keep friends accountable"
