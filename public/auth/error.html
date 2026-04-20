@@ -19,6 +19,28 @@
         --sub: #6b7280;
         --border: #e5e7eb;
         --error: #dc2626;
+        --logo-bg: #eff6ff;
+        --status-bg: #fef2f2;
+        --status-color: #dc2626;
+        --detail-bg: #fef2f2;
+        --detail-border: #fca5a5;
+        --detail-color: #dc2626;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111827;
+          --card: #1f2937;
+          --text: #f9fafb;
+          --sub: #9ca3af;
+          --border: #374151;
+          --error: #f87171;
+          --logo-bg: #1e3a5f;
+          --status-bg: #450a0a;
+          --status-color: #f87171;
+          --detail-bg: #450a0a;
+          --detail-border: #7f1d1d;
+          --detail-color: #f87171;
+        }
       }
       body {
         font-family:
@@ -47,7 +69,7 @@
         justify-content: center;
         width: 64px;
         height: 64px;
-        background: #eff6ff;
+        background: var(--logo-bg);
         border: 1px solid var(--border);
         border-radius: 18px;
         margin-bottom: 8px;
@@ -70,13 +92,13 @@
         justify-content: center;
         width: 72px;
         height: 72px;
-        background: #fef2f2;
+        background: var(--status-bg);
         border-radius: 50%;
         margin-bottom: 20px;
       }
       .status-icon .material-icons-round {
         font-size: 38px;
-        color: var(--error);
+        color: var(--status-color);
       }
       h1 {
         font-size: 26px;
@@ -94,11 +116,11 @@
       .error-detail {
         margin-top: 16px;
         padding: 10px 14px;
-        background: #fef2f2;
-        border: 1px solid #fca5a5;
+        background: var(--detail-bg);
+        border: 1px solid var(--detail-border);
         border-radius: 10px;
         font-size: 13px;
-        color: var(--error);
+        color: var(--detail-color);
         line-height: 1.5;
         text-align: left;
         display: none;

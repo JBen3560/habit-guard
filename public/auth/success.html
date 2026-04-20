@@ -19,6 +19,27 @@
         --text: #111827;
         --sub: #6b7280;
         --border: #e5e7eb;
+        --logo-bg: #eff6ff;
+        --status-bg: #d1fae5;
+        --status-color: #10b981;
+        --callout-bg: #d1fae5;
+        --callout-color: #065f46;
+        --callout-border: #6ee7b7;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111827;
+          --card: #1f2937;
+          --text: #f9fafb;
+          --sub: #9ca3af;
+          --border: #374151;
+          --logo-bg: #1e3a5f;
+          --status-bg: #064e3b;
+          --status-color: #34d399;
+          --callout-bg: #064e3b;
+          --callout-color: #6ee7b7;
+          --callout-border: #065f46;
+        }
       }
       body {
         font-family:
@@ -47,7 +68,7 @@
         justify-content: center;
         width: 64px;
         height: 64px;
-        background: #eff6ff;
+        background: var(--logo-bg);
         border: 1px solid var(--border);
         border-radius: 18px;
         margin-bottom: 8px;
@@ -70,13 +91,13 @@
         justify-content: center;
         width: 72px;
         height: 72px;
-        background: #d1fae5;
+        background: var(--status-bg);
         border-radius: 50%;
         margin-bottom: 20px;
       }
       .status-icon .material-icons-round {
         font-size: 38px;
-        color: var(--green);
+        color: var(--status-color);
       }
       h1 {
         font-size: 26px;
@@ -96,9 +117,9 @@
         align-items: center;
         gap: 8px;
         margin-top: 20px;
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #6ee7b7;
+        background: var(--callout-bg);
+        color: var(--callout-color);
+        border: 1px solid var(--callout-border);
         border-radius: 12px;
         padding: 12px 20px;
         font-size: 14px;

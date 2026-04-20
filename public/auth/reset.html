@@ -20,6 +20,28 @@
         --sub: #6b7280;
         --border: #e5e7eb;
         --error: #dc2626;
+        --logo-bg: #eff6ff;
+        --msg-error-bg: #fef2f2;
+        --msg-error-border: #fca5a5;
+        --msg-success-bg: #d1fae5;
+        --msg-success-border: #6ee7b7;
+        --msg-success-color: #065f46;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111827;
+          --card: #1f2937;
+          --text: #f9fafb;
+          --sub: #9ca3af;
+          --border: #374151;
+          --error: #f87171;
+          --logo-bg: #1e3a5f;
+          --msg-error-bg: #450a0a;
+          --msg-error-border: #7f1d1d;
+          --msg-success-bg: #064e3b;
+          --msg-success-border: #065f46;
+          --msg-success-color: #6ee7b7;
+        }
       }
       body {
         font-family:
@@ -48,7 +70,7 @@
         justify-content: center;
         width: 64px;
         height: 64px;
-        background: #eff6ff;
+        background: var(--logo-bg);
         border: 1px solid var(--border);
         border-radius: 18px;
         margin-bottom: 8px;
@@ -111,15 +133,15 @@
         text-align: left;
       }
       .message.error {
-        background: #fef2f2;
-        border: 1px solid #fca5a5;
+        background: var(--msg-error-bg);
+        border: 1px solid var(--msg-error-border);
         color: var(--error);
         display: block;
       }
       .message.success {
-        background: #d1fae5;
-        border: 1px solid #6ee7b7;
-        color: #065f46;
+        background: var(--msg-success-bg);
+        border: 1px solid var(--msg-success-border);
+        color: var(--msg-success-color);
         display: block;
       }
       .btn {
