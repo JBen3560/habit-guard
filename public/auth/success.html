@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Verified — Habit-Guard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
     <style>
       * {
         box-sizing: border-box;
@@ -40,7 +41,30 @@
         max-width: 420px;
         width: 100%;
       }
-      .icon {
+      .logo-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        background: #eff6ff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1);
+      }
+      .logo-mark .material-icons-round {
+        font-size: 32px;
+        color: var(--blue);
+      }
+      .brand-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sub);
+        margin-bottom: 28px;
+        letter-spacing: 0.2px;
+      }
+      .status-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -48,8 +72,11 @@
         height: 72px;
         background: #d1fae5;
         border-radius: 50%;
-        font-size: 36px;
         margin-bottom: 20px;
+      }
+      .status-icon .material-icons-round {
+        font-size: 38px;
+        color: var(--green);
       }
       h1 {
         font-size: 26px;
@@ -65,7 +92,9 @@
         margin-bottom: 8px;
       }
       .callout {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         margin-top: 20px;
         background: #d1fae5;
         color: #065f46;
@@ -76,28 +105,31 @@
         font-weight: 600;
         line-height: 1.5;
       }
-      .brand {
-        font-size: 13px;
-        color: #9ca3af;
-        margin-top: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
+      .callout .material-icons-round {
+        font-size: 18px;
       }
     </style>
   </head>
   <body>
     <div class="card">
-      <div class="icon">✅</div>
+      <div class="logo-mark">
+        <span class="material-icons-round">shield</span>
+      </div>
+      <div class="brand-name">Habit-Guard</div>
+
+      <div class="status-icon">
+        <span class="material-icons-round">check_circle</span>
+      </div>
       <h1>Email Verified!</h1>
       <p>Your Habit-Guard account is now active.</p>
       <p>
         Close this browser tab and return to <strong>Expo Go</strong> to sign in and start building
         your habits.
       </p>
-      <div class="callout">📱 Head back to Expo Go to continue</div>
-      <div class="brand">🛡️ Habit-Guard</div>
+      <div class="callout">
+        <span class="material-icons-round">smartphone</span>
+        Head back to Expo Go to continue
+      </div>
     </div>
   </body>
 </html>

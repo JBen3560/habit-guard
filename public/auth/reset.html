@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reset Password — Habit-Guard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
     <style>
       * {
         box-sizing: border-box;
@@ -41,7 +42,7 @@
         max-width: 420px;
         width: 100%;
       }
-      .logo {
+      .logo-mark {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -50,8 +51,19 @@
         background: #eff6ff;
         border: 1px solid var(--border);
         border-radius: 18px;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1);
+      }
+      .logo-mark .material-icons-round {
         font-size: 32px;
-        margin-bottom: 20px;
+        color: var(--blue);
+      }
+      .brand-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--sub);
+        margin-bottom: 28px;
+        letter-spacing: 0.2px;
       }
       h1 {
         font-size: 24px;
@@ -96,6 +108,7 @@
         font-size: 13px;
         line-height: 1.5;
         display: none;
+        text-align: left;
       }
       .message.error {
         background: #fef2f2;
@@ -110,7 +123,10 @@
         display: block;
       }
       .btn {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         width: 100%;
         margin-top: 20px;
         padding: 14px;
@@ -130,20 +146,18 @@
         opacity: 0.5;
         cursor: default;
       }
-      .brand {
-        font-size: 13px;
-        color: #9ca3af;
-        margin-top: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
+      .btn .material-icons-round {
+        font-size: 18px;
       }
     </style>
   </head>
   <body>
     <div class="card">
-      <div class="logo">🛡️</div>
+      <div class="logo-mark">
+        <span class="material-icons-round">shield</span>
+      </div>
+      <div class="brand-name">Habit-Guard</div>
+
       <h1>Reset Password</h1>
       <p class="subtitle">Enter a new password for your Habit-Guard account.</p>
 
@@ -155,14 +169,14 @@
 
       <div class="message" id="msg"></div>
 
-      <button class="btn" id="submitBtn" onclick="handleReset()">Update Password</button>
-
-      <div class="brand">🛡️ Habit-Guard</div>
+      <button class="btn" id="submitBtn" onclick="handleReset()">
+        <span class="material-icons-round">lock_reset</span>
+        Update Password
+      </button>
     </div>
 
     <script>
-      // Extract access_token from the URL fragment (Supabase puts it there)
-      const params = new URLSearchParams(window.location.hash.replace('#', '?'));
+      const params = new URLSearchParams(globalThis.location.hash.replace('#', '?'));
       const accessToken = params.get('access_token');
 
       async function handleReset() {
@@ -191,7 +205,7 @@
         }
 
         btn.disabled = true;
-        btn.textContent = 'Updating…';
+        btn.innerHTML = '<span class="material-icons-round">hourglass_top</span> Updating…';
 
         try {
           const SUPABASE_URL = 'https://qcjnkbbwytwytearfslk.supabase.co';
@@ -214,12 +228,12 @@
 
           msg.className = 'message success';
           msg.textContent = 'Password updated! You can now sign in to the app.';
-          btn.textContent = 'Done';
+          btn.innerHTML = '<span class="material-icons-round">check_circle</span> Done';
         } catch (err) {
           msg.className = 'message error';
           msg.textContent = err.message || 'Failed to update password. Please try again.';
           btn.disabled = false;
-          btn.textContent = 'Update Password';
+          btn.innerHTML = '<span class="material-icons-round">lock_reset</span> Update Password';
         }
       }
     </script>
