@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Verified — Habit-Guard</title>
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
       :root {
-        --blue: #3B82F6;
-        --green: #10B981;
-        --bg: #F9FAFB;
+        --blue: #3b82f6;
+        --green: #10b981;
+        --bg: #f9fafb;
         --card: #ffffff;
         --text: #111827;
-        --sub: #6B7280;
-        --border: #E5E7EB;
+        --sub: #6b7280;
+        --border: #e5e7eb;
       }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         background: var(--bg);
         color: var(--text);
         display: flex;
@@ -29,7 +34,7 @@
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.07);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.07);
         padding: 48px 40px;
         text-align: center;
         max-width: 420px;
@@ -39,48 +44,47 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 64px;
-        height: 64px;
-        background: #D1FAE5;
+        width: 72px;
+        height: 72px;
+        background: #d1fae5;
         border-radius: 50%;
-        font-size: 32px;
+        font-size: 36px;
         margin-bottom: 20px;
       }
       h1 {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 800;
         letter-spacing: -0.5px;
-        margin-bottom: 10px;
         color: var(--text);
+        margin-bottom: 12px;
       }
       p {
         color: var(--sub);
-        line-height: 1.6;
+        line-height: 1.7;
         font-size: 15px;
         margin-bottom: 8px;
       }
+      .callout {
+        display: inline-block;
+        margin-top: 20px;
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
       .brand {
         font-size: 13px;
-        color: #9CA3AF;
+        color: #9ca3af;
         margin-top: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
       }
-      .btn {
-        display: inline-block;
-        margin-top: 28px;
-        padding: 14px 28px;
-        background: var(--green);
-        color: #fff;
-        text-decoration: none;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 15px;
-        transition: opacity 0.15s;
-      }
-      .btn:hover { opacity: 0.88; }
     </style>
   </head>
   <body>
@@ -88,8 +92,11 @@
       <div class="icon">✅</div>
       <h1>Email Verified!</h1>
       <p>Your Habit-Guard account is now active.</p>
-      <p>Close this window and sign in to the app to start building your habits.</p>
-      <a href="#" class="btn">Open Habit-Guard</a>
+      <p>
+        Close this browser tab and return to <strong>Expo Go</strong> to sign in and start building
+        your habits.
+      </p>
+      <div class="callout">📱 Head back to Expo Go to continue</div>
       <div class="brand">🛡️ Habit-Guard</div>
     </div>
   </body>
