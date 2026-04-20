@@ -146,18 +146,23 @@
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 12px 16px;
+        gap: 12px;
+      }
+      .member-info {
+        text-align: left;
+        flex: 1;
+        min-width: 0;
       }
       .member-name {
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text);
-        text-align: left;
       }
       .member-role {
         font-size: 12px;
         color: var(--sub);
-        text-align: left;
-        margin-top: 2px;
+        margin-top: 3px;
+        line-height: 1.4;
       }
       .member-link {
         display: inline-flex;
@@ -167,6 +172,7 @@
         font-weight: 600;
         color: var(--blue);
         text-decoration: none;
+        flex-shrink: 0;
       }
       .member-link .material-icons-round {
         font-size: 16px;
@@ -218,7 +224,7 @@
       <p class="tagline">
         Habit Guard is a mobile app that helps you track daily habits, stay consistent, and earn
         trophies as you hit your goals.
-        <!-- EDIT: replace with your real description -->
+        <!-- EDIT: update description -->
       </p>
 
       <!-- Features -->
@@ -263,47 +269,62 @@
       <div class="section-label">The Team — Runtime Terrors</div>
       <div class="team">
         <div class="member">
-          <div>
-            <div class="member-name">Miles</div>
-            <!-- EDIT: last name? -->
-            <div class="member-role"><!-- EDIT: role --></div>
+          <div class="member-info">
+            <div class="member-name">Joey Benich</div>
+            <div class="member-role">
+              Head Developer · Project Manager · Backend &amp; Database Lead
+            </div>
           </div>
-          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
+          <a href="https://github.com/JBen3560" class="member-link" target="_blank">
             <span class="material-icons-round">open_in_new</span>GitHub
           </a>
         </div>
+
         <div class="member">
-          <div>
-            <div class="member-name">Joey</div>
-            <div class="member-role"><!-- EDIT: role --></div>
-          </div>
-          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
-            <span class="material-icons-round">open_in_new</span>GitHub
-          </a>
-        </div>
-        <div class="member">
-          <div>
-            <div class="member-name">Stephanie</div>
-            <div class="member-role"><!-- EDIT: role --></div>
-          </div>
-          <a href="https://github.com/PLACEHOLDER" class="member-link" target="_blank">
-            <span class="material-icons-round">open_in_new</span>GitHub
-          </a>
-        </div>
-        <div class="member">
-          <div>
-            <div class="member-name">Kylie</div>
-            <div class="member-role"><!-- EDIT: role --></div>
+          <div class="member-info">
+            <div class="member-name">Kylie Gilbert</div>
+            <div class="member-role">Head UI/UX Developer · Application &amp; Web</div>
           </div>
           <a href="https://github.com/KylieKat17" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+
+        <div class="member">
+          <div class="member-info">
+            <div class="member-name">Stephanie Justus</div>
+            <div class="member-role">
+              Head of Research &amp; Documentation · Lead Technical Writer · Frontend/UI Developer
+            </div>
+          </div>
+          <a href="https://github.com/sajustu" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+
+        <div class="member">
+          <div class="member-info">
+            <div class="member-name">Miles Rockow</div>
+            <div class="member-role">Context Researcher · Technical Writer</div>
+          </div>
+          <a href="https://github.com/WenLifeGivULemons" class="member-link" target="_blank">
+            <span class="material-icons-round">open_in_new</span>GitHub
+          </a>
+        </div>
+
+        <div class="member">
+          <div class="member-info">
+            <div class="member-name">Noah Samol</div>
+            <div class="member-role">Research &amp; Documentation Contributor</div>
+          </div>
+          <a href="https://github.com/nsamol13" class="member-link" target="_blank">
             <span class="material-icons-round">open_in_new</span>GitHub
           </a>
         </div>
       </div>
 
       <!-- Repo link -->
-      <a href="https://github.com/PLACEHOLDER/habit-guard" class="repo-btn" target="_blank">
-        <!-- EDIT: real repo URL -->
+      <a href="https://github.com/JBen3560/habit-guard" class="repo-btn" target="_blank">
         <span class="material-icons-round">code</span>
         View Repository
       </a>
