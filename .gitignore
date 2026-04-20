@@ -44,5 +44,3 @@ app-example
 /android
 
 app/confirm.tsx
-package-lock.json
-package.json
