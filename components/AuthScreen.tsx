@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -32,6 +32,15 @@ export default function AuthScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [messageTone, setMessageTone] = useState<'neutral' | 'error' | 'success'>('neutral');
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.location.hash === '#signup') {
+        setMode('sign-up');
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  }, []);
 
   const showMessage = (nextMessage: string, tone: 'neutral' | 'error' | 'success') => {
     setMessage(nextMessage);
