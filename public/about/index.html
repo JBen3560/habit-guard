@@ -20,6 +20,7 @@
         --sub: #6b7280;
         --border: #e5e7eb;
         --logo-bg: #eff6ff;
+        --nav-bg: #ffffff;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -29,60 +30,95 @@
           --sub: #9ca3af;
           --border: #374151;
           --logo-bg: #1e3a5f;
+          --nav-bg: #1f2937;
         }
       }
 
+      /* ── Nav bar ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: var(--nav-bg);
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        height: 56px;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 800;
+        font-size: 15px;
+        letter-spacing: -0.3px;
+      }
+      .nav-brand .material-icons-round {
+        font-size: 22px;
+        color: var(--blue);
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--sub);
+        text-decoration: none;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .nav-link:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+      .nav-link .material-icons-round {
+        font-size: 16px;
+      }
+      .nav-link.active {
+        color: var(--blue);
+        background: var(--logo-bg);
+      }
+      .nav-link.btn {
+        background: var(--blue);
+        color: #fff;
+        margin-left: 4px;
+      }
+      .nav-link.btn:hover {
+        opacity: 0.88;
+        color: #fff;
+        background: var(--blue);
+      }
+
+      /* ── Page body ── */
       body {
         font-family:
           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         background: var(--bg);
         color: var(--text);
-        min-height: 100vh;
-        padding: 32px 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        padding-top: 56px; /* height of fixed nav */
       }
 
       /* ── Page wrapper ── */
       .page {
-        width: 100%;
-        max-width: 960px;
-      }
-
-      /* ── Top bar ── */
-      .topbar {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 32px;
-      }
-      .logo-mark {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        height: 48px;
-        background: var(--logo-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1);
-        flex-shrink: 0;
-      }
-      .logo-mark .material-icons-round {
-        font-size: 26px;
-        color: var(--blue);
-      }
-      .brand-name {
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--text);
-        letter-spacing: -0.3px;
-      }
-      .brand-course {
-        font-size: 12px;
-        color: var(--sub);
-        margin-top: 1px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 24px 48px;
       }
 
       /* ── Main card ── */
@@ -94,11 +130,10 @@
         overflow: hidden;
       }
 
-      /* ── Two-column layout (desktop) ── */
+      /* ── Two-column layout ── */
       .layout {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        min-height: 520px;
       }
 
       .col-left {
@@ -112,11 +147,11 @@
 
       /* ── Hero ── */
       h1 {
-        font-size: 32px;
+        font-size: 34px;
         font-weight: 800;
         letter-spacing: -0.8px;
         color: var(--text);
-        line-height: 1.2;
+        line-height: 1.15;
         margin-bottom: 12px;
       }
       .tagline {
@@ -126,7 +161,7 @@
         margin-bottom: 28px;
       }
 
-      /* ── Features ── */
+      /* ── Features 2×2 grid ── */
       .features {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -188,6 +223,7 @@
         gap: 10px;
       }
       .member-info {
+        text-align: left;
         flex: 1;
         min-width: 0;
       }
@@ -257,26 +293,20 @@
 
       /* ── Mobile: single column ── */
       @media (max-width: 680px) {
-        body { padding: 20px 16px; }
+        .page { padding: 24px 16px 40px; }
 
-        .topbar { margin-bottom: 20px; }
+        .layout { grid-template-columns: 1fr; }
 
-        .layout {
-          grid-template-columns: 1fr;
-        }
         .col-left {
           padding: 32px 24px 28px;
           border-right: none;
           border-bottom: 1px solid var(--border);
         }
-        .col-right {
-          padding: 28px 24px 32px;
-        }
+        .col-right { padding: 28px 24px 32px; }
+
         h1 { font-size: 26px; }
 
-        .features {
-          grid-template-columns: 1fr;
-        }
+        .features { grid-template-columns: 1fr; }
 
         .footer-strip {
           flex-direction: column;
@@ -288,20 +318,34 @@
     </style>
   </head>
   <body>
-    <div class="page">
-
-      <!-- Top bar -->
-      <div class="topbar">
-        <div class="logo-mark">
-          <span class="material-icons-round">shield</span>
-        </div>
-        <div>
-          <div class="brand-name">Habit Guard</div>
-          <div class="brand-course">CPSC 4140 · Runtime Terrors</div>
-        </div>
+    <!-- Nav bar -->
+    <nav>
+      <a href="/about" class="nav-brand">
+        <span class="material-icons-round">shield</span>
+        Habit Guard
+      </a>
+      <div class="nav-links">
+        <a href="/about" class="nav-link active">
+          <span class="material-icons-round">info</span>
+          About
+        </a>
+        <a href="/video" class="nav-link">
+          <span class="material-icons-round">play_circle</span>
+          Video
+        </a>
+        <a href="https://habit-guard.netlify.app" class="nav-link">
+          <span class="material-icons-round">login</span>
+          Sign In
+        </a>
+        <a href="https://habit-guard.netlify.app" class="nav-link btn">
+          <span class="material-icons-round">person_add</span>
+          Create Account
+        </a>
       </div>
+    </nav>
 
-      <!-- Main card -->
+    <!-- Page content -->
+    <div class="page">
       <div class="card">
         <div class="layout">
 
@@ -311,6 +355,7 @@
             <p class="tagline">
               Habit Guard is a mobile app that helps you track daily habits, stay consistent,
               and earn trophies as you hit your goals.
+              <!-- EDIT: update description -->
             </p>
 
             <div class="features">
@@ -319,6 +364,7 @@
                 <div>
                   <div class="feature-text">Daily habit tracking</div>
                   <div class="feature-sub">Mark habits complete or skipped each day</div>
+                  <!-- EDIT -->
                 </div>
               </div>
               <div class="feature">
@@ -326,13 +372,15 @@
                 <div>
                   <div class="feature-text">Trophies &amp; achievements</div>
                   <div class="feature-sub">Unlock rewards as you build streaks</div>
+                  <!-- EDIT -->
                 </div>
               </div>
               <div class="feature">
                 <span class="material-icons-round">group</span>
                 <div>
                   <div class="feature-text">Friends &amp; accountability</div>
-                  <div class="feature-sub">See how your friends track their habits</div>
+                  <div class="feature-sub">See how your friends are tracking their habits</div>
+                  <!-- EDIT -->
                 </div>
               </div>
               <div class="feature">
@@ -340,6 +388,7 @@
                 <div>
                   <div class="feature-text">Progress overview</div>
                   <div class="feature-sub">Visualize your consistency over time</div>
+                  <!-- EDIT -->
                 </div>
               </div>
             </div>
@@ -347,7 +396,7 @@
 
           <!-- Right: team + repo -->
           <div class="col-right">
-            <div class="section-label">The Team</div>
+            <div class="section-label">The Team — Runtime Terrors</div>
             <div class="team">
               <div class="member">
                 <div class="member-info">
@@ -396,7 +445,8 @@
               </div>
             </div>
 
-            <a href="https://github.com/JBen3560/habit-guard" class="repo-btn" target="_blank">
+            <a href="https://github.com/KylieKat17/habit-guard" class="repo-btn" target="_blank">
+              <!-- EDIT: confirm repo URL -->
               <span class="material-icons-round">code</span>
               View Repository
             </a>
@@ -413,7 +463,6 @@
           <div>CPSC 4140 — Spring 2026</div>
         </div>
       </div>
-
     </div>
   </body>
 </html>
