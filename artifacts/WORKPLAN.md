@@ -2,7 +2,7 @@
 
 **Team 1: Runtime Terrors**
 Last updated: 2026-03-30
-Target: Usability-test-ready in ~1 week | 4/5 active developers
+Target: Usability-test-ready in ~1 week | 2/5 active developers
 
 ---
 
@@ -172,8 +172,8 @@ These touch nothing related to data and can be done in any order.
 
 - [ ] **Web bar chart bug** — 7-day progress bars show percentages but bars
       don't fill on web. The likely cause is `height: \`${pct}%\``inside a
-  flex container behaving differently on web. Switch to an explicit pixel
-  height calculated from a fixed container height, or use an`Animated`
+flex container behaving differently on web. Switch to an explicit pixel
+height calculated from a fixed container height, or use an`Animated`
       value
 - [ ] **Sort habits by time** — sort the `todayTasks` array by `task.time`
       (HH:MM string sort) before rendering, regardless of order in state
