@@ -1,6 +1,6 @@
-import { supabase } from './supabase';
-
 import { PROFILE_PHOTOS, type Friend } from '@/src/types';
+
+import { supabase } from './supabase';
 
 export type FriendStatus = 'pending' | 'accepted';
 
@@ -20,8 +20,6 @@ export type ProfileRow = {
   needs_nudge: boolean | null;
   avatar_url: string | null;
 };
-
-export type FriendRequest = FriendRow;
 
 async function getUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -49,7 +47,7 @@ async function getProfileByUsername(username: string): Promise<ProfileRow | null
     .maybeSingle();
 
   if (error) throw error;
-  return (data ?? null) as ProfileRow | null;
+  return data ?? null;
 }
 
 async function getProfilesByIds(profileIds: string[]): Promise<Map<string, ProfileRow>> {
@@ -108,7 +106,7 @@ async function getFriendRelation(userId: string, friendId: string): Promise<Frie
   if (forward.error) throw forward.error;
   if (reverse.error) throw reverse.error;
 
-  return (forward.data ?? reverse.data ?? null) as FriendRow | null;
+  return forward.data ?? reverse.data ?? null;
 }
 
 export async function getProfileByTag(tag: string): Promise<ProfileRow | null> {
@@ -146,7 +144,7 @@ export async function addFriendByTag(tag: string): Promise<FriendRow> {
     .single();
 
   if (error) throw error;
-  return data as FriendRow;
+  return data;
 }
 
 // Send friend request
@@ -176,7 +174,7 @@ export async function sendFriendRequest(friendId: string): Promise<FriendRow> {
     .single();
 
   if (error) throw error;
-  return data as FriendRow;
+  return data;
 }
 
 // Accept friend request
@@ -193,11 +191,11 @@ export async function acceptFriendRequest(requestId: string): Promise<FriendRow>
     .single();
 
   if (error) throw error;
-  return data as FriendRow;
+  return data;
 }
 
 // Get incoming friend requests
-export async function getIncomingRequests(): Promise<FriendRequest[]> {
+export async function getIncomingRequests(): Promise<FriendRow[]> {
   const userId = await getUserId();
 
   const { data, error } = await supabase
@@ -207,11 +205,11 @@ export async function getIncomingRequests(): Promise<FriendRequest[]> {
     .eq('status', 'pending');
 
   if (error) throw error;
-  return data as FriendRequest[];
+  return data ?? [];
 }
 
 // Get outgoing friend requests
-export async function getOutgoingRequests(): Promise<FriendRequest[]> {
+export async function getOutgoingRequests(): Promise<FriendRow[]> {
   const userId = await getUserId();
 
   const { data, error } = await supabase
@@ -221,7 +219,7 @@ export async function getOutgoingRequests(): Promise<FriendRequest[]> {
     .eq('status', 'pending');
 
   if (error) throw error;
-  return data as FriendRequest[];
+  return data ?? [];
 }
 
 // Get accepted friends as display cards
@@ -236,7 +234,7 @@ export async function getFriends(): Promise<Friend[]> {
 
   if (error) throw error;
 
-  const relationRows = (data ?? []) as FriendRow[];
+  const relationRows = data ?? [];
   const profileIds = relationRows.map((relation) =>
     relation.user_id === userId ? relation.friend_id : relation.user_id,
   );
@@ -250,7 +248,7 @@ export async function getFriends(): Promise<Friend[]> {
     .eq('active', true);
 
   const taskCountMap = new Map<string, number>();
-  for (const t of (taskData ?? []) as { user_id: string }[]) {
+  for (const t of taskData ?? []) {
     taskCountMap.set(t.user_id, (taskCountMap.get(t.user_id) ?? 0) + 1);
   }
 

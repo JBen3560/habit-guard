@@ -832,7 +832,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           onPress={() => router.push('/appearance')}
         >
           <MaterialIcons name="palette" size={20} color={C.sub} style={{ marginRight: 14 }} />
-          { /* Apperance.tsx = Preferences Screen */ }
+          { /* Appearance.tsx = Preferences Screen */ }
           <Text style={[s.settingsLabel, { color: C.text }]}>Preferences</Text>
           <MaterialIcons name="chevron-right" size={22} color={C.sub} />
         </TouchableOpacity>
