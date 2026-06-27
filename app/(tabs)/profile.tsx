@@ -1,7 +1,9 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -492,6 +494,8 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
   const [username, setUsername] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const isLoggedOutError = (error: unknown) =>
     error instanceof Error && error.message === 'User not logged in';
@@ -500,13 +504,14 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
     if (!user) return;
     supabase
       .from('profiles')
-      .select('username, display_name, description')
+      .select('username, display_name, description, avatar_url')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.username) setUsername(data.username);
         if (data?.display_name) setDisplayName(data.display_name);
         if (data?.description) setDescription(data.description);
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
       });
   }, [user]);
 
@@ -594,6 +599,56 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
     setDescription(newDescription);
   };
 
+  const pickAndUploadAvatar = async () => {
+    if (!user) return;
+
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert('Permission needed', 'Allow access to your photo library to set a profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+    const mimeType = asset.mimeType ?? 'image/jpeg';
+    const ext = mimeType.split('/')[1] ?? 'jpeg';
+    const filePath = `${user.id}/avatar.${ext}`;
+
+    setUploadingAvatar(true);
+    try {
+      const arrayBuffer = await fetch(asset.uri).then((r) => r.arrayBuffer());
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, arrayBuffer, { contentType: mimeType, upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+    } catch {
+      Alert.alert('Upload failed', 'Could not update your profile picture. Please try again.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const addFriend = async (tag: string) => {
     try {
       const normalizedTag = tag.startsWith('@') ? tag : `@${tag}`;
@@ -614,8 +669,24 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           <TouchableOpacity style={s.editProfileBtn} onPress={() => setEditProfileVisible(true)}>
             <MaterialIcons name="edit" size={18} color={C.sub} />
           </TouchableOpacity>
-          <View style={s.profileAvatarWrap}>
-            <MaterialIcons name="person" size={48} color="#6366F1" />
+          <View style={s.profileAvatarContainer}>
+            <TouchableOpacity
+              style={s.profileAvatarWrap}
+              onPress={() => { void pickAndUploadAvatar(); }}
+              disabled={uploadingAvatar}
+              activeOpacity={0.85}
+            >
+              {uploadingAvatar ? (
+                <ActivityIndicator size="large" color="#6366F1" />
+              ) : avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={s.profileAvatarImg} resizeMode="cover" />
+              ) : (
+                <MaterialIcons name="person" size={48} color="#6366F1" />
+              )}
+            </TouchableOpacity>
+            <View style={[s.avatarCameraBtn, { borderColor: C.card }]}>
+              <MaterialIcons name="camera-alt" size={12} color="#fff" />
+            </View>
           </View>
           <Text style={[s.profileName, { color: C.text }]}>{MY_NAME}</Text>
           <View style={s.profileTagRow}>
@@ -825,15 +896,30 @@ const s = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
   },
+  profileAvatarContainer: {
+    marginBottom: 12,
+  },
   profileAvatarWrap: {
     width: 88,
     height: 88,
     borderRadius: 44,
     overflow: 'hidden',
-    marginBottom: 12,
     backgroundColor: '#EEF2FF',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  profileAvatarImg: { width: '100%', height: '100%' },
+  avatarCameraBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#3B82F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
   },
   friendProfileAvatarWrap: {
     width: 96,
