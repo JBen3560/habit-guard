@@ -130,10 +130,10 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       <View style={[s.chartCard, { backgroundColor: C.card }]}>
         <View style={s.chartBars}>
-          {weeklyData.map((d, i) => {
+          {weeklyData.map((d) => {
             const color = d.rate >= 0.8 ? C.green : d.rate >= 0.5 ? C.blue : C.yellow;
             return (
-              <View key={i} style={s.barCol}>
+              <View key={d.date} style={s.barCol}>
                 <Text style={[s.barPct, { color: C.sub }]}>
                   {d.total > 0 ? `${Math.round(d.rate * 100)}%` : '–'}
                 </Text>
@@ -159,8 +159,8 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
 
       <View style={[s.heatmapCard, { backgroundColor: C.card }]}>
         <View style={s.heatmapGrid}>
-          {liveHistory.map((day, i) => (
-            <View key={i} style={s.heatCell}>
+          {liveHistory.map((day) => (
+            <View key={day.date} style={s.heatCell}>
               <View style={[s.heatSquare, { backgroundColor: heatColor(day.rate, isDark) }]} />
               <Text style={[s.heatNum, { color: C.sub }]}>{day.dayNum}</Text>
             </View>
@@ -169,8 +169,8 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
         {/* Legend */}
         <View style={s.heatLegend}>
           <Text style={[s.legendLabel, { color: C.sub }]}>Less</Text>
-          {[0, 0.3, 0.6, 0.85, 1].map((v, i) => (
-            <View key={i} style={[s.legendSquare, { backgroundColor: heatColor(v, isDark) }]} />
+          {[0, 0.3, 0.6, 0.85, 1].map((v) => (
+            <View key={v} style={[s.legendSquare, { backgroundColor: heatColor(v, isDark) }]} />
           ))}
           <Text style={[s.legendLabel, { color: C.sub }]}>More</Text>
         </View>

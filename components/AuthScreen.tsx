@@ -259,9 +259,9 @@ function useAuthForm() {
   const [localAvatarMimeType, setLocalAvatarMimeType] = useState('image/jpeg');
 
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.hash === '#signup') {
+    if (Platform.OS === 'web' && globalThis.location?.hash === '#signup') {
       setMode('sign-up');
-      window.history.replaceState(null, '', window.location.pathname);
+      globalThis.history?.replaceState(null, '', globalThis.location.pathname);
     }
   }, []);
 
