@@ -120,7 +120,7 @@ export default function AuthScreen() {
       }
 
       // Upload avatar if one was selected and we have an active session
-      if (localAvatarUri && data.session && data.user) {
+      if (localAvatarUri && data.user) {
         try {
           const ext = localAvatarMimeType.split('/')[1] ?? 'jpeg';
           const filePath = `${data.user.id}/avatar.${ext}`;
