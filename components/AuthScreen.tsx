@@ -41,7 +41,7 @@ async function uploadAvatar(userId: string, uri: string, mimeType: string): Prom
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function VerificationBanner({ email, onDismiss }: { email: string; onDismiss: () => void }) {
+function VerificationBanner({ email, onDismiss }: Readonly<{ email: string; onDismiss: () => void }>) {
   return (
     <View style={s.verifyBanner}>
       <View style={s.verifyIconWrap}>
@@ -62,7 +62,7 @@ function VerificationBanner({ email, onDismiss }: { email: string; onDismiss: ()
   );
 }
 
-function AvatarPicker({ uri, onPress, C }: { uri: string | null; onPress: () => void; C: Colors }) {
+function AvatarPicker({ uri, onPress, C }: Readonly<{ uri: string | null; onPress: () => void; C: Colors }>) {
   return (
     <View style={s.avatarPickerWrap}>
       <View style={s.avatarPickerContainer}>
@@ -91,14 +91,14 @@ function SignInFields({
   onChangePassword,
   onSubmit,
   C,
-}: {
+}: Readonly<{
   loginUsername: string;
   password: string;
   onChangeUsername: (v: string) => void;
   onChangePassword: (v: string) => void;
   onSubmit: () => void;
   C: Colors;
-}) {
+}>) {
   return (
     <>
       <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
@@ -146,7 +146,7 @@ function SignUpFields({
   onChangePassword,
   onSubmit,
   C,
-}: {
+}: Readonly<{
   email: string;
   displayName: string;
   username: string;
@@ -159,7 +159,7 @@ function SignUpFields({
   onChangePassword: (v: string) => void;
   onSubmit: () => void;
   C: Colors;
-}) {
+}>) {
   return (
     <>
       <Text style={[s.fieldLabel, { color: C.sub }]}>EMAIL</Text>
@@ -230,10 +230,22 @@ function SignUpFields({
   );
 }
 
-function MessageBox({ message, tone, C }: { message: string; tone: MessageTone; C: Colors }) {
+function getBorderColor(tone: MessageTone, border: string): string {
+  if (tone === 'error') return '#FCA5A5';
+  if (tone === 'success') return '#86EFAC';
+  return border;
+}
+
+function getTextColor(tone: MessageTone, green: string, sub: string): string {
+  if (tone === 'error') return '#DC2626';
+  if (tone === 'success') return green;
+  return sub;
+}
+
+function MessageBox({ message, tone, C }: Readonly<{ message: string; tone: MessageTone; C: Colors }>) {
   const bgColor = tone === 'error' ? '#DC262612' : `${C.blue}12`;
-  const borderColor = tone === 'error' ? '#FCA5A5' : tone === 'success' ? '#86EFAC' : C.border;
-  const textColor = tone === 'error' ? '#DC2626' : tone === 'success' ? C.green : C.sub;
+  const borderColor = getBorderColor(tone, C.border);
+  const textColor = getTextColor(tone, C.green, C.sub);
   return (
     <View style={[s.messageBox, { backgroundColor: bgColor, borderColor }]}>
       <Text style={[s.messageText, { color: textColor }]}>{message}</Text>

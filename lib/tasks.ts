@@ -1,8 +1,7 @@
-import { supabase } from './supabase';
+import { CATEGORY_META, INITIAL_TASKS } from '@/src/mockData';
+import { CATEGORY_COLORS, type Category, type Task } from '@/src/types';
 
-import { CATEGORY_META, INITIAL_TASKS } from '../src/mockData';
-import type { Task } from '../src/types';
-import { CATEGORY_COLORS, type Category } from '../src/types';
+import { supabase } from './supabase';
 
 // Raw DB row shapes
 
@@ -207,7 +206,7 @@ export async function incrementTaskSkippedCount(id: string): Promise<void> {
 
   if (error) throw error;
 
-  const current = (data as { skipped_count: number | null }).skipped_count ?? 0;
+  const current = data?.skipped_count ?? 0;
   const { error: updateError } = await supabase
     .from('tasks')
     .update({ skipped_count: current + 1 })
@@ -276,7 +275,7 @@ export async function getConsecutiveAllSkippedDays(maxDays = 7): Promise<number>
 
     const allSkipped = scheduledTaskIds.every((taskId) => {
       const completion = completionMap.get(`${date}|${taskId}`);
-      return Boolean(completion?.skipped_once) && !Boolean(completion?.completed_once);
+      return !!completion?.skipped_once && !completion?.completed_once;
     });
 
     if (!allSkipped) break;
@@ -318,15 +317,15 @@ export async function getProgressData(days = 28): Promise<{
   if (taskError) throw taskError;
   if (completionError) throw completionError;
 
-  const activeTasks = (taskRows ?? []) as Array<{
+  const activeTasks = (taskRows ?? []) as {
     id: string;
     category: Category;
     days: boolean[];
     active: boolean;
-  }>;
+  }[];
 
   const completionMap = new Map<string, boolean>();
-  for (const row of (completionRows ?? []) as Array<{ task_id: string; date: string; completed: boolean }>) {
+  for (const row of (completionRows ?? []) as { task_id: string; date: string; completed: boolean }[]) {
     completionMap.set(`${row.date}|${row.task_id}`, Boolean(row.completed));
   }
 

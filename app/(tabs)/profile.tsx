@@ -47,8 +47,14 @@ type TodayCategoryStat = {
   total: number;
 };
 
+function ProfileAvatarContent({ uploading, url }: Readonly<{ uploading: boolean; url: string | null }>) {
+  if (uploading) return <ActivityIndicator size="large" color="#6366F1" />;
+  if (url) return <Image source={{ uri: url }} style={s.profileAvatarImg} resizeMode="cover" />;
+  return <MaterialIcons name="person" size={48} color="#6366F1" />;
+}
+
 //  Progress section with a 7-day bar chart, 28-day heatmap, and category breakdowns with progress bars
-function ProgressSection({ tasks }: { tasks: Task[] }) {
+function ProgressSection({ tasks }: Readonly<{ tasks: Task[] }>) {
   const { isDark } = useTheme();
   const C = getColors(isDark);
   const [history, setHistory] = useState<ProgressDay[]>([]);
@@ -78,7 +84,7 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
     const total = todayScheduled.length;
     const completed = todayScheduled.filter((t) => t.completedToday).length;
     const patched = [...history];
-    const last = patched[patched.length - 1];
+    const last = patched.at(-1)!;
     patched[patched.length - 1] = {
       ...last,
       completed,
@@ -131,7 +137,9 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
       <View style={[s.chartCard, { backgroundColor: C.card }]}>
         <View style={s.chartBars}>
           {weeklyData.map((d) => {
-            const color = d.rate >= 0.8 ? C.green : d.rate >= 0.5 ? C.blue : C.yellow;
+            let color = C.yellow;
+            if (d.rate >= 0.8) color = C.green;
+            else if (d.rate >= 0.5) color = C.blue;
             return (
               <View key={d.date} style={s.barCol}>
                 <Text style={[s.barPct, { color: C.sub }]}>
@@ -677,13 +685,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
               disabled={uploadingAvatar}
               activeOpacity={0.85}
             >
-              {uploadingAvatar ? (
-                <ActivityIndicator size="large" color="#6366F1" />
-              ) : avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={s.profileAvatarImg} resizeMode="cover" />
-              ) : (
-                <MaterialIcons name="person" size={48} color="#6366F1" />
-              )}
+              <ProfileAvatarContent uploading={uploadingAvatar} url={avatarUrl} />
             </TouchableOpacity>
             <View style={[s.avatarCameraBtn, { borderColor: C.card }]}>
               <MaterialIcons name="camera-alt" size={12} color="#fff" />
@@ -734,31 +736,24 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
         {friends.map((friend) => {
           const needsNudge = friend.needsNudge;
 
+          const handleRemove = async () => {
+            try {
+              await removeFriend(friend.relationId ?? friend.profileId ?? friend.id);
+              await refreshFriends();
+            } catch (error) {
+              Alert.alert('Could not remove friend', error instanceof Error ? error.message : 'Try again.');
+            }
+          };
+
+          const confirmRemove = () => Alert.alert('Remove Friend', `Remove ${friend.name}?`, [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Remove', style: 'destructive', onPress: () => { void handleRemove(); } },
+          ]);
+
           const renderRightActions = () => (
             <TouchableOpacity
               style={s.swipeDelete}
-              onPress={() =>
-                Alert.alert('Remove Friend', `Remove ${friend.name}?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Remove',
-                    style: 'destructive',
-                    onPress: () => {
-                      void (async () => {
-                        try {
-                          await removeFriend(friend.relationId ?? friend.profileId ?? friend.id);
-                          await refreshFriends();
-                        } catch (error) {
-                          Alert.alert(
-                            'Could not remove friend',
-                            error instanceof Error ? error.message : 'Try again.',
-                          );
-                        }
-                      })();
-                    },
-                  },
-                ])
-              }
+              onPress={confirmRemove}
             >
               <MaterialIcons name="person-remove" size={22} color="#fff" />
               <Text style={s.swipeDeleteText}>Remove</Text>
