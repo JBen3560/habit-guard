@@ -1,7 +1,10 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,6 +16,7 @@ import {
 } from 'react-native';
 
 import { signInWithUsername, signUp } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/src/context/ThemeContext';
 import { getColors } from '@/src/types';
 
@@ -32,6 +36,8 @@ export default function AuthScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [messageTone, setMessageTone] = useState<'neutral' | 'error' | 'success'>('neutral');
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [localAvatarUri, setLocalAvatarUri] = useState<string | null>(null);
+  const [localAvatarMimeType, setLocalAvatarMimeType] = useState('image/jpeg');
 
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -45,6 +51,24 @@ export default function AuthScreen() {
   const showMessage = (nextMessage: string, tone: 'neutral' | 'error' | 'success') => {
     setMessage(nextMessage);
     setMessageTone(tone);
+  };
+
+  const pickAvatar = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert('Permission needed', 'Allow access to your photo library to set a profile picture.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    setLocalAvatarUri(asset.uri);
+    setLocalAvatarMimeType(asset.mimeType ?? 'image/jpeg');
   };
 
   const handleSubmit = async () => {
@@ -93,6 +117,24 @@ export default function AuthScreen() {
       if (error) {
         showMessage(error.message, 'error');
         return;
+      }
+
+      // Upload avatar if one was selected and we have an active session
+      if (localAvatarUri && data.session && data.user) {
+        try {
+          const ext = localAvatarMimeType.split('/')[1] ?? 'jpeg';
+          const filePath = `${data.user.id}/avatar.${ext}`;
+          const arrayBuffer = await fetch(localAvatarUri).then((r) => r.arrayBuffer());
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, arrayBuffer, { contentType: localAvatarMimeType, upsert: true });
+          if (!uploadError) {
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+            await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', data.user.id);
+          }
+        } catch {
+          // Non-fatal — avatar can be set later from the profile tab
+        }
       }
 
       if (data.session) {
@@ -155,6 +197,30 @@ export default function AuthScreen() {
                 ? 'Enter your username and password.'
                 : 'Your email is only needed once to create your account.'}
             </Text>
+
+            {mode === 'sign-up' ? (
+              <View style={s.avatarPickerWrap}>
+                <View style={s.avatarPickerContainer}>
+                  <TouchableOpacity
+                    style={s.avatarPickerCircle}
+                    onPress={() => { void pickAvatar(); }}
+                    activeOpacity={0.8}
+                  >
+                    {localAvatarUri ? (
+                      <Image source={{ uri: localAvatarUri }} style={s.avatarPickerImg} resizeMode="cover" />
+                    ) : (
+                      <MaterialIcons name="person" size={36} color="#6366F1" />
+                    )}
+                  </TouchableOpacity>
+                  <View style={[s.avatarCameraOverlay, { backgroundColor: C.blue, borderColor: C.card }]}>
+                    <MaterialIcons name="camera-alt" size={11} color="#fff" />
+                  </View>
+                </View>
+                <Text style={[s.avatarPickerHint, { color: C.sub }]}>
+                  {localAvatarUri ? 'Tap to change photo' : 'Add a photo (optional)'}
+                </Text>
+              </View>
+            ) : null}
 
             {mode === 'sign-in' ? (
               <>
@@ -306,6 +372,8 @@ export default function AuthScreen() {
                   setUsername('');
                   setDescription('');
                   setEmail('');
+                  setLocalAvatarUri(null);
+                  setLocalAvatarMimeType('image/jpeg');
                 } else {
                   setLoginUsername('');
                 }
@@ -450,4 +518,38 @@ const s = StyleSheet.create({
   verifyText: { fontSize: 13, color: '#166534', lineHeight: 18 },
   verifyEmail: { fontWeight: '700' },
   verifyDismiss: { padding: 4, flexShrink: 0 },
+
+  avatarPickerWrap: {
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 20,
+  },
+  avatarPickerContainer: {
+    position: 'relative',
+  },
+  avatarPickerCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarPickerImg: { width: '100%', height: '100%' },
+  avatarCameraOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+  },
+  avatarPickerHint: {
+    marginTop: 8,
+    fontSize: 12,
+  },
 });
