@@ -21,6 +21,7 @@ import CategoryPill from '@/components/CategoryPill';
 import DayToggle from '@/components/DayToggle';
 import ProgressRing from '@/components/ProgressRing';
 import { createTask, deleteTask, updateTask } from '@/lib/tasks';
+import { useDaysDefault } from '@/src/context/DaysDefaultContext';
 import { useTheme } from '@/src/context/ThemeContext';
 import { useTimeFormat } from '@/src/context/TimeFormatContext';
 import { CATEGORY_META } from '@/src/mockData';
@@ -80,6 +81,7 @@ function HabitModal({
 }>) {
   const { isDark } = useTheme();
   const { formatTime, is24Hour } = useTimeFormat();
+  const { daysDefault } = useDaysDefault();
   const C = getColors(isDark);
   const [form, setForm] = useState<HabitFormData>(EMPTY_FORM);
   const [webTimeText, setWebTimeText] = useState('');
@@ -96,11 +98,11 @@ function HabitModal({
               days: [...initial.days],
               active: initial.active,
             }
-          : { ...EMPTY_FORM },
+          : { ...EMPTY_FORM, days: Array(7).fill(daysDefault) },
       );
       setWebTimeText(initial?.time ?? EMPTY_FORM.time);
     }
-  }, [visible, initial]);
+  }, [visible, initial, daysDefault]);
 
   const toggleDay = (i: number) => {
     const d = [...form.days];

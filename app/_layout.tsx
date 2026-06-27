@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider } from "@/src/context/AuthContext";
+import { DaysDefaultProvider } from "@/src/context/DaysDefaultContext";
 import { ThemeProvider, useTheme } from "@/src/context/ThemeContext";
 import { TimeFormatProvider } from "@/src/context/TimeFormatContext";
 
@@ -38,9 +39,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <TimeFormatProvider>
-            <AuthProvider>
-              <AppShell />
-            </AuthProvider>
+            <DaysDefaultProvider>
+              <AuthProvider>
+                <AppShell />
+              </AuthProvider>
+            </DaysDefaultProvider>
           </TimeFormatProvider>
         </ThemeProvider>
       </SafeAreaProvider>
