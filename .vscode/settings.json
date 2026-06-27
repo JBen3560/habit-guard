@@ -32,5 +32,5 @@
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
-  "cSpell.words": ["supabase"]
+  "cSpell.words": ["supabase", "Swipeable"]
 }

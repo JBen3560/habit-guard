@@ -13,7 +13,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ScrollView, Swipeable } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { addFriendByTag, getFriends, removeFriend } from '@/lib/friends';
@@ -60,8 +61,8 @@ function ProgressSection({ tasks }: { tasks: Task[] }) {
         if (!active) return;
         setHistory(data.history);
       })
-      .catch((error) => {
-        console.error('Failed to load progress data', error);
+      .catch(() => {
+        // progress data unavailable — UI shows empty state
       });
 
     return () => {
@@ -536,7 +537,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           return;
         }
 
-        console.error('Failed to load friends', error);
+        throw error;
       });
 
     return () => {
@@ -765,7 +766,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
           );
 
           return (
-            <Swipeable
+            <ReanimatedSwipeable
               key={friend.id}
               renderRightActions={renderRightActions}
               overshootRight={false}
@@ -818,7 +819,7 @@ export default function ProfileTab({ tasks, friends, setFriends }: Props) {
                 )}
                 <MaterialIcons name="chevron-right" size={22} color={C.sub} />
               </TouchableOpacity>
-            </Swipeable>
+            </ReanimatedSwipeable>
           );
         })}
 
