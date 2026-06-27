@@ -78,11 +78,6 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 
 // Static data
 
-export const PROFILE_PHOTOS = {
-    cplaue: require('../../assets/avatars/cplaue.png') as ImageSourcePropType,
-    agalean: require('../../assets/avatars/agalean.png') as ImageSourcePropType,
-};
-
 export const INITIAL_TROPHIES: Trophy[] = [
     { id: 't1', title: 'First Step',       description: 'Complete your first habit',        icon: '👟',   type: 'bronze', earned: false                                                                    },
     { id: 't2', title: 'Sennight Soldier', description: '7-day streak on any habit',        icon: '⚔️',  type: 'silver', earned: false                                                                    },

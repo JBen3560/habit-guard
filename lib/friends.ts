@@ -1,4 +1,4 @@
-import { PROFILE_PHOTOS, type Friend } from '@/src/types';
+import { type Friend } from '@/src/types';
 
 import { supabase } from './supabase';
 
@@ -31,10 +31,6 @@ function normalizeUsername(value: string): string {
   return value.trim().replace(/^@+/, '');
 }
 
-function resolvePhoto(username: string | null | undefined) {
-  if (!username) return undefined;
-  return PROFILE_PHOTOS[username as keyof typeof PROFILE_PHOTOS];
-}
 
 async function getProfileByUsername(username: string): Promise<ProfileRow | null> {
   const normalizedUsername = normalizeUsername(username);
@@ -81,7 +77,7 @@ function relationToFriend(relation: FriendRow, profile: ProfileRow, userId: stri
     tag: `@${normalizeUsername(friendUsername)}`,
     streakDays: 0,
     needsNudge: profile.needs_nudge ?? false,
-    photo: profile.avatar_url ? { uri: profile.avatar_url } : resolvePhoto(profile.username),
+    photo: profile.avatar_url ? { uri: profile.avatar_url } : undefined,
     tasks: 0,
     bio: profile.description ?? undefined,
   };
