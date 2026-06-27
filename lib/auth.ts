@@ -28,8 +28,8 @@ export async function signUp(email: string, password: string, options: SignUpOpt
 
   try {
     await seedStarterTasks(data.user.id);
-  } catch (error) {
-    return { data, error };
+  } catch (e) {
+    return { data, error: e instanceof Error ? e : new Error('Failed to seed starter tasks') };
   }
 
   return { data, error: null };

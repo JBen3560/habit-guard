@@ -21,10 +21,229 @@ import { useTheme } from '@/src/context/ThemeContext';
 import { getColors } from '@/src/types';
 
 type Mode = 'sign-in' | 'sign-up';
+type Colors = ReturnType<typeof getColors>;
+type MessageTone = 'neutral' | 'error' | 'success';
 
-export default function AuthScreen() {
-  const { isDark } = useTheme();
-  const C = getColors(isDark);
+// ─── Utility ──────────────────────────────────────────────────────────────────
+
+async function uploadAvatar(userId: string, uri: string, mimeType: string): Promise<void> {
+  const ext = mimeType.split('/')[1] ?? 'jpeg';
+  const filePath = `${userId}/avatar.${ext}`;
+  const arrayBuffer = await fetch(uri).then((r) => r.arrayBuffer());
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, arrayBuffer, { contentType: mimeType, upsert: true });
+  if (!uploadError) {
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId);
+  }
+}
+
+// ─── Sub-components ────────────────────────────────────────────────────────────
+
+function VerificationBanner({ email, onDismiss }: { email: string; onDismiss: () => void }) {
+  return (
+    <View style={s.verifyBanner}>
+      <View style={s.verifyIconWrap}>
+        <MaterialIcons name="mark-email-unread" size={26} color="#166534" />
+      </View>
+      <View style={s.verifyBody}>
+        <Text style={s.verifyTitle}>Check your inbox!</Text>
+        <Text style={s.verifyText}>
+          We sent a confirmation link to{' '}
+          <Text style={s.verifyEmail}>{email}</Text>
+          . Click the link to verify your account, then sign in below.
+        </Text>
+      </View>
+      <TouchableOpacity onPress={onDismiss} style={s.verifyDismiss}>
+        <MaterialIcons name="close" size={18} color="#166534" />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function AvatarPicker({ uri, onPress, C }: { uri: string | null; onPress: () => void; C: Colors }) {
+  return (
+    <View style={s.avatarPickerWrap}>
+      <View style={s.avatarPickerContainer}>
+        <TouchableOpacity style={s.avatarPickerCircle} onPress={onPress} activeOpacity={0.8}>
+          {uri ? (
+            <Image source={{ uri }} style={s.avatarPickerImg} resizeMode="cover" />
+          ) : (
+            <MaterialIcons name="person" size={36} color="#6366F1" />
+          )}
+        </TouchableOpacity>
+        <View style={[s.avatarCameraOverlay, { backgroundColor: C.blue, borderColor: C.card }]}>
+          <MaterialIcons name="camera-alt" size={11} color="#fff" />
+        </View>
+      </View>
+      <Text style={[s.avatarPickerHint, { color: C.sub }]}>
+        {uri ? 'Tap to change photo' : 'Add a photo (optional)'}
+      </Text>
+    </View>
+  );
+}
+
+function SignInFields({
+  loginUsername,
+  password,
+  onChangeUsername,
+  onChangePassword,
+  onSubmit,
+  C,
+}: {
+  loginUsername: string;
+  password: string;
+  onChangeUsername: (v: string) => void;
+  onChangePassword: (v: string) => void;
+  onSubmit: () => void;
+  C: Colors;
+}) {
+  return (
+    <>
+      <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={loginUsername}
+        onChangeText={onChangeUsername}
+        placeholder="your_username"
+        placeholderTextColor={C.sub}
+        autoCapitalize="none"
+        autoCorrect={false}
+        textContentType="username"
+        autoComplete="username"
+        returnKeyType="next"
+      />
+      <Text style={[s.fieldLabel, { color: C.sub }]}>PASSWORD</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={password}
+        onChangeText={onChangePassword}
+        placeholder="At least 6 characters"
+        placeholderTextColor={C.sub}
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry
+        textContentType="password"
+        autoComplete="password"
+        returnKeyType="done"
+        onSubmitEditing={onSubmit}
+      />
+    </>
+  );
+}
+
+function SignUpFields({
+  email,
+  displayName,
+  username,
+  description,
+  password,
+  onChangeEmail,
+  onChangeDisplayName,
+  onChangeUsername,
+  onChangeDescription,
+  onChangePassword,
+  onSubmit,
+  C,
+}: {
+  email: string;
+  displayName: string;
+  username: string;
+  description: string;
+  password: string;
+  onChangeEmail: (v: string) => void;
+  onChangeDisplayName: (v: string) => void;
+  onChangeUsername: (v: string) => void;
+  onChangeDescription: (v: string) => void;
+  onChangePassword: (v: string) => void;
+  onSubmit: () => void;
+  C: Colors;
+}) {
+  return (
+    <>
+      <Text style={[s.fieldLabel, { color: C.sub }]}>EMAIL</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={email}
+        onChangeText={onChangeEmail}
+        placeholder="you@example.com"
+        placeholderTextColor={C.sub}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        textContentType="emailAddress"
+        autoComplete="email"
+        returnKeyType="next"
+      />
+      <Text style={[s.fieldLabel, { color: C.sub }]}>DISPLAY NAME</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={displayName}
+        onChangeText={onChangeDisplayName}
+        placeholder="How you want your name shown"
+        placeholderTextColor={C.sub}
+        autoCapitalize="words"
+        autoCorrect={false}
+        returnKeyType="next"
+      />
+      <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={username}
+        onChangeText={onChangeUsername}
+        placeholder="your name"
+        placeholderTextColor={C.sub}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="next"
+      />
+      <Text style={[s.fieldLabel, { color: C.sub }]}>DESCRIPTION</Text>
+      <TextInput
+        style={[s.textArea, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={description}
+        onChangeText={onChangeDescription}
+        placeholder="A short bio for your profile"
+        placeholderTextColor={C.sub}
+        autoCapitalize="sentences"
+        autoCorrect={false}
+        multiline
+        numberOfLines={3}
+        textAlignVertical="top"
+      />
+      <Text style={[s.fieldLabel, { color: C.sub }]}>PASSWORD</Text>
+      <TextInput
+        style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
+        value={password}
+        onChangeText={onChangePassword}
+        placeholder="At least 6 characters"
+        placeholderTextColor={C.sub}
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry
+        textContentType="newPassword"
+        autoComplete="password"
+        returnKeyType="done"
+        onSubmitEditing={onSubmit}
+      />
+    </>
+  );
+}
+
+function MessageBox({ message, tone, C }: { message: string; tone: MessageTone; C: Colors }) {
+  const bgColor = tone === 'error' ? '#DC262612' : `${C.blue}12`;
+  const borderColor = tone === 'error' ? '#FCA5A5' : tone === 'success' ? '#86EFAC' : C.border;
+  const textColor = tone === 'error' ? '#DC2626' : tone === 'success' ? C.green : C.sub;
+  return (
+    <View style={[s.messageBox, { backgroundColor: bgColor, borderColor }]}>
+      <Text style={[s.messageText, { color: textColor }]}>{message}</Text>
+    </View>
+  );
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+function useAuthForm() {
   const [mode, setMode] = useState<Mode>('sign-in');
   const [loginUsername, setLoginUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -34,22 +253,20 @@ export default function AuthScreen() {
   const [description, setDescription] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [messageTone, setMessageTone] = useState<'neutral' | 'error' | 'success'>('neutral');
+  const [messageTone, setMessageTone] = useState<MessageTone>('neutral');
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [localAvatarUri, setLocalAvatarUri] = useState<string | null>(null);
   const [localAvatarMimeType, setLocalAvatarMimeType] = useState('image/jpeg');
 
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      if (window.location.hash === '#signup') {
-        setMode('sign-up');
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.hash === '#signup') {
+      setMode('sign-up');
+      window.history.replaceState(null, '', window.location.pathname);
     }
   }, []);
 
-  const showMessage = (nextMessage: string, tone: 'neutral' | 'error' | 'success') => {
-    setMessage(nextMessage);
+  const showMessage = (msg: string, tone: MessageTone) => {
+    setMessage(msg);
     setMessageTone(tone);
   };
 
@@ -71,72 +288,50 @@ export default function AuthScreen() {
     setLocalAvatarMimeType(asset.mimeType ?? 'image/jpeg');
   };
 
-  const handleSubmit = async () => {
-    const trimmedLoginUsername = loginUsername.trim();
+  const handleSignIn = async () => {
+    const un = loginUsername.trim();
+    const pw = password;
+    if (!un || !pw.trim()) {
+      showMessage('Enter your username and password to continue.', 'error');
+      return;
+    }
+    setBusy(true);
+    setMessage(null);
+    try {
+      const { error } = await signInWithUsername(un, pw);
+      if (error) { showMessage(error.message, 'error'); return; }
+      setVerificationEmail(null);
+      showMessage('Signed in. Loading your account...', 'success');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSignUp = async () => {
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedDisplayName = displayName.trim();
     const trimmedUsername = username.trim();
     const trimmedDescription = description.trim();
-
-    if (mode === 'sign-in') {
-      if (!trimmedLoginUsername || !password.trim()) {
-        showMessage('Enter your username and password to continue.', 'error');
-        return;
-      }
-    } else if (!trimmedEmail || !password.trim()) {
+    if (!trimmedEmail || !password.trim()) {
       showMessage('Enter an email and password to continue.', 'error');
       return;
     }
-
-    if (mode === 'sign-up' && (!trimmedDisplayName || !trimmedUsername)) {
+    if (!trimmedDisplayName || !trimmedUsername) {
       showMessage('Enter a display name and username to create your account.', 'error');
       return;
     }
-
     setBusy(true);
     setMessage(null);
-
     try {
-      if (mode === 'sign-in') {
-        const { error } = await signInWithUsername(trimmedLoginUsername, password);
-        if (error) {
-          showMessage(error.message, 'error');
-          return;
-        }
-
-        setVerificationEmail(null);
-        showMessage('Signed in. Loading your account...', 'success');
-        return;
-      }
-
       const { data, error } = await signUp(trimmedEmail, password, {
         displayName: trimmedDisplayName,
         username: trimmedUsername,
         description: trimmedDescription,
       });
-      if (error) {
-        showMessage(error.message, 'error');
-        return;
-      }
-
-      // Upload avatar if one was selected and we have an active session
+      if (error) { showMessage(error.message, 'error'); return; }
       if (localAvatarUri && data.user) {
-        try {
-          const ext = localAvatarMimeType.split('/')[1] ?? 'jpeg';
-          const filePath = `${data.user.id}/avatar.${ext}`;
-          const arrayBuffer = await fetch(localAvatarUri).then((r) => r.arrayBuffer());
-          const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(filePath, arrayBuffer, { contentType: localAvatarMimeType, upsert: true });
-          if (!uploadError) {
-            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-            await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', data.user.id);
-          }
-        } catch {
-          // Non-fatal — avatar can be set later from the profile tab
-        }
+        try { await uploadAvatar(data.user.id, localAvatarUri, localAvatarMimeType); } catch { /* non-fatal */ }
       }
-
       if (data.session) {
         showMessage('Account created. Loading your account...', 'success');
       } else {
@@ -150,11 +345,52 @@ export default function AuthScreen() {
     }
   };
 
-  const title = mode === 'sign-in' ? 'Sign in to Habit Guard' : 'Create your account';
-  const subtitle =
-    mode === 'sign-in'
-      ? 'Pick up your habits on any device.'
-      : 'Create your account once and keep your habit history tied to you.';
+  const handleSubmit = () => {
+    if (mode === 'sign-in') { void handleSignIn(); } else { void handleSignUp(); }
+  };
+
+  const handleSwitchMode = () => {
+    const nextMode: Mode = mode === 'sign-in' ? 'sign-up' : 'sign-in';
+    setMode(nextMode);
+    setMessage(null);
+    if (nextMode === 'sign-in') {
+      setLoginUsername(username.trim());
+      setDisplayName('');
+      setUsername('');
+      setDescription('');
+      setEmail('');
+      setLocalAvatarUri(null);
+      setLocalAvatarMimeType('image/jpeg');
+    } else {
+      setLoginUsername('');
+    }
+  };
+
+  return {
+    mode,
+    loginUsername, setLoginUsername,
+    email, setEmail,
+    password, setPassword,
+    displayName, setDisplayName,
+    username, setUsername,
+    description, setDescription,
+    busy,
+    message, messageTone,
+    verificationEmail, setVerificationEmail,
+    localAvatarUri,
+    pickAvatar,
+    handleSubmit,
+    handleSwitchMode,
+  };
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
+export default function AuthScreen() {
+  const { isDark } = useTheme();
+  const C = getColors(isDark);
+  const form = useAuthForm();
+  const isSignIn = form.mode === 'sign-in';
 
   return (
     <View style={[s.shell, { backgroundColor: C.bg }]}>
@@ -168,221 +404,89 @@ export default function AuthScreen() {
               <MaterialIcons name="shield" size={28} color={C.blue} />
             </View>
             <Text style={[s.brand, { color: C.text }]}>Habit Guard</Text>
-            <Text style={[s.heroText, { color: C.sub }]}>{subtitle}</Text>
+            <Text style={[s.heroText, { color: C.sub }]}>
+              {isSignIn
+                ? 'Pick up your habits on any device.'
+                : 'Create your account once and keep your habit history tied to you.'}
+            </Text>
           </View>
 
-          {verificationEmail ? (
-            <View style={s.verifyBanner}>
-              <View style={s.verifyIconWrap}>
-                <MaterialIcons name="mark-email-unread" size={26} color="#166534" />
-              </View>
-              <View style={s.verifyBody}>
-                <Text style={s.verifyTitle}>Check your inbox!</Text>
-                <Text style={s.verifyText}>
-                  We sent a confirmation link to{' '}
-                  <Text style={s.verifyEmail}>{verificationEmail}</Text>
-                  {'. Click the link to verify your account, then sign in below.'}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setVerificationEmail(null)} style={s.verifyDismiss}>
-                <MaterialIcons name="close" size={18} color="#166534" />
-              </TouchableOpacity>
-            </View>
+          {form.verificationEmail ? (
+            <VerificationBanner
+              email={form.verificationEmail}
+              onDismiss={() => form.setVerificationEmail(null)}
+            />
           ) : null}
 
           <View style={[s.card, { backgroundColor: C.card, borderColor: C.border }]}>
-            <Text style={[s.title, { color: C.text }]}>{title}</Text>
+            <Text style={[s.title, { color: C.text }]}>
+              {isSignIn ? 'Sign in to Habit Guard' : 'Create your account'}
+            </Text>
             <Text style={[s.caption, { color: C.sub }]}>
-              {mode === 'sign-in'
+              {isSignIn
                 ? 'Enter your username and password.'
                 : 'Your email is only needed once to create your account.'}
             </Text>
 
-            {mode === 'sign-up' ? (
-              <View style={s.avatarPickerWrap}>
-                <View style={s.avatarPickerContainer}>
-                  <TouchableOpacity
-                    style={s.avatarPickerCircle}
-                    onPress={() => { void pickAvatar(); }}
-                    activeOpacity={0.8}
-                  >
-                    {localAvatarUri ? (
-                      <Image source={{ uri: localAvatarUri }} style={s.avatarPickerImg} resizeMode="cover" />
-                    ) : (
-                      <MaterialIcons name="person" size={36} color="#6366F1" />
-                    )}
-                  </TouchableOpacity>
-                  <View style={[s.avatarCameraOverlay, { backgroundColor: C.blue, borderColor: C.card }]}>
-                    <MaterialIcons name="camera-alt" size={11} color="#fff" />
-                  </View>
-                </View>
-                <Text style={[s.avatarPickerHint, { color: C.sub }]}>
-                  {localAvatarUri ? 'Tap to change photo' : 'Add a photo (optional)'}
-                </Text>
-              </View>
-            ) : null}
-
-            {mode === 'sign-in' ? (
-              <>
-                <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
-                <TextInput
-                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-                  value={loginUsername}
-                  onChangeText={setLoginUsername}
-                  placeholder="your_username"
-                  placeholderTextColor={C.sub}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  textContentType="username"
-                  autoComplete="username"
-                  returnKeyType="next"
-                />
-              </>
-            ) : (
-              <>
-                <Text style={[s.fieldLabel, { color: C.sub }]}>EMAIL</Text>
-                <TextInput
-                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="you@example.com"
-                  placeholderTextColor={C.sub}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="email-address"
-                  textContentType="emailAddress"
-                  autoComplete="email"
-                  returnKeyType="next"
-                />
-              </>
+            {isSignIn ? null : (
+              <AvatarPicker
+                uri={form.localAvatarUri}
+                onPress={() => { void form.pickAvatar(); }}
+                C={C}
+              />
             )}
 
-            {mode === 'sign-up' ? (
-              <>
-                <Text style={[s.fieldLabel, { color: C.sub }]}>DISPLAY NAME</Text>
-                <TextInput
-                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-                  value={displayName}
-                  onChangeText={setDisplayName}
-                  placeholder="How you want your name shown"
-                  placeholderTextColor={C.sub}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
+            {isSignIn ? (
+              <SignInFields
+                loginUsername={form.loginUsername}
+                password={form.password}
+                onChangeUsername={form.setLoginUsername}
+                onChangePassword={form.setPassword}
+                onSubmit={form.handleSubmit}
+                C={C}
+              />
+            ) : (
+              <SignUpFields
+                email={form.email}
+                displayName={form.displayName}
+                username={form.username}
+                description={form.description}
+                password={form.password}
+                onChangeEmail={form.setEmail}
+                onChangeDisplayName={form.setDisplayName}
+                onChangeUsername={form.setUsername}
+                onChangeDescription={form.setDescription}
+                onChangePassword={form.setPassword}
+                onSubmit={form.handleSubmit}
+                C={C}
+              />
+            )}
 
-                <Text style={[s.fieldLabel, { color: C.sub }]}>USERNAME</Text>
-                <TextInput
-                  style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-                  value={username}
-                  onChangeText={setUsername}
-                  placeholder="your name"
-                  placeholderTextColor={C.sub}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
-
-                <Text style={[s.fieldLabel, { color: C.sub }]}>DESCRIPTION</Text>
-                <TextInput
-                  style={[
-                    s.textArea,
-                    { backgroundColor: C.bg, borderColor: C.border, color: C.text },
-                  ]}
-                  value={description}
-                  onChangeText={setDescription}
-                  placeholder="A short bio for your profile"
-                  placeholderTextColor={C.sub}
-                  autoCapitalize="sentences"
-                  autoCorrect={false}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
-              </>
-            ) : null}
-
-            <Text style={[s.fieldLabel, { color: C.sub }]}>PASSWORD</Text>
-            <TextInput
-              style={[s.input, { backgroundColor: C.bg, borderColor: C.border, color: C.text }]}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="At least 6 characters"
-              placeholderTextColor={C.sub}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry
-              textContentType={mode === 'sign-in' ? 'password' : 'newPassword'}
-              autoComplete="password"
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-            />
-
-            {message ? (
-              <View
-                style={[
-                  s.messageBox,
-                  { backgroundColor: `${messageTone === 'error' ? '#DC2626' : C.blue}12` },
-                  messageTone === 'error' && { borderColor: '#FCA5A5' },
-                  messageTone === 'success' && { borderColor: '#86EFAC' },
-                ]}
-              >
-                <Text
-                  style={[
-                    s.messageText,
-                    {
-                      color:
-                        messageTone === 'error'
-                          ? '#DC2626'
-                          : messageTone === 'success'
-                            ? C.green
-                            : C.sub,
-                    },
-                  ]}
-                >
-                  {message}
-                </Text>
-              </View>
+            {form.message ? (
+              <MessageBox message={form.message} tone={form.messageTone} C={C} />
             ) : null}
 
             <TouchableOpacity
-              style={[s.submitBtn, { backgroundColor: C.blue }, busy && { opacity: 0.72 }]}
-              onPress={handleSubmit}
+              style={[s.submitBtn, { backgroundColor: C.blue }, form.busy && { opacity: 0.72 }]}
+              onPress={form.handleSubmit}
               activeOpacity={0.85}
-              disabled={busy}
+              disabled={form.busy}
             >
-              {busy ? (
+              {form.busy ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={s.submitText}>
-                  {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
+                  {isSignIn ? 'Sign In' : 'Create Account'}
                 </Text>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[s.switchBtn, { borderColor: C.border, backgroundColor: C.bg }]}
-              onPress={() => {
-                const nextMode = mode === 'sign-in' ? 'sign-up' : 'sign-in';
-                setMode(nextMode);
-                setMessage(null);
-                if (nextMode === 'sign-in') {
-                  setLoginUsername(username.trim());
-                  setDisplayName('');
-                  setUsername('');
-                  setDescription('');
-                  setEmail('');
-                  setLocalAvatarUri(null);
-                  setLocalAvatarMimeType('image/jpeg');
-                } else {
-                  setLoginUsername('');
-                }
-              }}
+              onPress={form.handleSwitchMode}
             >
               <Text style={[s.switchText, { color: C.sub }]}>
-                {mode === 'sign-in'
-                  ? 'Need an account? Create one'
-                  : 'Already have an account? Sign in'}
+                {isSignIn ? 'Need an account? Create one' : 'Already have an account? Sign in'}
               </Text>
             </TouchableOpacity>
           </View>
