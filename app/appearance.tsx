@@ -41,13 +41,11 @@ const OPTIONS: ThemeOption[] = [
 // Main component for the Appearance screen
 const DAYS_OPTIONS = [
   {
-    icon: 'radio-button-unchecked',
     label: 'All Days Off',
     description: 'Day buttons start unchecked when creating a new task',
     value: false,
   },
   {
-    icon: 'radio-button-checked',
     label: 'All Days On',
     description: 'Day buttons start checked when creating a new task',
     value: true,
@@ -133,16 +131,15 @@ export default function AppearanceScreen() {
               activeOpacity={0.7}
             >
               <MaterialIcons
-                name={opt.icon as React.ComponentProps<typeof MaterialIcons>['name']}
+                name={isActive ? 'radio-button-checked' : 'radio-button-unchecked'}
                 size={22}
-                color={C.sub}
+                color={isActive ? C.blue : C.sub}
                 style={{ marginRight: 14 }}
               />
               <View style={s.rowText}>
                 <Text style={[s.rowLabel, { color: C.text }]}>{opt.label}</Text>
                 <Text style={[s.rowDesc, { color: C.sub }]}>{opt.description}</Text>
               </View>
-              {isActive && <MaterialIcons name="check" size={20} color={C.blue} />}
             </TouchableOpacity>
           );
         })}
